@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Moving Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🗺</div>
+      <div>
+        <h1>Moving Map</h1>
+        <p class="subtitle">Carte VFR hors-ligne (MapLibre) centrée sur l'avion</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip num">NUMMAP · numérique (100%-5L mini)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/NUMMAP.jpg" alt="NUMMAP — carte mobile">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li><b>Fond de carte MapLibre</b> affiché <b>directement dans la cellule</b> (plus besoin de cliquer pour l'ouvrir).</li>
+          <li>En-tête <b>EFIS</b> en haut (cap, altitude, vario, vitesse, bille) ; la carte occupe le reste.</li>
+          <li>La carte <b>suit l'avion</b> ; icône avion <b>noire</b> au centre.</li>
+          <li><b>Trace</b> parcourue (ligne verte) et <b>prolongation de route</b> (pointillés jaunes) avec <b>pastilles temps 2 / 4 / 6 min</b> le long de la route (selon la vitesse sol).</li>
+          <li><b>Villes</b> et <b>codes ICAO des terrains</b> affichés sur le fond (activables/masquables).</li>
+          <li><b>Espaces aériens, aérodromes, balises, obstacles, points de report</b> (données OpenAIP) superposés.</li>
+        </ul>
+
+        <h3>Boutons (à droite)</h3>
+        <ul class="feat">
+          <li><b>Couches</b> : ouvre la sélection des éléments à afficher (villes, codes terrains, aérodromes, espaces aériens, balises, obstacles, points de report). Choix <b>mémorisé</b>.</li>
+          <li><b>Recentrer</b> (cible) : recentre sur l'avion et réactive le suivi automatique.</li>
+          <li><b>Nord / Cap en haut</b> : bascule l'orientation du fond de carte.</li>
+          <li><b>+ / −</b> : zoom.</li>
+        </ul>
+
+        <h3>Gestes</h3>
+        <ul class="feat">
+          <li><b>Pincer</b> : zoomer / dézoomer.</li>
+          <li><b>Déplacer à deux doigts</b> : déplacer la carte (passe en vue libre ; le bouton Recentrer rétablit le suivi). Un glissement à un doigt fait défiler les cockpits.</li>
+          <li><b>Tap sur un aérodrome ou un espace aérien</b> : ouvre une <b>fiche d'information</b> (voir ci-dessous).</li>
+        </ul>
+
+        <h3>Fiche d'information (tap)</h3>
+        <ul class="feat">
+          <li><b>Aérodrome</b> : nom, code ICAO, type, altitude terrain et <b>fréquences</b>.</li>
+          <li><b>Espace aérien</b> : nom, type (CTR, TMA, SIV, zone D/R/P…), <b>plancher / plafond</b> et fréquence.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Le fond de carte et les données aéronautiques se téléchargent dans Réglages ▸ Cockpits ▸ Cartes (à faire en Wi-Fi). Aide indicative et non certifiée — ne remplace ni une carte OACI officielle ni un GPS certifié.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

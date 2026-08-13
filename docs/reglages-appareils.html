@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Appareils</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🛩</div>
+      <div>
+        <h1>Appareils</h1>
+        <p class="subtitle">Vos ULMs et avions · vitesses caractéristiques · import/export</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">Identité · nom / sous-titre / icône</span>
+      <span class="chip num">Vitesses · Vs0 · Vs1 · Vno · Vne · Vpl</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/REGLAGES-APPAREILS.jpg" alt="Liste des appareils">
+        <div style="height:16px"></div>
+        <img class="shot" src="screenshots/REGLAGES-APPAREILS-EDIT.jpg" alt="Édition (vitesses / arcs / ...)">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li><b>Ajout / édition / suppression</b> d'appareils.</li>
+          <li>Identité de l'appareil : <b>nom</b>, <b>sous-titre</b> et <b>icône</b>.</li>
+        </ul>
+
+        <h3>Vitesses caractéristiques</h3>
+        <ul class="feat">
+          <li><b>Vs0</b> — décrochage volets sortis · <b>Vs1</b> — décrochage lisse.</li>
+          <li><b>Arc vert</b> (plage normale) et <b>arc blanc</b> (pleins volets).</li>
+          <li><b>Vno</b> — vitesse normale maxi · <b>Vne</b> — à ne jamais dépasser.</li>
+          <li><b>Vpl</b> — vitesse optimale de plané.</li>
+          <li>Ces valeurs alimentent les <b>arcs colorés de l'anémomètre</b>.</li>
+        </ul>
+
+        <h3>Import / Export</h3>
+        <ul class="feat">
+          <li>Import et export d'un appareil au format <b>JSON</b>.</li>
+          <li>Via le <b>sélecteur de fichiers Android</b> (SAF).</li>
+          <li>L'import sur un appareil existant demande une <b>confirmation</b> avant d'écraser.</li>
+        </ul>
+
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">↕</span> Touchez le numéro d'ordre pour déplacer un appareil</div>
+        <div class="gesture"><span class="g">⋮</span> Menu de ligne : Modifier · Supprimer · Importer · Exporter</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Toute suppression est confirmée. Les vitesses saisies (en km/h) servent à tracer les arcs de l'anémomètre.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

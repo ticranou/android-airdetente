@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Anémomètre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🌀</div>
+      <div>
+        <h1>Anémomètre</h1>
+        <p class="subtitle">Vitesse GPS · arcs de couleur · curseurs Vs/Vpl</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLSPD · analogique</span>
+      <span class="chip num">NUMSPD · numérique (100%-1L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLSPD.jpg" alt="ANLSPD — cadran">
+        <div style="height:16px"></div>
+        <img class="shot" src="screenshots/NUMSPD.jpg" alt="NUMSPD (bande)">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Affiche la <b>vitesse GPS</b>.</li>
+          <li><b>Arcs de couleur</b> : vert (plage normale), blanc (volets), rouge (Vne).</li>
+          <li>Curseurs de <b>décrochage</b> Vs0/Vs1 (<b style="color:#e33">rouges</b>).</li>
+          <li>Curseur de <b>vitesse de plané</b> Vpl (<b style="color:var(--accent2)">magenta</b>).</li>
+          <li>Version numérique : bande défilante + valeur en gros dans une cellule orange.</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : —</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Réglages liés</h3>
+        <ul class="feat">
+          <li>Unité : <b>km/h</b> ou <b>kt</b> (onglet Cockpits).</li>
+          <li>Arcs définis par les <b>vitesses de l'appareil</b>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

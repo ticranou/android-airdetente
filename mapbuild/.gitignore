@@ -1,0 +1,13 @@
+# Chaine de build carte — fichiers a NE PAS versionner
+
+# Secrets / config locale (contient la cle OpenAIP)
+config.env
+
+# Outils telecharges
+tools/
+
+# Donnees sources et intermediaires (volumineuses)
+data/
+
+# Sorties generees (a publier via GitHub Releases, pas dans Git)
+dist/

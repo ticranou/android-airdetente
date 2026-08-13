@@ -1,0 +1,170 @@
+/* AirDetente — documentation "affiches", thème pro sombre & épuré.
+   Aligné sur l'UI de l'app : fonds anthracite, accents orange / magenta,
+   cartes à bordures fines, typographie nette. */
+:root {
+  --bg:        #0b0e12;   /* fond page */
+  --panel:     #14181e;   /* fond affiche */
+  --panel-2:   #1b2028;   /* cartes */
+  --line:      #2b323c;   /* bordures */
+  --ink:       #e7ecf2;   /* texte principal */
+  --ink-soft:  #9aa6b2;   /* texte secondaire */
+  --accent:    #e8843a;   /* orange (valeurs) */
+  --accent2:   #d24dea;   /* magenta (curseurs) */
+  --ok:        #35c759;   /* vert */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #171c24 0%, transparent 60%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App shell: fixed left navigation + scrollable content area. */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  position: sticky; top: 0; align-self: flex-start;
+  width: 250px; min-width: 250px; height: 100vh; overflow-y: auto;
+  background: #0e1218; border-right: 1px solid var(--line);
+  padding: 22px 16px 30px;
+}
+.sidebar .side-brand {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding: 0 4px;
+}
+.sidebar .side-brand .logo {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  display: grid; place-items: center; font-size: 18px;
+}
+.sidebar .side-brand b { font-size: 18px; font-weight: 800; }
+
+.nav-group { margin: 18px 0 6px; padding: 0 8px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); }
+.sidebar nav a {
+  display: block; padding: 8px 10px; margin: 2px 0; border-radius: 8px;
+  color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 600;
+}
+.sidebar nav a:hover { background: var(--panel-2); color: var(--ink); }
+.sidebar nav a.active { background: rgba(232,132,58,0.14); color: var(--accent); border: 1px solid rgba(232,132,58,0.3); }
+
+.main { flex: 1; min-width: 0; }
+
+@media (max-width: 760px) {
+  .layout { flex-direction: column; }
+  .sidebar { position: static; width: 100%; min-width: 0; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+  .sidebar nav { columns: 2; }
+}
+
+/* One poster = one page block. */
+.poster {
+  position: relative;
+  width: min(920px, 96%);
+  margin: 30px auto;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Thin accent rule along the top edge. */
+.poster::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  z-index: 2;
+}
+
+.content { position: relative; z-index: 1; padding: 34px 38px 40px; }
+
+.brand { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.brand .logo {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  display: grid; place-items: center; font-size: 24px;
+}
+h1 { font-size: 32px; margin: 0; letter-spacing: 0.3px; font-weight: 800; }
+.subtitle { font-size: 14px; color: var(--ink-soft); margin: 3px 0 0; }
+
+.tagline {
+  font-size: 17px; font-weight: 600; color: var(--ink);
+  border-left: 3px solid var(--accent); padding: 4px 0 4px 14px;
+  margin: 20px 0 24px;
+}
+
+/* Screenshot placeholder — the user drops the real capture here. */
+.shot {
+  border: 1.0px dashed var(--line);
+  border-radius: 12px;
+  background: repeating-linear-gradient(45deg, #12161c, #12161c 10px, #10141a 10px, #10141a 20px);
+  min-height: 240px;
+  display: grid; place-items: center;
+  text-align: center; color: var(--ink-soft);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+  padding: 22px;
+}
+.shot.portrait { min-height: 420px; max-width: 250px; margin: 0 auto; }
+
+/* Real screenshot: drop-in replacement for a .shot placeholder.
+   Use <img class="shot" src="screenshots/xxx.png" alt="…">. */
+img.shot {
+  display: block;
+  width: 90%;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  background: #0e1218;
+  border-style: solid;
+  object-fit: contain;
+}
+img.shot.portrait { width: auto; max-width: 250px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 18px 20px;
+}
+.card h2 { margin: 0 0 10px; font-size: 19px; font-weight: 800; }
+.card h3 {
+  margin: 16px 0 6px; font-size: 12px; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+}
+
+ul.feat { margin: 6px 0 0; padding-left: 18px; }
+ul.feat li { margin: 7px 0; line-height: 1.45; color: var(--ink); }
+ul.feat li b { color: #fff; }
+
+.chip {
+  display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.4px;
+  padding: 4px 11px; border-radius: 6px; margin: 0 6px 6px 0;
+  background: rgba(232,132,58,0.14); color: var(--accent);
+  border: 1px solid rgba(232,132,58,0.35);
+}
+.chip.num { background: rgba(210,77,234,0.13); color: var(--accent2); border-color: rgba(210,77,234,0.35); }
+
+/* Gesture rows with a clear glyph badge. */
+.gesture { display:flex; align-items:center; gap:10px; margin:8px 0; font-weight:600; }
+.gesture .g {
+  display:inline-grid; place-items:center; width:34px; height:24px;
+  border:1px solid var(--line); border-radius:6px; background:#0e1218;
+  color:#fff; font-weight:800; letter-spacing:2px;
+}
+
+.footer {
+  margin-top: 24px; font-size: 12px; color: var(--ink-soft);
+  border-top: 1px solid var(--line); padding-top: 12px;
+}
+
+.nav {
+  text-align:center; font-size:13px; color:var(--ink-soft);
+  margin: 10px auto 34px; width:min(920px,96vw);
+}
+.nav a { color: var(--accent); text-decoration: none; font-weight: 700; margin: 0 8px; }
+.nav a:hover { text-decoration: underline; }

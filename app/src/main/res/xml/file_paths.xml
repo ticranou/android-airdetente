@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Exposes filesDir/vac/ so downloaded VAC PDFs can be shared via FileProvider. -->
+    <files-path name="vac" path="vac/" />
+    <!-- Exposes the cache dir so generated exports (nav-plan PDF) can be opened. -->
+    <cache-path name="exports" path="." />
+</paths>

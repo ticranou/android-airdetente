@@ -1,0 +1,27 @@
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/app/build/
+.kotlin/
+
+# Build output APK (publish via GitHub Releases, not versioned in the repo)
+/AirDetente.apk
+/app/build/outputs/
+
+# Map build: keep scripts/configs/docs, ignore the huge OSM sources & generated basemaps
+/mapbuild/data/
+/mapbuild/dist/
+/mapbuild/**/*.mbtiles
+/mapbuild/**/*.osm.pbf
+/mapbuild/**/*.zip
+
+# Local tooling / agent state
+/.claude/

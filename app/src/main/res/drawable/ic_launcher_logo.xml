@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-icon foreground: the club's round "Air détente" logo, scaled up so it
+     fills the icon's visible area despite the adaptive safe-zone crop. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/logo_air_detente"
+    android:inset="-8%" />

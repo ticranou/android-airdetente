@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Horamètre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🕒</div>
+      <div>
+        <h1>Horamètre</h1>
+        <p class="subtitle">Relevés Départ / Arrivée · durée de vol calculée</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLHRM · analogique</span>
+      <span class="chip num">NUMHRM · numérique (100%-1L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLHRM.jpg" alt="ANLHRM — cadran">
+        <div style="height:16px"></div>
+        <img class="shot" src="screenshots/NUMHRM.jpg" alt="NUMHRM — relevés">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Deux relevés (<b>Départ</b> / <b>Arrivée</b>, format NNN.NN).</li>
+          <li>La <b>durée de vol calculée</b> s'affiche (différence × 6 min → minutes et h:mm).</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long sur une cellule : saisir le relevé</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

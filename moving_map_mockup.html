@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirChecklists — Aperçu EFIS + Moving Map</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; background:#101314; color:#e8e8e8;
+    font-family:-apple-system,Roboto,"Segoe UI",sans-serif;
+    display:flex; flex-direction:column; align-items:center; gap:16px; padding:20px; }
+  h1 { font-size:17px; font-weight:600; margin:0; }
+  .sub { color:#9aa0a6; font-size:13px; margin:0 0 4px; }
+  .panel { width:740px; max-width:96vw; background:#000; border:2px solid #3a3a3a; border-radius:4px; overflow:hidden; }
+  canvas { display:block; width:100%; height:auto; }
+  .legend { width:740px; max-width:96vw; font-size:12px; color:#b8bcc0; line-height:1.7;
+    background:#17191a; border:1px solid #262626; border-radius:10px; padding:12px 14px; }
+  .legend b { color:#e8e8e8; }
+  .sw { display:inline-block; width:12px; height:12px; border-radius:2px; vertical-align:middle; margin-right:6px; }
+</style>
+</head>
+<body>
+  <h1>EFIS « 3 lignes » + Moving Map en zone basse (aperçu)</h1>
+  <p class="sub">Ton bandeau EFIS conservé — la carte remplacée par le rendu de la maquette</p>
+
+  <div class="panel"><canvas id="c" width="740" height="720"></canvas></div>
+
+  <div class="legend">
+    <div><span class="sw" style="background:#35c759"></span><b>Route</b> entre terrains, avec distance + cap (aller / retour) sur chaque segment</div>
+    <div><span class="sw" style="background:#ffd21a"></span><b>Avion</b> + vecteur de cap suivi</div>
+    <div><span class="sw" style="background:rgba(190,77,214,.18); border:1px solid #be4dd6"></span><b>Espace aérien</b> importé (OpenAIR / GeoJSON)</div>
+    <div><span class="sw" style="background:#c9b6a0"></span><b>Terrains</b> avec nom + fréquence</div>
+    <div style="margin-top:6px; color:#8a8f94;">Fond vectoriel simplifié (offline) : terre / eau / grille. Nord en haut ici ; le mode « Track-up » sera proposé.</div>
+  </div>
+
+<script>
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+const W=cv.width, H=cv.height;
+
+// ---------- Top EFIS band (reproduces the user's header) ----------
+function band(){
+  const headerH=60, midTop=headerH, midH=118;
+  // Header background (heading tape)
+  ctx.fillStyle='#151515'; ctx.fillRect(0,0,W,headerH);
+  ctx.fillStyle='#cfcfcf'; ctx.font='22px sans-serif'; ctx.textAlign='center';
+  const hdgs=[110,120,130,140,150,160,'',180,190,200,210,220,230];
+  hdgs.forEach((v,i)=>{ if(v==='')return; const x=30+i*57; ctx.fillText(v,x,30);
+    ctx.strokeStyle='#8a8a8a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,40); ctx.lineTo(x,54); ctx.stroke(); });
+  // center heading cell
+  ctx.fillStyle='#111'; ctx.fillRect(W/2-56,2,112,56);
+  ctx.strokeStyle='#5a5a5a'; ctx.strokeRect(W/2-56,2,112,56);
+  ctx.fillStyle='#ffb300'; ctx.font='bold 40px sans-serif'; ctx.fillText('170°',W/2,44);
+
+  // Mid strip: ALT / VARIO left, aircraft+ball center, speed right
+  ctx.fillStyle='#000'; ctx.fillRect(0,midTop,W,midH);
+  // ALT cell
+  ctx.fillStyle='#111'; ctx.fillRect(14,midTop+14,120,40); ctx.strokeStyle='#5a5a5a'; ctx.strokeRect(14,midTop+14,120,40);
+  ctx.fillStyle='#35c759'; ctx.font='bold 30px sans-serif'; ctx.textAlign='left'; ctx.fillText('1600',22,midTop+46);
+  ctx.fillStyle='#aaa'; ctx.font='16px sans-serif'; ctx.fillText('ft',144,midTop+44);
+  // VARIO cell
+  ctx.fillStyle='#111'; ctx.fillRect(14,midTop+62,120,40); ctx.strokeStyle='#5a5a5a'; ctx.strokeRect(14,midTop+62,120,40);
+  ctx.fillStyle='#35c759'; ctx.font='bold 30px sans-serif'; ctx.fillText('200',22,midTop+94);
+  ctx.fillStyle='#aaa'; ctx.font='16px sans-serif'; ctx.fillText('ft/min',144,midTop+92);
+  // Aircraft symbol (center)
+  ctx.strokeStyle='#ffb300'; ctx.lineWidth=6;
+  ctx.beginPath(); ctx.moveTo(W/2-70,midTop+40); ctx.lineTo(W/2-14,midTop+40);
+  ctx.moveTo(W/2+14,midTop+40); ctx.lineTo(W/2+70,midTop+40);
+  ctx.moveTo(W/2,midTop+40); ctx.lineTo(W/2,midTop+22); ctx.stroke();
+  ctx.fillStyle='#ffb300'; ctx.beginPath(); ctx.arc(W/2,midTop+40,7,0,7); ctx.fill();
+  // Ball pill
+  ctx.strokeStyle='#5a5a5a'; ctx.lineWidth=2;
+  roundRect(W/2-70,midTop+64,140,30,15); ctx.stroke();
+  ctx.fillStyle='#ffb300'; ctx.beginPath(); ctx.arc(W/2,midTop+79,11,0,7); ctx.fill();
+  ctx.strokeStyle='#e8e8e8'; ctx.beginPath(); ctx.moveTo(W/2-18,midTop+66); ctx.lineTo(W/2-18,midTop+92);
+  ctx.moveTo(W/2+18,midTop+66); ctx.lineTo(W/2+18,midTop+92); ctx.stroke();
+  // Speed cell (right)
+  ctx.fillStyle='#aaa'; ctx.font='16px sans-serif'; ctx.textAlign='right'; ctx.fillText('Km/h',W-150,midTop+30);
+  ctx.fillStyle='#111'; ctx.fillRect(W-134,midTop+14,120,40); ctx.strokeStyle='#5a5a5a'; ctx.strokeRect(W-134,midTop+14,120,40);
+  ctx.fillStyle='#ffb300'; ctx.font='bold 30px sans-serif'; ctx.fillText('150',W-22,midTop+46);
+  // green arc under speed
+  ctx.fillStyle='#2e7d32'; ctx.fillRect(W-134,midTop+62,120,10);
+  ctx.textAlign='left';
+  return headerH+midH; // y where the map starts
+}
+
+// ---------- Moving map (fills the rest) ----------
+function map(top){
+  const mh=H-top;
+  ctx.save(); ctx.beginPath(); ctx.rect(0,top,W,mh); ctx.clip();
+  // base
+  ctx.fillStyle='#eef1ea'; ctx.fillRect(0,top,W,mh);   // light aero-map paper tone
+  // water bodies (subtle)
+  ctx.fillStyle='#d7e6ef';
+  ctx.beginPath(); ctx.ellipse(W*0.15,top+mh*0.75,60,26,0.3,0,7); ctx.fill();
+  // grid (lat/lon, faint)
+  ctx.strokeStyle='rgba(120,120,120,0.18)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=90){ ctx.beginPath(); ctx.moveTo(x,top); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=top;y<H;y+=90){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // some vector "town/road" hints
+  ctx.strokeStyle='rgba(150,150,150,0.35)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(W*0.1,top+mh*0.9); ctx.quadraticCurveTo(W*0.5,top+mh*0.6,W*0.95,top+mh*0.7); ctx.stroke();
+
+  // airspace (magenta polygon, like the user's screenshot)
+  ctx.fillStyle='rgba(190,77,214,0.15)'; ctx.strokeStyle='#be4dd6'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(W*0.55,top+mh*0.18); ctx.lineTo(W*0.72,top+mh*0.12); ctx.lineTo(W*0.78,top+mh*0.42);
+  ctx.lineTo(W*0.64,top+mh*0.5); ctx.lineTo(W*0.52,top+mh*0.36); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#9c3bb0'; ctx.font='11px sans-serif';
+  ctx.fillText('SIV RENNES SUD — FL65', W*0.55, top+mh*0.15);
+
+  // Airfields (from the screenshot)
+  const A=[W*0.20,top+mh*0.42];  // Les Aspres / St-Paul
+  const B=[W*0.66,top+mh*0.40];  // LFAI Argentan
+  const C=[W*0.72,top+mh*0.82];  // LFOF Alençon-Valframbert
+  function field(p,name,freq){
+    ctx.fillStyle='#c9741a'; ctx.beginPath(); ctx.arc(p[0],p[1],6,0,7); ctx.fill();
+    ctx.strokeStyle='#c9741a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(p[0],p[1],11,0,7); ctx.stroke();
+    ctx.fillStyle='#153'; ctx.font='bold 11px sans-serif'; ctx.fillText(name,p[0]+14,p[1]-2);
+    ctx.fillStyle='#357'; ctx.font='10px sans-serif'; ctx.fillText(freq,p[0]+14,p[1]+11);
+  }
+
+  // Route segments (green) with distance/heading labels
+  function seg(p,q,label){
+    ctx.strokeStyle='#35c759'; ctx.lineWidth=5; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]); ctx.stroke();
+    const mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2, ang=Math.atan2(q[1]-p[1],q[0]-p[0]);
+    ctx.save(); ctx.translate(mx,my); ctx.rotate(ang);
+    ctx.fillStyle='#0a5a1f'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(label,0,-6); ctx.restore(); ctx.textAlign='left';
+  }
+  seg(A,B,'23.8 nm  275°/95°');
+  seg(B,C,'13.4 nm  159°/339°');
+
+  field(A,'LES ASPRES ST-PAUL','663');
+  field(B,'LFAI ARGENTAN','681');
+  field(C,'LFOF ALENÇON VALFRAMBERT','118.33');
+
+  // Ownship (yellow triangle) mid-route on A->B, heading vector
+  const px=W*0.44, py=top+mh*0.41, hdg=95;
+  ctx.strokeStyle='#ffd21a'; ctx.lineWidth=2.5; ctx.setLineDash([8,5]);
+  const r=(hdg-90)*Math.PI/180;
+  ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+Math.cos(r)*140,py+Math.sin(r)*140); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.save(); ctx.translate(px,py); ctx.rotate(hdg*Math.PI/180);
+  ctx.fillStyle='#ffb300'; ctx.strokeStyle='#7a4d00'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,-15); ctx.lineTo(10,11); ctx.lineTo(0,6); ctx.lineTo(-10,11); ctx.closePath();
+  ctx.fill(); ctx.stroke(); ctx.restore();
+
+  // Compass rose (top-right of map)
+  const cx=W-46, cy=top+46, cr=28;
+  ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(cx,cy,cr+4,0,7); ctx.fill();
+  ctx.strokeStyle='#555'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,cr,0,7); ctx.stroke();
+  ctx.fillStyle='#111'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('N',cx,cy-cr+12); ctx.fillText('S',cx,cy+cr-2);
+  ctx.fillText('E',cx+cr-8,cy+4); ctx.fillText('W',cx-cr+8,cy+4); ctx.textAlign='left';
+
+  // Scale bar
+  ctx.strokeStyle='#111'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(16,H-18); ctx.lineTo(16+84,H-18);
+  ctx.moveTo(16,H-22); ctx.lineTo(16,H-14); ctx.moveTo(100,H-22); ctx.lineTo(100,H-14); ctx.stroke();
+  ctx.fillStyle='#111'; ctx.font='11px sans-serif'; ctx.fillText('5 NM',44,H-24);
+
+  // Data strip (bottom-right)
+  ctx.fillStyle='rgba(0,0,0,.62)'; roundRect(W-168,H-56,156,44,6); ctx.fill();
+  ctx.fillStyle='#9aa0a6'; ctx.font='9px sans-serif';
+  ctx.fillText('SOL',W-160,H-42); ctx.fillText('CAP',W-108,H-42); ctx.fillText('DIST',W-52,H-42);
+  ctx.fillStyle='#35c759'; ctx.font='bold 16px sans-serif';
+  ctx.fillText('148',W-160,H-22); ctx.fillText('095',W-108,H-22); ctx.fillText('12nm',W-56,H-22);
+
+  ctx.restore();
+}
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+const mapTop=band(); map(mapTop);
+</script>
+</body>
+</html>

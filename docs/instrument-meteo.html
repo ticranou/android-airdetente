@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Météo (radar + vent FL20)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🌧</div>
+      <div>
+        <h1>Météo (radar + vent FL20)</h1>
+        <p class="subtitle">Radar de précipitations · vent au FL20 · terrains proches</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLMTO · analogique</span>
+      <span class="chip num">NUMMTO · numérique (50%-2L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLMTO.jpg" alt="ANLMTO — radar">
+        <div style="height:16px"></div>
+        <img class="shot" src="screenshots/NUMMTO.jpg" alt="NUMMTO — radar + vent">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li><b>Radar de précipitations</b> (RainViewer) centré sur la position.</li>
+          <li><b>Vent au FL20</b> (Open-Meteo) : <b style="color:#e88">flèche orange</b> + direction/vitesse.</li>
+          <li><b>Terrains proches</b>.</li>
+        </ul>
+        <h3>Carte météo plein écran</h3>
+        <ul class="feat">
+          <li>En-tête soignée : titre <b>METEO</b>, sources (radar / vent) et bloc <b>vent FL20</b> avec flèche.</li>
+          <li>Icône <b>avion</b> orientée selon le cap + <b>trajectoire future</b> en pointillés.</li>
+          <li><b>Pinch-to-zoom</b> et déplacement.</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : ouvrir la carte météo plein écran</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Nécessite <b>GPS + réseau</b>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

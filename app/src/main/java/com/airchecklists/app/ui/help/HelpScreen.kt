@@ -151,7 +151,7 @@ private fun HelpContent() {
     Bullet("Horamètre (ANLHRM / NUMHRM) : deux compteurs d'heures que vous saisissez.")
     Bullet("Montre (ANLWCH / NUMWCH) : heure courante.")
     Bullet("Météo (ANLMTO / NUMMTO) : radar de précipitations + vent au FL20 ; tapez la tuile pour la carte météo plein écran.")
-    Bullet("Terrains proches (ANLFLD / NUMFLD) : aérodromes les plus proches et leur relèvement.")
+    Bullet("Terrains proches (ANLFLD / NUMFLD) : aérodromes les plus proches et leur relèvement, issus de la base aérodromes complète (hors-ligne). En voyage, ils s'adaptent à votre position — pas seulement votre liste. Un aérodrome proche non listé : ouvrez sa VAC à la demande ou ajoutez-le à vos terrains.")
     Note(
         "Gyroscope requis : l'horizon, le conservateur de cap, la bille et l'EFIS complet ont besoin " +
             "d'un capteur d'orientation. Sur un appareil qui en est dépourvu, ces instruments affichent " +

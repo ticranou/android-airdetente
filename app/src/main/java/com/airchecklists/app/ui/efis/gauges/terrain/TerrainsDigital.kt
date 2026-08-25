@@ -34,7 +34,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.di.ServiceLocator
@@ -59,13 +62,25 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val context = LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
 
     val hasFix = state.hasPosition
+    // Nearby terrains from the full offline OpenAIP directory, enriched by the user's
+    // VAC charts (by ICAO); parsed off the UI thread. Falls back to the user's charts.
+    val latKey = (state.latitude * 50).roundToInt()
+    val lonKey = (state.longitude * 50).roundToInt()
+    val merged by androidx.compose.runtime.produceState(
+        initialValue = charts, charts, hasFix, latKey, lonKey,
+    ) {
+        value = com.airchecklists.app.data.repository.AerodromeDirectory.nearbyCharts(
+            state.latitude, state.longitude, hasFix, charts, 40,
+        )
+    }
     // All terrains sorted by proximity (for the dialog); the instrument shows the top 3.
-    val sortedAll = charts
+    val sortedAll = merged
         .map { c ->
             val d = if (hasFix && c.latitude != null && c.longitude != null)
                 haversineKm(state.latitude, state.longitude, c.latitude!!, c.longitude!!) else Double.MAX_VALUE
@@ -82,6 +97,10 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
             localFile = ServiceLocator.vacRepository.localPdf(chart),
             remoteUrl = ServiceLocator.vacRepository.remoteUrl(cycle, chart.icao),
         )
+    }
+
+    fun addToMyTerrains(chart: VacChart) {
+        scope.launch { ServiceLocator.vacRepository.upsert(chart.copy(id = "")) }
     }
 
     Canvas(
@@ -142,6 +161,7 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         items(sortedAll, key = { it.first.id }) { t ->
+                            val ephemeral = com.airchecklists.app.data.repository.AerodromeDirectory.isEphemeral(t.first)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -151,7 +171,19 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("${t.first.icao} · ${t.first.airfieldName}", style = MaterialTheme.typography.titleMedium)
-                                    Text(t.first.circuit, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(
+                                        if (ephemeral) "Aérodrome — appuyer pour ouvrir la VAC" else t.first.circuit,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                if (ephemeral) {
+                                    androidx.compose.material3.IconButton(onClick = { addToMyTerrains(t.first) }) {
+                                        androidx.compose.material3.Icon(
+                                            Icons.Filled.Add,
+                                            contentDescription = "Ajouter à mes terrains",
+                                        )
+                                    }
                                 }
                                 if (hasFix && t.second != Double.MAX_VALUE) {
                                     Column(horizontalAlignment = Alignment.End) {

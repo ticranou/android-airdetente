@@ -95,8 +95,25 @@ fun NavPlannerInstrument(modifier: Modifier = Modifier) {
     // Holds the live MapLibre map so the PDF export can snapshot the real basemap.
     val mapHolder = remember { arrayOfNulls<org.maplibre.android.maps.MapLibreMap>(1) }
 
+    // Full French aerodrome directory (offline OpenAIP), so the planner can pick ANY
+    // aerodrome, not only the user's VAC list. Parsed off the UI thread; empty until ready.
+    val aerodromes by androidx.compose.runtime.produceState(
+        initialValue = emptyList<com.airchecklists.app.data.repository.Aerodrome>(),
+    ) {
+        value = com.airchecklists.app.data.repository.AerodromeDirectory.load()
+    }
+    // Terrains selectable in the picker AND used to resolve the plan: user charts first
+    // (richer), then every other OpenAIP aerodrome, deduplicated by ICAO.
+    val allCharts = remember(charts, aerodromes) {
+        val byIcaoUser = charts.associateBy { it.icao.uppercase() }
+        val extras = aerodromes
+            .filter { it.icao.uppercase() !in byIcaoUser }
+            .map { with(com.airchecklists.app.data.repository.AerodromeDirectory) { it.toEphemeralChart() } }
+        charts + extras
+    }
+
     // Resolve the ordered plan into VacCharts (skip unknown ICAOs).
-    val byIcao = charts.associateBy { it.icao.uppercase() }
+    val byIcao = allCharts.associateBy { it.icao.uppercase() }
     val route = plan.icaos.mapNotNull { byIcao[it.uppercase()] }
 
     // Cruise speed (kt) from the current aircraft's green-arc top, else default.
@@ -204,7 +221,7 @@ fun NavPlannerInstrument(modifier: Modifier = Modifier) {
 
     if (showPicker) {
         TerrainPickerDialog(
-            charts = charts,
+            charts = allCharts,
             onDismiss = { showPicker = false },
             onPick = { icao -> ServiceLocator.setNavPlan(plan.copy(icaos = plan.icaos + icao)); showPicker = false },
         )
@@ -367,9 +384,11 @@ internal fun RouteMapSchematic(route: List<VacChart>, modifier: Modifier = Modif
 private fun TerrainPickerDialog(charts: List<VacChart>, onDismiss: () -> Unit, onPick: (String) -> Unit) {
     var query by remember { mutableStateOf("") }
     val q = query.trim()
-    val filtered = charts.filter {
-        q.isEmpty() || it.icao.contains(q, true) || it.airfieldName.contains(q, true)
-    }.sortedBy { it.icao }
+    val filtered = remember(charts, q) {
+        charts.filter {
+            q.isEmpty() || it.icao.contains(q, true) || it.airfieldName.contains(q, true)
+        }.sortedBy { it.icao }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Ajouter un terrain") },

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.data.sensors.EfisState
@@ -63,12 +66,25 @@ private const val NEAR_COUNT = 3
 fun TerrainsInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val context = LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
 
-    val sorted = remember(charts, state.latitude, state.longitude, state.hasPosition) {
-        sortByProximity(charts, state)
+    // Nearby terrains come from the full offline OpenAIP aerodrome directory,
+    // enriched by the user's own VAC charts (by ICAO). Parsed off the UI thread;
+    // falls back to the user's charts when the map layer/GPS is unavailable.
+    val latKey = (state.latitude * 50).roundToInt()
+    val lonKey = (state.longitude * 50).roundToInt()
+    val merged by androidx.compose.runtime.produceState(
+        initialValue = charts, charts, state.hasPosition, latKey, lonKey,
+    ) {
+        value = com.airchecklists.app.data.repository.AerodromeDirectory.nearbyCharts(
+            state.latitude, state.longitude, state.hasPosition, charts, 40,
+        )
+    }
+    val sorted = remember(merged, state.latitude, state.longitude, state.hasPosition) {
+        sortByProximity(merged, state)
     }
     val nearest = sorted.take(NEAR_COUNT)
 
@@ -79,6 +95,12 @@ fun TerrainsInstrument(modifier: Modifier = Modifier) {
             localFile = ServiceLocator.vacRepository.localPdf(chart),
             remoteUrl = ServiceLocator.vacRepository.remoteUrl(cycle, chart.icao),
         )
+    }
+
+    fun addToMyTerrains(chart: VacChart) {
+        scope.launch {
+            ServiceLocator.vacRepository.upsert(chart.copy(id = ""))
+        }
     }
 
     Canvas(
@@ -102,6 +124,7 @@ fun TerrainsInstrument(modifier: Modifier = Modifier) {
             hasPosition = state.hasPosition,
             onDismiss = { showDialog = false },
             onSelect = { chart -> openVac(chart); showDialog = false },
+            onAdd = { chart -> addToMyTerrains(chart) },
         )
     }
 }
@@ -167,6 +190,7 @@ private fun TerrainsDialog(
     hasPosition: Boolean,
     onDismiss: () -> Unit,
     onSelect: (VacChart) -> Unit,
+    onAdd: (VacChart) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -180,7 +204,7 @@ private fun TerrainsDialog(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     items(terrains, key = { it.chart.id }) { t ->
-                        TerrainRow(t, hasPosition, onClick = { onSelect(t.chart) })
+                        TerrainRow(t, hasPosition, onClick = { onSelect(t.chart) }, onAdd = { onAdd(t.chart) })
                     }
                 }
             }
@@ -190,14 +214,28 @@ private fun TerrainsDialog(
 }
 
 @Composable
-private fun TerrainRow(t: NearTerrain, hasPosition: Boolean, onClick: () -> Unit) {
+private fun TerrainRow(t: NearTerrain, hasPosition: Boolean, onClick: () -> Unit, onAdd: () -> Unit) {
+    val ephemeral = com.airchecklists.app.data.repository.AerodromeDirectory.isEphemeral(t.chart)
     Row(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text("${t.chart.icao} · ${t.chart.airfieldName}", style = MaterialTheme.typography.titleMedium)
-            Text(t.chart.circuit, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                if (ephemeral) "Aérodrome — appuyer pour ouvrir la VAC" else t.chart.circuit,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        // Nearby aerodrome not yet in the user's list → offer to add it.
+        if (ephemeral) {
+            androidx.compose.material3.IconButton(onClick = onAdd) {
+                androidx.compose.material3.Icon(
+                    Icons.Filled.Add,
+                    contentDescription = "Ajouter à mes terrains",
+                )
+            }
         }
         if (hasPosition && t.hasCoords) {
             Column(horizontalAlignment = Alignment.End) {

@@ -94,6 +94,9 @@ class PreferencesRepository(private val store: SettingsStore) {
     suspend fun setMapLayers(layers: com.airchecklists.app.data.model.MapLayerPrefs) =
         persist { it.copy(mapLayers = layers) }
 
+    suspend fun setWxLayers(layers: com.airchecklists.app.data.model.WxLayerPrefs) =
+        persist { it.copy(wxLayers = layers) }
+
     suspend fun setMapShowZoomButtons(show: Boolean) =
         persist { it.copy(mapShowZoomButtons = show) }
 

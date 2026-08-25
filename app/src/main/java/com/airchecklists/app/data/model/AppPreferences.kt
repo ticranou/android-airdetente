@@ -361,6 +361,8 @@ data class AppPreferences(
     val gaugeBezelColor: Long = 0xFF1C1C1C,
     /** Which OpenAIP overlays are shown on the moving map. */
     val mapLayers: MapLayerPrefs = MapLayerPrefs(),
+    /** Which overlays are shown on the weather map (radar/METAR/TAF/SIGMET). */
+    val wxLayers: WxLayerPrefs = WxLayerPrefs(),
     /** Show the on-map +/- zoom buttons (pinch-to-zoom always works). */
     val mapShowZoomButtons: Boolean = false,
     /** Tag of the currently installed offline map (null = none downloaded). */

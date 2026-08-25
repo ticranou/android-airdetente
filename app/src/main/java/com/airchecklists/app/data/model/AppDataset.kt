@@ -51,6 +51,7 @@ data class DatasetPrefs(
     val gaugeBezelColor: Long = 0xFF1C1C1C,
     val mapLayers: MapLayerPrefs = MapLayerPrefs(),
     val mapShowZoomButtons: Boolean = false,
+    val wxLayers: WxLayerPrefs = WxLayerPrefs(),
 ) {
     /** Extract the shippable prefs from a full [AppPreferences]. */
     companion object {
@@ -74,6 +75,7 @@ data class DatasetPrefs(
             gaugeBezelColor = p.gaugeBezelColor,
             mapLayers = p.mapLayers,
             mapShowZoomButtons = p.mapShowZoomButtons,
+            wxLayers = p.wxLayers,
         )
     }
 
@@ -98,5 +100,6 @@ data class DatasetPrefs(
         gaugeBezelColor = gaugeBezelColor,
         mapLayers = mapLayers,
         mapShowZoomButtons = mapShowZoomButtons,
+        wxLayers = wxLayers,
     )
 }

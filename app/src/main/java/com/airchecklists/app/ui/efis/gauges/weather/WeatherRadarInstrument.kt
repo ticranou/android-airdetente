@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,7 +85,7 @@ internal const val MAX_TILE_Z = 7
 /** Dial zoom (view). */
 internal const val DIAL_Z = 7
 /** Dialog starts here, then the user zooms/pans freely. */
-internal const val DIALOG_Z0 = 10
+internal const val DIALOG_Z0 = 8
 
 /** Composited radar view: a block of tiles around the ship, plus the pixel offset
  *  (within the centre tile) of the ship's exact position. [viewZ] is the requested
@@ -176,15 +178,35 @@ internal fun WeatherMapDialog(
     val tm = rememberTextMeasurer()
     val efisState by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val headingDeg = efisState.headingDeg
+    val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
+    val layers = prefs.wxLayers
     var zoom by remember { mutableIntStateOf(DIALOG_Z0) }
     var panX by remember { mutableFloatStateOf(0f) }
     var panY by remember { mutableFloatStateOf(0f) }
     var pinchAccum by remember { mutableFloatStateOf(1f) }
+    var showLayers by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf<WxSelection?>(null) }
 
     // Wider tile block (5×5) so panning has content around the edges.
     val radar by produceState<RadarBitmaps?>(null, frame, zoom) {
         val f = frame
         value = if (f != null) loadRadar(f, lat, lon, zoom, span = 2) else null
+    }
+    // Dark basemap tiles under the radar (coastlines/cities) for localisation.
+    val basemap by produceState<RadarBitmaps?>(null, zoom) {
+        value = loadBasemap(lat, lon, zoom, span = 2)
+    }
+    // METAR points around the ship: refresh when the map moves a "cell" or zooms.
+    val latKey = (lat * 4).roundToInt()
+    val lonKey = (lon * 4).roundToInt()
+    val metars by produceState(emptyList<com.airchecklists.app.data.model.MetarPoint>(), latKey, lonKey) {
+        // ~3° box around the ship — wide enough to cover the visible area at the
+        // default zoom (e.g. Dinard LFRD, ~2° west of Argentan).
+        value = ServiceLocator.aviationWeatherClient.metarsInBbox(lat - 3.0, lon - 3.0, lat + 3.0, lon + 3.0)
+    }
+    // SIGMET areas (global feed); we draw only those intersecting the view.
+    val sigmets by produceState(emptyList<com.airchecklists.app.data.model.SigmetArea>()) {
+        value = ServiceLocator.aviationWeatherClient.sigmets()
     }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -192,28 +214,56 @@ internal fun WeatherMapDialog(
             modifier = Modifier.fillMaxSize().background(Color(0xFF0A0A0A)),
         ) {
             Canvas(
-                modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-                    detectTransformGestures { _, pan, gestureZoom, _ ->
-                        panX += pan.x
-                        panY += pan.y
-                        pinchAccum *= gestureZoom
-                        when {
-                            pinchAccum > 1.5f && zoom < MAX_Z -> { zoom++; pinchAccum = 1f; panX /= 2f; panY /= 2f }
-                            pinchAccum < 1f / 1.5f && zoom > MIN_Z -> { zoom--; pinchAccum = 1f; panX *= 2f; panY *= 2f }
+                modifier = Modifier.fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, pan, gestureZoom, _ ->
+                            panX += pan.x
+                            panY += pan.y
+                            pinchAccum *= gestureZoom
+                            when {
+                                pinchAccum > 1.5f && zoom < MAX_Z -> { zoom++; pinchAccum = 1f; panX /= 2f; panY /= 2f }
+                                pinchAccum < 1f / 1.5f && zoom > MIN_Z -> { zoom--; pinchAccum = 1f; panX *= 2f; panY *= 2f }
+                            }
                         }
                     }
-                },
+                    .pointerInput(metars, sigmets, zoom, layers) {
+                        detectTapGestures { pos ->
+                            val cx = size.width / 2f; val cy = size.height / 2f
+                            val shipX = cx + panX; val shipY = cy + panY
+                            fun proj(la: Double, lo: Double) = wxProject(la, lo, lat, lon, shipX, shipY, zoom)
+                            // METAR dots first (small targets), then SIGMET areas.
+                            val hitMetar = if (layers.metar) metars.minByOrNull {
+                                val o = proj(it.lat, it.lon); (o.x - pos.x) * (o.x - pos.x) + (o.y - pos.y) * (o.y - pos.y)
+                            }?.takeIf {
+                                val o = proj(it.lat, it.lon); (o.x - pos.x) * (o.x - pos.x) + (o.y - pos.y) * (o.y - pos.y) < 40f * 40f
+                            } else null
+                            selected = when {
+                                hitMetar != null -> WxSelection.Metar(hitMetar)
+                                layers.sigmet -> sigmets.firstOrNull { pointInSigmet(pos.x, pos.y, it) { la, lo -> proj(la, lo) } }
+                                    ?.let { WxSelection.Sigmet(it) }
+                                else -> null
+                            }
+                        }
+                    },
             ) {
                 val cx = size.width / 2f
                 val cy = size.height / 2f
                 val faceR = minOf(size.width, size.height) / 2f - 8f
+                val shipX = cx + panX; val shipY = cy + panY
+                fun proj(la: Double, lo: Double) = wxProject(la, lo, lat, lon, shipX, shipY, zoom)
                 val clip = Path().apply { addRect(Rect(0f, 0f, size.width, size.height)) }
                 clipPath(clip) {
-                    drawRadarLayer(radar, cx, cy, faceR, lat, lon, zoom, panX, panY, charts, tm, labelTerrains = true, maxTerrains = Int.MAX_VALUE)
+                    // Dark basemap under everything for geographic context.
+                    drawBasemapLayer(basemap, cx, cy, panX, panY, zoom)
+                    if (layers.radar) {
+                        // Radar tiles only — terrain markers are replaced by the METAR
+                        // layer (coloured by flight category), so pass no charts here.
+                        drawRadarLayer(radar, cx, cy, faceR, lat, lon, zoom, panX, panY, emptyList(), tm, labelTerrains = false, maxTerrains = 0)
+                    }
+                    if (layers.sigmet) drawSigmets(sigmets) { la, lo -> proj(la, lo) }
+                    if (layers.metar) drawMetars(metars, { la, lo -> proj(la, lo) }, tm)
                 }
-                // Own-ship + future-track: a dashed line ahead along the current
-                // heading, and a large plane icon rotated to that heading.
-                val shipX = cx + panX; val shipY = cy + panY
+                // Own-ship + future-track.
                 drawTrackAhead(shipX, shipY, headingDeg, length = minOf(size.width, size.height) * 0.5f)
                 rotate(headingDeg, pivot = Offset(shipX, shipY)) {
                     drawPlaneMarker(shipX, shipY, size = 64f)
@@ -223,14 +273,139 @@ internal fun WeatherMapDialog(
             // FL20 wind (direction / speed + arrow) on the right.
             WeatherDialogHeader(
                 winds = winds,
+                onLayers = { showLayers = true },
                 modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(),
             )
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(8.dp),
+            // Zoom controls (+ / current level / −), right-centre.
+            Column(
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("Fermer")
+                WxZoomButton("+", enabled = zoom < MAX_Z) { if (zoom < MAX_Z) { zoom++; panX /= 2f; panY /= 2f } }
+                Surface(color = Color(0xCC14171C), shape = RoundedCornerShape(8.dp), modifier = Modifier.padding(vertical = 6.dp)) {
+                    Text("Z$zoom", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                }
+                WxZoomButton("−", enabled = zoom > MIN_Z) { if (zoom > MIN_Z) { zoom--; panX *= 2f; panY *= 2f } }
             }
+            // Tapped-feature detail panel (METAR/TAF or SIGMET).
+            selected?.let { sel ->
+                WxDetailPanel(
+                    selection = sel,
+                    onDismiss = { selected = null },
+                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(12.dp),
+                )
+            }
+            if (selected == null) {
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(8.dp),
+                ) {
+                    Text("Fermer")
+                }
+            }
+        }
+    }
+
+    if (showLayers) {
+        WxLayerDialog(
+            current = layers,
+            onDismiss = { showLayers = false },
+            onApply = { ServiceLocator.setWxLayers(it); showLayers = false },
+        )
+    }
+}
+
+/** What the user tapped on the weather map. */
+internal sealed interface WxSelection {
+    data class Metar(val point: com.airchecklists.app.data.model.MetarPoint) : WxSelection
+    data class Sigmet(val area: com.airchecklists.app.data.model.SigmetArea) : WxSelection
+}
+
+/** Bottom detail panel for a tapped METAR (raw + TAF fetched on demand) or SIGMET. */
+@Composable
+private fun WxDetailPanel(selection: WxSelection, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = Color(0xFF14171C),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, Color(0xFF2A2E35)),
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            when (selection) {
+                is WxSelection.Metar -> {
+                    val m = selection.point
+                    Text("${m.icao} · ${m.flightCategory}", color = fltCatColor(m.flightCategory), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(m.rawOb, color = Color(0xFFE0E0E0), fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
+                    // TAF on demand.
+                    val taf by produceState<String?>(null, m.icao) {
+                        value = runCatching { ServiceLocator.weatherClient.fetch(m.icao).taf?.raw }.getOrNull()
+                    }
+                    taf?.let {
+                        Text("TAF", color = Color(0xFF9AA0A6), fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp))
+                        Text(it, color = Color(0xFFCFD3D8), fontSize = 12.sp)
+                    }
+                }
+                is WxSelection.Sigmet -> {
+                    val s = selection.area
+                    Text("SIGMET ${s.hazard}", color = sigmetColor(s.hazard), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    val sub = buildString {
+                        if (s.firName.isNotBlank()) append(s.firName)
+                        if (s.topFl != null) { if (isNotEmpty()) append(" · "); append("Sommet FL${s.topFl / 100}") }
+                    }
+                    if (sub.isNotBlank()) Text(sub, color = Color(0xFF9AA0A6), fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp))
+                    Text(s.raw, color = Color(0xFFE0E0E0), fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+                }
+            }
+            TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Fermer") }
+        }
+    }
+}
+
+/** Checkbox dialog for the weather overlay layers. */
+@Composable
+private fun WxLayerDialog(
+    current: com.airchecklists.app.data.model.WxLayerPrefs,
+    onDismiss: () -> Unit,
+    onApply: (com.airchecklists.app.data.model.WxLayerPrefs) -> Unit,
+) {
+    var draft by remember { mutableStateOf(current) }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Calques météo") },
+        text = {
+            Column {
+                WxLayerRow("Radar (pluie)", draft.radar) { draft = draft.copy(radar = it) }
+                WxLayerRow("METAR / TAF", draft.metar) { draft = draft.copy(metar = it) }
+                WxLayerRow("SIGMET", draft.sigmet) { draft = draft.copy(sigmet = it) }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onApply(draft) }) { Text("Appliquer") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
+    )
+}
+
+@Composable
+private fun WxLayerRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    androidx.compose.foundation.layout.Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+    ) {
+        androidx.compose.material3.Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+        Text(label, modifier = Modifier.padding(start = 8.dp))
+    }
+}
+
+@Composable
+private fun WxZoomButton(label: String, enabled: Boolean, onClick: () -> Unit) {
+    Surface(
+        color = Color(0xCC14171C),
+        shape = androidx.compose.foundation.shape.CircleShape,
+        border = BorderStroke(1.dp, Color(0x33FFFFFF)),
+        modifier = Modifier.size(44.dp),
+    ) {
+        androidx.compose.material3.IconButton(onClick = onClick, enabled = enabled) {
+            Text(label, color = if (enabled) Color.White else Color(0xFF666666), fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -240,27 +415,39 @@ internal fun WeatherMapDialog(
  *  sources on the left and the FL20 wind (direction/speed + arrow → FL20) on the
  *  right. Sits below the system status bar. */
 @Composable
-private fun WeatherDialogHeader(winds: WindsAloft?, modifier: Modifier = Modifier) {
+private fun WeatherDialogHeader(winds: WindsAloft?, onLayers: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier.background(Color(0xFF0C0C0C)).androidStatusBarPadding()) {
-        // Row 1 — centred title.
-        Text(
-            "METEO",
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 8.dp),
-        )
+        // Row 1 — centred title + a layers button on the right.
+        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp)) {
+            Text(
+                "METEO",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            )
+            androidx.compose.material3.IconButton(
+                onClick = onLayers,
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp),
+            ) {
+                androidx.compose.material3.Icon(
+                    Icons.Filled.Layers,
+                    contentDescription = "Calques",
+                    tint = Color.White,
+                )
+            }
+        }
         // Row 2 — sources (left) + wind (right).
         androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 44.dp)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
         ) {
             Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                Text("Radar : RainViewer", color = Color(0xFF9AA0A6), fontSize = 11.sp)
-                Text("Vent : Open-Meteo", color = Color(0xFF9AA0A6), fontSize = 11.sp)
+                Text("Radar : RainViewer", color = Color(0xFF9AA0A6), fontSize = 10.sp, lineHeight = 12.sp)
+                Text("METAR/SIGMET : AviationWeather", color = Color(0xFF9AA0A6), fontSize = 10.sp, lineHeight = 12.sp)
+                Text("Vent : Open-Meteo", color = Color(0xFF9AA0A6), fontSize = 10.sp, lineHeight = 12.sp)
             }
             androidx.compose.foundation.layout.Row(
                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -510,3 +697,149 @@ private fun downloadImage(url: String): ImageBitmap {
         return bmp.asImageBitmap()
     }
 }
+
+// ---- Dark basemap tiles (CARTO), drawn UNDER the radar to help localisation ----
+
+/** Max zoom we fetch basemap tiles at (CARTO serves higher, but this is plenty and
+ *  lets higher view zooms magnify one level like the radar does). */
+private const val MAX_BASE_Z = 10
+
+/** Loads CARTO "dark_all" raster tiles around (lat,lon) for view zoom [viewZ],
+ *  reusing the same block/scale model as [loadRadar]. */
+internal suspend fun loadBasemap(lat: Double, lon: Double, viewZ: Int, span: Int): RadarBitmaps? = withContext(Dispatchers.IO) {
+    runCatching {
+        val tileZ = minOf(viewZ, MAX_BASE_Z)
+        val scale = (1 shl (viewZ - tileZ)).toFloat()
+        val n = 1 shl tileZ
+        val xF = (lon + 180.0) / 360.0 * n
+        val latRad = Math.toRadians(lat)
+        val yF = (1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * n
+        val xC = floor(xF).toInt()
+        val yC = floor(yF).toInt()
+        val shipPxX = ((xF - xC) * TILE).toFloat()
+        val shipPxY = ((yF - yC) * TILE).toFloat()
+        val tiles = mutableListOf<TileImage>()
+        for (dy in -span..span) for (dx in -span..span) {
+            val tx = ((xC + dx) % n + n) % n
+            val ty = yC + dy
+            if (ty < 0 || ty >= n) continue
+            val url = "https://a.basemaps.cartocdn.com/dark_all/$tileZ/$tx/$ty.png"
+            val img = runCatching { downloadImage(url) }.getOrNull() ?: continue
+            tiles.add(TileImage(dx, dy, img))
+        }
+        if (tiles.isEmpty()) null else RadarBitmaps(viewZ, tileZ, scale, tiles, shipPxX, shipPxY)
+    }.getOrNull()
+}
+
+/** Draws a pre-loaded basemap tile block centred on the ship (same math as radar). */
+internal fun DrawScope.drawBasemapLayer(base: RadarBitmaps?, cx: Float, cy: Float, panX: Float, panY: Float, zoom: Int) {
+    if (base == null || base.viewZ != zoom) return
+    val shipX = cx + panX; val shipY = cy + panY
+    val ts = TILE * base.scale
+    base.tiles.forEach { t ->
+        val left = shipX - base.shipPxX * base.scale + t.dx * ts
+        val top = shipY - base.shipPxY * base.scale + t.dy * ts
+        drawImage(
+            image = t.image,
+            dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
+            dstSize = IntSize(ts.roundToInt(), ts.roundToInt()),
+        )
+    }
+}
+
+// ---- Web-mercator projection shared by the weather overlays (matches the radar tiles) ----
+
+/** World-pixel X of [lon] at [zoom] (TILE * 2^zoom pixels around the globe). */
+private fun worldX(lon: Double, zoom: Int): Double =
+    (lon + 180.0) / 360.0 * (1 shl zoom).toDouble() * TILE
+
+/** World-pixel Y of [lat] at [zoom]. */
+private fun worldY(lat: Double, zoom: Int): Double {
+    val r = Math.toRadians(lat)
+    return (1.0 - ln(tan(r) + 1.0 / cos(r)) / PI) / 2.0 * (1 shl zoom).toDouble() * TILE
+}
+
+/** Screen offset for (lat,lon) given the ship anchor at (shipX,shipY) and [zoom]. */
+private fun wxProject(lat: Double, lon: Double, shipLat: Double, shipLon: Double, shipX: Float, shipY: Float, zoom: Int): Offset {
+    val px = shipX + (worldX(lon, zoom) - worldX(shipLon, zoom)).toFloat()
+    val py = shipY + (worldY(lat, zoom) - worldY(shipLat, zoom)).toFloat()
+    return Offset(px, py)
+}
+
+/** Inverse of [wxProject]: screen (px,py) → (lat,lon). */
+private fun wxUnproject(px: Float, py: Float, shipLat: Double, shipLon: Double, shipX: Float, shipY: Float, zoom: Int): Pair<Double, Double> {
+    val n = (1 shl zoom).toDouble() * TILE
+    val wx = worldX(shipLon, zoom) + (px - shipX)
+    val wy = worldY(shipLat, zoom) + (py - shipY)
+    val lon = wx / n * 360.0 - 180.0
+    val latRad = kotlin.math.atan(kotlin.math.sinh(PI * (1.0 - 2.0 * wy / n)))
+    return Math.toDegrees(latRad) to lon
+}
+
+/** Flight-category dot colour (FAA convention). */
+internal fun fltCatColor(cat: String): Color = when (cat.uppercase()) {
+    "VFR" -> Color(0xFF2ECC40)
+    "MVFR" -> Color(0xFF2196F3)
+    "IFR" -> Color(0xFFE53935)
+    "LIFR" -> Color(0xFFD24DEA)
+    else -> Color(0xFF9AA0A6)
+}
+
+/** Hazard fill colour for SIGMET areas. */
+internal fun sigmetColor(hazard: String): Color = when (hazard.uppercase()) {
+    "TS", "CONVECTIVE" -> Color(0xFFFF6D00)
+    "TURB" -> Color(0xFFFFB300)
+    "ICE" -> Color(0xFF29B6F6)
+    "MTW" -> Color(0xFFAB47BC)
+    else -> Color(0xFFEF5350)
+}
+
+/** Draw SIGMET hazard polygons (filled + outlined) using [project]. */
+internal fun DrawScope.drawSigmets(
+    areas: List<com.airchecklists.app.data.model.SigmetArea>,
+    project: (Double, Double) -> Offset,
+) {
+    areas.forEach { area ->
+        val ring = area.rings.firstOrNull() ?: return@forEach
+        val path = Path()
+        ring.forEachIndexed { i, p ->
+            val o = project(p[0], p[1])
+            if (i == 0) path.moveTo(o.x, o.y) else path.lineTo(o.x, o.y)
+        }
+        path.close()
+        val c = sigmetColor(area.hazard)
+        drawPath(path, c.copy(alpha = 0.20f))
+        drawPath(path, c, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
+    }
+}
+
+/** Draw METAR flight-category dots + ICAO labels using [project]. */
+internal fun DrawScope.drawMetars(
+    metars: List<com.airchecklists.app.data.model.MetarPoint>,
+    project: (Double, Double) -> Offset,
+    tm: TextMeasurer,
+) {
+    metars.forEach { m ->
+        val o = project(m.lat, m.lon)
+        drawCircle(fltCatColor(m.flightCategory), radius = 9f, center = o)
+        drawCircle(Color.White, radius = 9f, center = o, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+        compactText(tm, m.icao, o.x, o.y - 16f, sizeSp = 10f, bold = true, color = Color(0xFFE0E0E0))
+    }
+}
+
+/** True if screen point (px,py) is inside the polygon's first ring (projected). */
+internal fun pointInSigmet(px: Float, py: Float, area: com.airchecklists.app.data.model.SigmetArea, project: (Double, Double) -> Offset): Boolean {
+    val ring = area.rings.firstOrNull() ?: return false
+    val pts = ring.map { project(it[0], it[1]) }
+    var inside = false
+    var j = pts.size - 1
+    for (i in pts.indices) {
+        val a = pts[i]; val b = pts[j]
+        if (((a.y > py) != (b.y > py)) &&
+            (px < (b.x - a.x) * (py - a.y) / (b.y - a.y) + a.x)
+        ) inside = !inside
+        j = i
+    }
+    return inside
+}
+

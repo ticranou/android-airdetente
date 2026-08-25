@@ -25,3 +25,6 @@ local.properties
 
 # Local tooling / agent state
 /.claude/
+
+# Local device screenshots (test captures)
+/.shots/

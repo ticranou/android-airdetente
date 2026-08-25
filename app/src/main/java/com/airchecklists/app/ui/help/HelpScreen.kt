@@ -163,8 +163,11 @@ private fun HelpContent() {
             "conservées quand vous changez de tableau de bord, ET après une fermeture / réouverture de l'application : " +
             "un compte à rebours lancé continue de décompter en arrière-plan.",
     )
-    SubSection("Carte météo (radar)")
+    SubSection("Carte météo (radar + METAR/SIGMET)")
     Bullet("Radar de précipitations (RainViewer) superposé à la carte, centré sur votre position.")
+    Bullet("METAR : pastilles colorées par catégorie de vol (VFR/MVFR/IFR/LIFR) ; tapez-en une pour le METAR brut + le TAF.")
+    Bullet("SIGMET : zones de phénomènes dangereux (orages, turbulence, givrage…) dessinées et cliquables ; tapez une zone pour son détail (nature, sommet, texte brut). Source : AviationWeather.gov.")
+    Bullet("Calques activables (bouton en haut à droite) : Radar, METAR/TAF, SIGMET — le choix est mémorisé.")
     Bullet("Trajectoire future matérialisée par un trait en pointillés sur le cap actuel.")
     Bullet("Votre position est indiquée par une icône d'avion orientée selon le cap.")
     Bullet("Encart « vent au FL20 » : direction et force du vent en altitude.")

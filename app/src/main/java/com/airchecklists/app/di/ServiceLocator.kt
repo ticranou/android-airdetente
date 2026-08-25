@@ -50,6 +50,11 @@ object ServiceLocator {
     /** Stateless NOAA weather client. */
     val weatherClient: WeatherClient by lazy { WeatherClient() }
 
+    /** Stateless aeronautical weather client (METAR bbox + SIGMET polygons). */
+    val aviationWeatherClient: com.airchecklists.app.data.net.AviationWeatherClient by lazy {
+        com.airchecklists.app.data.net.AviationWeatherClient()
+    }
+
     /** Device hardware snapshot (sensors, GPS), detected once at startup. */
     val capabilities: com.airchecklists.app.data.sensors.DeviceCapabilities by lazy {
         com.airchecklists.app.data.sensors.DeviceCapabilities.detect(appContext)
@@ -111,6 +116,11 @@ object ServiceLocator {
     /** Persist the moving-map layer visibility preferences. */
     fun setMapLayers(layers: com.airchecklists.app.data.model.MapLayerPrefs) {
         appScope.launch { preferences.setMapLayers(layers) }
+    }
+
+    /** Persist the weather-map layer visibility preferences. */
+    fun setWxLayers(layers: com.airchecklists.app.data.model.WxLayerPrefs) {
+        appScope.launch { preferences.setWxLayers(layers) }
     }
 
     /** Update + persist the navigation plan (ordered terrain ICAOs + notes). */

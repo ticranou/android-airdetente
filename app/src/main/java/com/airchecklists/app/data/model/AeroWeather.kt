@@ -39,3 +39,12 @@ data class WxLayerPrefs(
     val metar: Boolean = true,
     val sigmet: Boolean = true,
 )
+
+/** A station's raw METAR + TAF (for the nav-plan PDF weather section). */
+data class StationWx(
+    val icao: String,
+    val name: String,
+    val flightCategory: String,
+    val rawMetar: String,
+    val rawTaf: String?,
+)

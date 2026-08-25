@@ -64,6 +64,7 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.map.NavMath
 import com.airchecklists.app.ui.terrain.QfuParser
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val DEFAULT_CRUISE_KT = 90.0
@@ -89,6 +90,7 @@ private data class NavLeg(val rm: Int?, val distNm: Double?, val timeSec: Int?)
 @Composable
 fun NavPlannerInstrument(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val exportScope = androidx.compose.runtime.rememberCoroutineScope()
     val plan by ServiceLocator.navPlan.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showPicker by remember { mutableStateOf(false) }
@@ -199,13 +201,25 @@ fun NavPlannerInstrument(modifier: Modifier = Modifier) {
                         designator = dsg,
                     )
                 }
-                // Snapshot the real MapLibre basemap (async), then build the PDF; if
-                // no map is available, export with the schematic fallback.
-                val map = mapHolder[0]
-                if (map != null) {
-                    map.snapshot { bmp -> exportPdf(context, route, exp, plan.notes, bmp) }
-                } else {
-                    exportPdf(context, route, exp, plan.notes, null)
+                // Fetch METAR/TAF for a wide box around the route, then build the PDF
+                // (snapshotting the real MapLibre basemap when available).
+                val pts = route.filter { it.latitude != null && it.longitude != null }
+                exportScope.launch {
+                    val wx = if (pts.isEmpty()) emptyList() else {
+                        val minLat = pts.minOf { it.latitude!! } - 1.0
+                        val maxLat = pts.maxOf { it.latitude!! } + 1.0
+                        val minLon = pts.minOf { it.longitude!! } - 1.5
+                        val maxLon = pts.maxOf { it.longitude!! } + 1.5
+                        runCatching {
+                            ServiceLocator.aviationWeatherClient.stationWxInBbox(minLat, minLon, maxLat, maxLon)
+                        }.getOrDefault(emptyList())
+                    }
+                    val map = mapHolder[0]
+                    if (map != null) {
+                        map.snapshot { bmp -> exportPdf(context, route, exp, plan.notes, bmp, wx) }
+                    } else {
+                        exportPdf(context, route, exp, plan.notes, null, wx)
+                    }
                 }
             }) {
                 Text("PDF", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)

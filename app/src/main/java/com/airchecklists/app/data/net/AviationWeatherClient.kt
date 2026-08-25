@@ -56,7 +56,71 @@ class AviationWeatherClient {
         }.getOrDefault(emptyList())
     }
 
-    // ---- parsing ----
+    /**
+     * Raw METAR + TAF for every station in the bbox (for the nav-plan PDF). One
+     * METAR bbox call + one TAF bbox call, merged by ICAO. Sorted by ICAO.
+     */
+    suspend fun stationWxInBbox(
+        south: Double, west: Double, north: Double, east: Double,
+    ): List<com.airchecklists.app.data.model.StationWx> = withContext(Dispatchers.IO) {
+        val bbox = String.format(java.util.Locale.US, "%.3f,%.3f,%.3f,%.3f", south, west, north, east)
+        // TAF by ICAO.
+        val tafs = runCatching {
+            val arr = json.parseToJsonElement(httpGet("$tafUrl?bbox=$bbox&format=json")) as? JsonArray
+            arr.orEmpty().mapNotNull { it as? JsonObject }
+                .mapNotNull { o -> o.str("icaoId")?.let { it.uppercase() to (o.str("rawTAF") ?: "") } }
+                .toMap()
+        }.getOrDefault(emptyMap())
+        // METAR (JSON, richest raw) → StationWx, joined with TAF.
+        runCatching {
+            val arr = json.parseToJsonElement(httpGet("$metarUrl?bbox=$bbox&format=json")) as? JsonArray
+            arr.orEmpty().mapNotNull { it as? JsonObject }
+                .mapNotNull { o ->
+                    val icao = o.str("icaoId")?.uppercase() ?: return@mapNotNull null
+                    // fltcat is often absent in bbox mode → compute from visib + ceiling.
+                    val cat = o.str("fltcat") ?: o.str("fltCat") ?: flightCategory(o)
+                    com.airchecklists.app.data.model.StationWx(
+                        icao = icao,
+                        name = cleanName(o.str("name")),
+                        flightCategory = cat,
+                        rawMetar = o.str("rawOb") ?: "",
+                        rawTaf = tafs[icao]?.takeIf { it.isNotBlank() },
+                    )
+                }
+                .distinctBy { it.icao }
+                .sortedBy { it.icao }
+        }.getOrDefault(emptyList())
+    }
+
+    /** "Deauville/Saint Gati, NO, FR" → "Deauville/Saint Gati" (drop region/country). */
+    private fun cleanName(raw: String?): String {
+        val n = raw?.substringBefore(",")?.trim().orEmpty()
+        return n.removeSuffix(" Arpt").trim()
+    }
+
+    /** FAA-style flight category from the METAR's visibility + cloud ceiling. */
+    private fun flightCategory(o: JsonObject): String {
+        val vis: Double? = o.str("visib")?.let { v ->
+            when {
+                v.contains("+") -> 7.0                              // "6+" → plenty
+                else -> v.toDoubleOrNull()?.let { if (it > 100) it / 1609.34 else it }  // m vs SM
+            }
+        }
+        val ceil: Int? = (o["clouds"] as? JsonArray).orEmpty()
+            .mapNotNull { it as? JsonObject }
+            .filter { it.str("cover") in setOf("BKN", "OVC", "OVX") }
+            .mapNotNull { it.int("base") }
+            .minOrNull()
+        return when {
+            (ceil != null && ceil < 500) || (vis != null && vis < 1) -> "LIFR"
+            (ceil != null && ceil < 1000) || (vis != null && vis < 3) -> "IFR"
+            (ceil != null && ceil < 3000) || (vis != null && vis < 5) -> "MVFR"
+            ceil == null && vis == null -> "UNKN"
+            else -> "VFR"
+        }
+    }
+
+    private val tafUrl = "https://aviationweather.gov/api/data/taf"
 
     private fun kotlinx.serialization.json.JsonElement.asMetarPoint(): MetarPoint? = runCatching {
         val f = jsonObject

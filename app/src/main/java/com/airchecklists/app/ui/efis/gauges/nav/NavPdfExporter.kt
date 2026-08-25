@@ -30,11 +30,13 @@ internal fun exportPdf(
     steps: List<NavStepExport>,
     notes: String,
     mapBitmap: Bitmap?,
+    stationWx: List<com.airchecklists.app.data.model.StationWx> = emptyList(),
 ) {
     runCatching {
         val doc = PdfDocument()
         drawMainPage(doc, route, steps, notes, mapBitmap)
         appendVacPages(context, doc, route)
+        appendWeatherPages(doc, stationWx)
 
         val out = File(context.cacheDir, "nav_plan.pdf")
         out.outputStream().use { doc.writeTo(it) }
@@ -46,6 +48,78 @@ internal fun exportPdf(
     }.onFailure { e ->
         android.widget.Toast.makeText(context, "Échec de l'export PDF : ${e.message}", android.widget.Toast.LENGTH_LONG).show()
     }
+}
+
+/**
+ * Append a "MÉTÉO" section: raw METAR + TAF for every station around the nav,
+ * flowing across as many A4 pages as needed. Nothing is drawn when the list is
+ * empty (no network / no stations).
+ */
+private fun appendWeatherPages(doc: PdfDocument, stations: List<com.airchecklists.app.data.model.StationWx>) {
+    if (stations.isEmpty()) return
+    val title = Paint().apply { color = AColor.BLACK; textSize = 20f; isFakeBoldText = true }
+    val hd = Paint().apply { color = AColor.rgb(16, 48, 90); textSize = 12f; isFakeBoldText = true }
+    val lbl = Paint().apply { color = AColor.DKGRAY; textSize = 8f; isFakeBoldText = true }
+    val mono = Paint().apply { color = AColor.BLACK; textSize = 9f }
+    val line = Paint().apply { color = AColor.rgb(210, 210, 210); strokeWidth = 1f }
+    val wrapW = PAGE_W - 2 * MARGIN
+    val bottom = PAGE_H - MARGIN
+
+    // Continue numbering after the main + VAC pages already added.
+    var pageNo = doc.pages.size + 1
+    var page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_W, PAGE_H, pageNo++).create())
+    var c = page.canvas
+    var y = 44f
+    c.drawText("Météo — METAR / TAF", MARGIN, y, title); y += 10f
+    c.drawText("Stations autour de la navigation · source AviationWeather.gov", MARGIN, y + 4f, lbl); y += 22f
+
+    fun newPage() {
+        doc.finishPage(page)
+        page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_W, PAGE_H, pageNo++).create())
+        c = page.canvas
+        y = 44f
+    }
+    // Draw [text] wrapped to the page width in [paint]; paginates as needed.
+    fun drawWrapped(text: String, paint: Paint, indent: Float = 0f) {
+        wrapLines(text, paint, wrapW - indent).forEach { ln ->
+            if (y > bottom) newPage()
+            c.drawText(ln, MARGIN + indent, y, paint); y += paint.textSize + 3f
+        }
+    }
+
+    stations.forEach { s ->
+        if (y + 46f > bottom) newPage()
+        val head = if (s.name.isNotBlank()) "${s.icao} · ${s.name} · ${s.flightCategory}"
+        else "${s.icao} · ${s.flightCategory}"
+        c.drawText(head, MARGIN, y, hd); y += 14f
+        c.drawText("METAR", MARGIN, y, lbl); y += 11f
+        drawWrapped(s.rawMetar.ifBlank { "—" }, mono, indent = 6f)
+        y += 4f
+        c.drawText("TAF", MARGIN, y, lbl); y += 11f
+        drawWrapped(s.rawTaf ?: "—", mono, indent = 6f)
+        y += 8f
+        if (y <= bottom) { c.drawLine(MARGIN, y, PAGE_W - MARGIN, y, line); y += 12f }
+    }
+    doc.finishPage(page)
+}
+
+/** Greedy word-wrap of [text] to [maxW] pixels for [paint]. */
+private fun wrapLines(text: String, paint: Paint, maxW: Float): List<String> {
+    val words = text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    if (words.isEmpty()) return listOf("—")
+    val lines = mutableListOf<String>()
+    var cur = StringBuilder()
+    words.forEach { w ->
+        val candidate = if (cur.isEmpty()) w else "$cur $w"
+        if (paint.measureText(candidate) <= maxW) {
+            cur = StringBuilder(candidate)
+        } else {
+            if (cur.isNotEmpty()) lines += cur.toString()
+            cur = StringBuilder(w)
+        }
+    }
+    if (cur.isNotEmpty()) lines += cur.toString()
+    return lines
 }
 
 private fun drawMainPage(

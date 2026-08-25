@@ -23,6 +23,7 @@
     <string name="vac_empty">Aucune carte VAC. Ajoutez-en depuis les Réglages.</string>
     <string name="vac_line_secondary">Alti: %1$s - Circuit: %2$s</string>
     <string name="vac_status_offline">Disponible hors-ligne</string>
+    <string name="vac_weather_station">Station météo (METAR/TAF)</string>
     <string name="vac_status_outdated">Mise à jour disponible</string>
     <string name="vac_open_failed">Aucune application pour ouvrir le PDF.</string>
 

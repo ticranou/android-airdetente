@@ -47,6 +47,20 @@ fun VacScreen(
 ) {
     val charts by viewModel.charts.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Open a terrain's VAC PDF directly (local if downloaded, else the SIA URL).
+    fun openVac(chart: VacChart) {
+        val repo = com.airchecklists.app.di.ServiceLocator.vacRepository
+        com.airchecklists.app.data.net.PdfOpener.open(
+            context = context,
+            localFile = repo.localPdf(chart),
+            remoteUrl = repo.remoteUrl(
+                com.airchecklists.app.di.ServiceLocator.preferences.preferences.value.vacAiracCycle,
+                chart.icao,
+            ),
+        )
+    }
 
     Scaffold(
         topBar = { PrimaryTopBar(title = stringResource(R.string.vac_title)) },
@@ -93,7 +107,11 @@ fun VacScreen(
                     items(charts, key = { it.id }) { chart ->
                         VacRow(
                             chart = chart,
-                            onClick = { onOpenTerrain(chart.id) },
+                            // Weather station → detail sheet (Weather + VAC). Otherwise the
+                            // detail sheet would show only the VAC tile, so open it directly.
+                            onClick = {
+                                if (chart.hasWeather) onOpenTerrain(chart.id) else openVac(chart)
+                            },
                         )
                     }
                 }
@@ -112,9 +130,12 @@ private fun VacRow(
         ListItem(
             colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
             headlineContent = {
+                // Terrains that are also a weather station (METAR/TAF) get a blue title.
                 Text(
                     text = "${chart.icao} - ${chart.airfieldName}",
                     style = MaterialTheme.typography.titleMedium.scaledByPrefs(),
+                    color = if (chart.hasWeather) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface,
                 )
             },
             supportingContent = {

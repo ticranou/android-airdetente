@@ -169,6 +169,12 @@
     <string name="efis_instr_watch">ANLWCH - Montre</string>
     <string name="efis_instr_watch_c">NUMWCH - Montre (50%-1L)</string>
     <string name="efis_instr_nav">CMNNAV - Prépa Navigation (100%-6L)</string>
+    <string name="efis_instr_fdr">ANLFDR - Enregistreur de vol</string>
+    <string name="settings_fdr">Enregistreur de vol</string>
+    <string name="settings_fdr_hint">L\'instrument ANLFDR enregistre les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). L\'enregistrement tourne tant que le Cockpit est affiché.</string>
+    <string name="settings_fdr_buffer">Durée conservée</string>
+    <string name="settings_fdr_flush">Sauvegarde disque</string>
+    <string name="settings_fdr_minutes">%1$d min</string>
     <string name="aircraft_field_vpl">Vpl — vitesse optimale de plané</string>
     <string name="settings_efis_speed_unit">Unité de vitesse</string>
     <string name="settings_efis_speed_kmh">km/h</string>

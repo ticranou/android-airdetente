@@ -90,6 +90,7 @@ fun InstrumentSlot(
             EfisInstrument.WATCH -> WatchGauge(showValues, fill)
             EfisInstrument.WATCH_COMPACT -> com.airchecklists.app.ui.efis.gauges.compact.WatchDigital(fill)
             EfisInstrument.NAV_PLANNER -> com.airchecklists.app.ui.efis.gauges.nav.NavPlannerInstrument(fill)
+            EfisInstrument.ANLFDR -> FlightRecorderInstrument(round)
         }
     }
     }

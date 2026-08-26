@@ -55,6 +55,7 @@ enum class EfisInstrument {
     WATCH,               // Montre analogique (aiguilles)
     WATCH_COMPACT,       // Montre numérique (rectangulaire)
     NAV_PLANNER,         // Prépa navigation (plein écran, 6 lignes)
+    ANLFDR,              // Flight Recorder (enregistreur de vol, jauge ronde)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -70,7 +71,7 @@ enum class EfisInstrument {
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR)
 
     /** Instruments that need a working orientation (pitch/roll/magnetic heading):
      *  attitude, heading and slip-ball variants, plus the combined EFIS block.
@@ -300,6 +301,7 @@ data class InstrumentPersistState(
     val countdownAnlBot: CountdownSnapshot = CountdownSnapshot(),
     val horameterNum: HorameterSnapshot = HorameterSnapshot(),
     val horameterAnl: HorameterSnapshot = HorameterSnapshot(),
+    val fdrPaused: Boolean = false,
     val targetHeading: Int? = null,
     val targetAltitude: Int? = null,
 )
@@ -371,6 +373,9 @@ data class AppPreferences(
     val disclaimerAccepted: Boolean = false,
     /** Whether the startup hardware-compatibility warning has been dismissed. */
     val compatWarningDismissed: Boolean = false,
+    /** Flight recorder rolling-buffer length (minutes, min 5) and disk-flush period. */
+    val fdrBufferMinutes: Int = 10,
+    val fdrFlushMinutes: Int = 2,
     /** Durable state of the stateful instruments + heading/altitude targets. */
     val instruments: InstrumentPersistState = InstrumentPersistState(),
     /** Saved navigation plan (ordered terrain ICAOs + notes). */
@@ -384,6 +389,10 @@ data class AppPreferences(
         const val EFIS_MAX_COLS = 2
         const val EFIS_MAX_ROWS = 6
         const val LEGACY_DASHBOARD_ID = "legacy-default"
+        const val FDR_MIN_BUFFER_MIN = 5
+        const val FDR_MAX_BUFFER_MIN = 60
+        const val FDR_MIN_FLUSH_MIN = 1
+        const val FDR_MAX_FLUSH_MIN = 10
     }
 
     /** efisSlots resized to exactly efisCols*efisRows (pad with NONE / truncate). */

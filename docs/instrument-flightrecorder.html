@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Enregistreur de vol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🛰</div>
+      <div>
+        <h1>Enregistreur de vol</h1>
+        <p class="subtitle">Flight Recorder — journal des dernières minutes de vol</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLFDR · analogique</span>
+      <span class="chip num">GPS · Accél. · Gyro · Alti · Baro</span>
+    </div>
+
+    <div class="card">
+      <h2>Possibilités</h2>
+      <ul class="feat">
+        <li>Conserve en continu les <b>dernières minutes de vol</b> dans un buffer glissant : position GPS (1 Hz), accélération et inclinaison (~20 Hz), altitude (1 Hz), baromètre (~5 Hz).</li>
+        <li>Statut affiché : <b style="color:#32C832">Recording</b> (enregistrement) / <b style="color:#E8843A">Paused</b> (en pause).</li>
+        <li>Liste des paramètres avec une pastille <b style="color:#32C832">verte</b> (capteur disponible et enregistré) ou <b style="color:#E8843A">orange</b> (capteur absent sur l'appareil, ex. baromètre).</li>
+        <li>But : servir de <b>journal d'incident</b> pour analyser après coup ce qui s'est passé — socle du futur moteur de détection d'incident / Search &amp; Rescue.</li>
+      </ul>
+      <h3>Réglages (Réglages ▸ Cockpits)</h3>
+      <ul class="feat">
+        <li><b>Durée conservée</b> : longueur du buffer (min 5 min, défaut 10 min).</li>
+        <li><b>Sauvegarde disque</b> : le buffer est écrit sur l'appareil à intervalle régulier (défaut 2 min).</li>
+      </ul>
+      <h3>Gestes</h3>
+      <div class="gesture"><span class="g">··</span> Double-tap : pause / reprise de l'enregistrement</div>
+      <div class="gesture"><span class="g">–</span> Appui long : exporter dans <b>Téléchargements</b> — <b>trace GPX</b> (positions + altitude de <b>tout le vol</b>) ou <b>log brut CSV</b> (toutes les mesures des <b>X dernières minutes</b> conservées). Récupérable en branchant l'appareil au PC.</div>
+      <h3>Note</h3>
+      <ul class="feat">
+        <li>L'enregistrement tourne <b>tant que le Cockpit est affiché</b> (il s'interrompt en veille ou en quittant le cockpit — un enregistrement continu en arrière-plan viendra dans une version ultérieure).</li>
+        <li>Indicatif et non certifié.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : deux points « ·· » = double-tap (pause / reprise).
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

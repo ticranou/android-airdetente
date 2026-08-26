@@ -52,6 +52,8 @@ data class DatasetPrefs(
     val mapLayers: MapLayerPrefs = MapLayerPrefs(),
     val mapShowZoomButtons: Boolean = false,
     val wxLayers: WxLayerPrefs = WxLayerPrefs(),
+    val fdrBufferMinutes: Int = 10,
+    val fdrFlushMinutes: Int = 2,
 ) {
     /** Extract the shippable prefs from a full [AppPreferences]. */
     companion object {
@@ -76,6 +78,8 @@ data class DatasetPrefs(
             mapLayers = p.mapLayers,
             mapShowZoomButtons = p.mapShowZoomButtons,
             wxLayers = p.wxLayers,
+            fdrBufferMinutes = p.fdrBufferMinutes,
+            fdrFlushMinutes = p.fdrFlushMinutes,
         )
     }
 
@@ -101,5 +105,7 @@ data class DatasetPrefs(
         mapLayers = mapLayers,
         mapShowZoomButtons = mapShowZoomButtons,
         wxLayers = wxLayers,
+        fdrBufferMinutes = fdrBufferMinutes,
+        fdrFlushMinutes = fdrFlushMinutes,
     )
 }

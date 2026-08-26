@@ -66,6 +66,7 @@ fun efisInstrumentLabel(instrument: EfisInstrument): String = stringResource(
         EfisInstrument.WATCH -> R.string.efis_instr_watch
         EfisInstrument.WATCH_COMPACT -> R.string.efis_instr_watch_c
         EfisInstrument.NAV_PLANNER -> R.string.efis_instr_nav
+        EfisInstrument.ANLFDR -> R.string.efis_instr_fdr
     },
 )
 

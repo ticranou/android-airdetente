@@ -19,6 +19,7 @@
       ["instrument-terrains.html", "Terrains proches"],
       ["instrument-meteo.html", "Météo (radar + vent)"],
       ["instrument-montre.html", "Montre"],
+      ["instrument-flightrecorder.html", "Enregistreur de vol"],
       ["instrument-efis.html", "EFIS"],
       ["instrument-movingmap.html", "Moving Map"],
     ]},

@@ -152,6 +152,7 @@ private fun HelpContent() {
     Bullet("Montre (ANLWCH / NUMWCH) : heure courante.")
     Bullet("Météo (ANLMTO / NUMMTO) : radar de précipitations + vent au FL20 ; tapez la tuile pour la carte météo plein écran.")
     Bullet("Terrains proches (ANLFLD / NUMFLD) : aérodromes les plus proches et leur relèvement, issus de la base aérodromes complète (hors-ligne). En voyage, ils s'adaptent à votre position — pas seulement votre liste. Un aérodrome proche non listé : ouvrez sa VAC à la demande ou ajoutez-le à vos terrains.")
+    Bullet("Enregistreur de vol (ANLFDR) : conserve les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). Double-tap = pause / reprise. Appui long = exporter dans Téléchargements : la trace GPX couvre tout le vol (positions + altitude), le log brut CSV couvre les X dernières minutes (toutes les mesures). Récupérable en branchant l'appareil au PC. Il tourne tant que le Cockpit est affiché ; durée conservée et fréquence de sauvegarde réglables dans Réglages ▸ Cockpits. Pastille verte = paramètre disponible et enregistré, orange = capteur absent. Anneau orange = temps avant la prochaine sauvegarde disque.")
     Note(
         "Gyroscope requis : l'horizon, le conservateur de cap, la bille et l'EFIS complet ont besoin " +
             "d'un capteur d'orientation. Sur un appareil qui en est dépourvu, ces instruments affichent " +

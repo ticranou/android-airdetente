@@ -128,6 +128,14 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setKeepScreenOn(on) }
     }
 
+    fun setFdrBufferMinutes(min: Int) {
+        viewModelScope.launch { prefsRepo.setFdrBufferMinutes(min) }
+    }
+
+    fun setFdrFlushMinutes(min: Int) {
+        viewModelScope.launch { prefsRepo.setFdrFlushMinutes(min) }
+    }
+
     // ---- Dashboards ----
 
     /** Create a new empty dashboard and return its id (for immediate editing). */

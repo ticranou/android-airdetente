@@ -152,6 +152,25 @@ object ServiceLocator {
         )
     }
 
+    /** Flight recorder (rolling buffer). Started/stopped with the cockpit screen. */
+    val flightRecorder: com.airchecklists.app.data.sensors.FlightRecorder by lazy {
+        val p = preferences.preferences.value
+        com.airchecklists.app.data.sensors.FlightRecorder(
+            context = appContext,
+            store = com.airchecklists.app.data.local.FlightRecorderStore(appContext),
+            caps = capabilities,
+        ).apply {
+            bufferMinutes = p.fdrBufferMinutes
+            flushMinutes = p.fdrFlushMinutes
+            setPausedRestored(instrumentPersist.fdrPaused)
+        }
+    }
+
+    /** Persist the flight-recorder pause state so it survives a restart. */
+    fun setFdrPaused(paused: Boolean) {
+        updateInstruments { it.copy(fdrPaused = paused) }
+    }
+
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     fun init(context: Context) {

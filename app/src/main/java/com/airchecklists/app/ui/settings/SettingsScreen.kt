@@ -290,6 +290,8 @@ fun SettingsScreen(
                     onAltitudeUnit = viewModel::setAltitudeUnit,
                     onEfisResponsiveness = viewModel::setEfisResponsiveness,
                     onEfisShowValues = viewModel::setEfisShowValues,
+                    onFdrBufferMinutes = viewModel::setFdrBufferMinutes,
+                    onFdrFlushMinutes = viewModel::setFdrFlushMinutes,
                     onAddDashboard = { onEditDashboard(viewModel.addDashboard("Nouveau tableau")) },
                     onEditDashboard = onEditDashboard,
                     onDeleteDashboard = { dashboardToDelete = it },
@@ -455,6 +457,24 @@ fun SettingsScreen(
 }
 
 // ---- Sections ----
+
+/** −/value/+ stepper for a minutes setting (label left, controls right). */
+@Composable
+private fun MinutesStepper(label: String, value: Int, min: Int, max: Int, onChange: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = { onChange(value - 1) }, enabled = value > min) {
+            Icon(Icons.Filled.Remove, contentDescription = "-")
+        }
+        Text(
+            stringResource(R.string.settings_fdr_minutes, value),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        IconButton(onClick = { onChange(value + 1) }, enabled = value < max) {
+            Icon(Icons.Filled.Add, contentDescription = "+")
+        }
+    }
+}
 
 /** Hidden maintenance tab: export / import the full dataset. */
 @Composable
@@ -718,6 +738,8 @@ private fun CockpitsSection(
     onAltitudeUnit: (com.airchecklists.app.data.model.AltitudeUnit) -> Unit,
     onEfisResponsiveness: (Float) -> Unit,
     onEfisShowValues: (Boolean) -> Unit,
+    onFdrBufferMinutes: (Int) -> Unit,
+    onFdrFlushMinutes: (Int) -> Unit,
     onAddDashboard: () -> Unit,
     onEditDashboard: (String) -> Unit,
     onDeleteDashboard: (com.airchecklists.app.data.model.Dashboard) -> Unit,
@@ -852,6 +874,28 @@ private fun CockpitsSection(
             )
         }
     }
+
+    // Flight recorder (ANLFDR): rolling buffer length + disk-flush period.
+    SectionHeader(stringResource(R.string.settings_fdr))
+    Text(
+        stringResource(R.string.settings_fdr_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    MinutesStepper(
+        label = stringResource(R.string.settings_fdr_buffer),
+        value = prefs.fdrBufferMinutes,
+        min = AppPreferences.FDR_MIN_BUFFER_MIN,
+        max = AppPreferences.FDR_MAX_BUFFER_MIN,
+        onChange = onFdrBufferMinutes,
+    )
+    MinutesStepper(
+        label = stringResource(R.string.settings_fdr_flush),
+        value = prefs.fdrFlushMinutes,
+        min = AppPreferences.FDR_MIN_FLUSH_MIN,
+        max = AppPreferences.FDR_MAX_FLUSH_MIN,
+        onChange = onFdrFlushMinutes,
+    )
 
     // Dashboards (saved instrument layouts).
     SectionHeader(stringResource(R.string.settings_dashboards))

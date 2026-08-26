@@ -109,6 +109,14 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setCompatWarningDismissed(dismissed: Boolean) = persist { it.copy(compatWarningDismissed = dismissed) }
 
+    suspend fun setFdrBufferMinutes(min: Int) = persist {
+        it.copy(fdrBufferMinutes = min.coerceIn(AppPreferences.FDR_MIN_BUFFER_MIN, AppPreferences.FDR_MAX_BUFFER_MIN))
+    }
+
+    suspend fun setFdrFlushMinutes(min: Int) = persist {
+        it.copy(fdrFlushMinutes = min.coerceIn(AppPreferences.FDR_MIN_FLUSH_MIN, AppPreferences.FDR_MAX_FLUSH_MIN))
+    }
+
     suspend fun setInstrumentState(state: com.airchecklists.app.data.model.InstrumentPersistState) =
         persist { it.copy(instruments = state) }
 

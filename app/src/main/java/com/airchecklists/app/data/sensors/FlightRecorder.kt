@@ -1,14 +1,10 @@
 package com.airchecklists.app.data.sensors
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import com.airchecklists.app.data.local.FlightRecorderStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,10 +56,12 @@ class FlightRecorder(
     context: Context,
     private val store: FlightRecorderStore,
     private val caps: DeviceCapabilities,
+    // Position source: the app's fused EfisState (real GPS in flight, scripted in
+    // demo mode). Using it keeps the recorded track in sync with the moving map.
+    private val positionProvider: () -> EfisState,
 ) {
     private val appContext = context.applicationContext
     private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val locationManager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     private val accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     private val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -82,6 +80,7 @@ class FlightRecorder(
     @Volatile var flushMinutes: Int = 2
 
     private var flushJob: Job? = null
+    private var positionJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
     private val _status = MutableStateFlow(
@@ -93,9 +92,6 @@ class FlightRecorder(
         ),
     )
     val status: StateFlow<FdrStatus> = _status.asStateFlow()
-
-    // Throttle GPS/ALT to ~1 Hz and BARO handled at its natural rate.
-    private var lastGpsMs = 0L
 
     // Flush-cycle timing (for the UI progress ring): when the current cycle started
     // and how long it lasts. flushProgress() = elapsed / interval, clamped 0..1.
@@ -118,7 +114,17 @@ class FlightRecorder(
         accel?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME) }
         gyro?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME) }
         pressure?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_NORMAL) }
-        startLocation()
+        // Position at ~1 Hz from the app's fused state (real GPS or demo).
+        positionJob = scope.launch {
+            while (started) {
+                val s = positionProvider()
+                if (s.hasPosition) {
+                    add(FdrKind.GPS, s.latitude, s.longitude, s.gpsSpeedKmh.toDouble())
+                    add(FdrKind.ALT, s.gpsAltitudeFt.toDouble())
+                }
+                delay(1000L)
+            }
+        }
         flushJob = scope.launch {
             while (started) {
                 delay(flushIntervalMs())
@@ -134,7 +140,7 @@ class FlightRecorder(
         started = false
         flushCycleStartMs = 0L
         sensorManager.unregisterListener(sensorListener)
-        runCatching { locationManager.removeUpdates(locationListener) }
+        positionJob?.cancel(); positionJob = null
         flushJob?.cancel(); flushJob = null
         flush()   // persist whatever we have
         publish()
@@ -191,40 +197,10 @@ class FlightRecorder(
                     add(FdrKind.ACCEL, event.values[0].toDouble(), event.values[1].toDouble(), event.values[2].toDouble())
                 Sensor.TYPE_GYROSCOPE ->
                     add(FdrKind.GYRO, event.values[0].toDouble(), event.values[1].toDouble(), event.values[2].toDouble())
-                Sensor.TYPE_PRESSURE -> {
-                    val hPa = event.values[0].toDouble()
-                    add(FdrKind.BARO, hPa)
-                    // Baro-derived altitude (feet), 1 sample per event (~5 Hz, fine).
-                    val altM = SensorManager.getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, hPa.toFloat())
-                    add(FdrKind.ALT, altM.toDouble() * 3.28084)
-                }
+                // Raw pressure only; altitude comes from the fused position poll so it
+                // stays consistent with the moving map (and works in demo mode).
+                Sensor.TYPE_PRESSURE -> add(FdrKind.BARO, event.values[0].toDouble())
             }
-        }
-    }
-
-    private val locationListener = LocationListener { loc: Location ->
-        val now = System.currentTimeMillis()
-        if (now - lastGpsMs < 950L) return@LocationListener   // ~1 Hz
-        lastGpsMs = now
-        add(FdrKind.GPS, loc.latitude, loc.longitude, (loc.speed * 3.6).toDouble())
-        if (loc.hasAltitude()) add(FdrKind.ALT, loc.altitude * 3.28084)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun startLocation() {
-        val hasPerm =
-            appContext.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED ||
-                appContext.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                android.content.pm.PackageManager.PERMISSION_GRANTED
-        if (!hasPerm) return
-        runCatching {
-            val provider = when {
-                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
-                else -> null
-            }
-            if (provider != null) locationManager.requestLocationUpdates(provider, 1000L, 0f, locationListener)
         }
     }
 }

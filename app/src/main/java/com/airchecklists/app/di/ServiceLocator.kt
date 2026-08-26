@@ -159,6 +159,7 @@ object ServiceLocator {
             context = appContext,
             store = com.airchecklists.app.data.local.FlightRecorderStore(appContext),
             caps = capabilities,
+            positionProvider = { efisProvider.state.value },
         ).apply {
             bufferMinutes = p.fdrBufferMinutes
             flushMinutes = p.fdrFlushMinutes

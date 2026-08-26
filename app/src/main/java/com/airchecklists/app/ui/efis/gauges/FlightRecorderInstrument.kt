@@ -3,6 +3,7 @@ package com.airchecklists.app.ui.efis.gauges
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -64,6 +65,16 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
             val name = com.airchecklists.app.data.local.FlightLogExporter.exportRaw(context, samples)
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                 toast(if (name != null) "Log exporté : Téléchargements/$name" else "Échec de l'export du log.")
+            }
+        }
+    }
+
+    fun exportKml() {
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val samples = ServiceLocator.flightRecorder.snapshotTrack()
+            val name = com.airchecklists.app.data.local.FlightLogExporter.exportKml(context, samples)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                toast(if (name != null) "Trace exportée : Téléchargements/$name" else "Échec de l'export KML.")
             }
         }
     }
@@ -161,18 +172,27 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
             onDismissRequest = { showExport = false },
             title = { androidx.compose.material3.Text("Exporter l'enregistrement") },
             text = {
-                androidx.compose.material3.Text(
-                    "Écrit un fichier dans le dossier Téléchargements (accessible en branchant l'appareil au PC).",
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { showExport = false; exportGpx() }) {
-                    androidx.compose.material3.Text("Trace GPX")
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.Text(
+                        "Écrit un fichier dans le dossier Téléchargements (accessible en branchant l'appareil au PC).",
+                    )
+                    androidx.compose.material3.TextButton(
+                        onClick = { showExport = false; exportKml() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Trace KML (Google Earth)") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { showExport = false; exportGpx() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Trace GPX (QGIS, logiciels de vol)") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { showExport = false; exportRaw() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Log brut CSV (X dernières minutes)") }
                 }
             },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showExport = false; exportRaw() }) {
-                    androidx.compose.material3.Text("Log brut (CSV)")
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { showExport = false }) {
+                    androidx.compose.material3.Text("Fermer")
                 }
             },
         )

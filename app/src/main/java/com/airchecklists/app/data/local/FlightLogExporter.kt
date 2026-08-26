@@ -38,6 +38,13 @@ object FlightLogExporter {
         return if (writeToDownloads(context, name, "application/gpx+xml", gpx)) name else null
     }
 
+    /** Writes a KML track to Downloads (opens in Google Earth Web/Pro). Name or null. */
+    fun exportKml(context: Context, samples: List<FdrSample>): String? {
+        val name = "airdetente-trace-${stamp()}.kml"
+        val kml = buildKml(samples)
+        return if (writeToDownloads(context, name, "application/vnd.google-earth.kml+xml", kml)) name else null
+    }
+
     /** Writes the raw sample log (CSV) to Downloads. Returns the file name, or null. */
     fun exportRaw(context: Context, samples: List<FdrSample>): String? {
         val name = "airdetente-log-${stamp()}.csv"
@@ -70,6 +77,29 @@ object FlightLogExporter {
         }
         sb.append("  </trkseg></trk>\n")
         sb.append("</gpx>\n")
+        return sb.toString()
+    }
+
+    private fun buildKml(samples: List<FdrSample>): String {
+        // Track points from GPS; altitude from the nearest ALT sample.
+        val alts = samples.filter { it.kind == FdrKind.ALT && it.v1 != null }
+        fun nearestAltM(tMs: Long): Double =
+            (alts.minByOrNull { kotlin.math.abs(it.tMs - tMs) }?.v1 ?: 0.0) / 3.28084  // ft → m
+
+        val pts = samples.filter { it.kind == FdrKind.GPS && it.v1 != null && it.v2 != null }
+        val sb = StringBuilder()
+        sb.append("""<?xml version="1.0" encoding="UTF-8"?>""").append('\n')
+        sb.append("""<kml xmlns="http://www.opengis.net/kml/2.2">""").append('\n')
+        sb.append("  <Document><name>AirDetente ${stamp()}</name>\n")
+        sb.append("""    <Style id="trk"><LineStyle><color>ff2e8ae8</color><width>3</width></LineStyle></Style>""").append('\n')
+        sb.append("""    <Placemark><name>Trace</name><styleUrl>#trk</styleUrl>""")
+        sb.append("""<LineString><tessellate>1</tessellate><altitudeMode>absolute</altitudeMode><coordinates>""")
+        pts.forEach { s ->
+            // KML order: lon,lat,alt(metres).
+            sb.append("${s.v2},${s.v1},${"%.1f".format(java.util.Locale.US, nearestAltM(s.tMs))} ")
+        }
+        sb.append("</coordinates></LineString></Placemark>\n")
+        sb.append("  </Document>\n</kml>\n")
         return sb.toString()
     }
 

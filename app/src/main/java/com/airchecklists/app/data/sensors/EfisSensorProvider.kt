@@ -87,6 +87,9 @@ class EfisSensorProvider(
     /** Demo mode: scripted flight that ignores real sensors while active. */
     private val _demoActive = MutableStateFlow(false)
     val demoActive: StateFlow<Boolean> = _demoActive.asStateFlow()
+    /** Which scripted demo runs: 0 = manoeuvres tour, 1 = final approach. */
+    private val _demoVariant = MutableStateFlow(0)
+    val demoVariant: StateFlow<Int> = _demoVariant.asStateFlow()
     private val demoScope = CoroutineScope(Dispatchers.Default)
     private var demoJob: Job? = null
 
@@ -263,11 +266,22 @@ class EfisSensorProvider(
         if (_demoActive.value) stopDemo() else startDemo()
     }
 
+    /**
+     * Cycle to the next demo scenario. If a demo is running it restarts immediately with
+     * the new variant; if none is running it starts one. Wraps around the variants.
+     */
+    fun nextDemo() {
+        _demoVariant.value = (_demoVariant.value + 1) % DEMO_VARIANTS
+        stopDemo()
+        startDemo()
+    }
+
     /** Start a scripted flight: calibration → climb → descent → turn → speed sweep. */
     fun startDemo() {
         if (_demoActive.value) return
         _demoActive.value = true
-        demoJob = demoScope.launch { runDemo() }
+        val variant = _demoVariant.value
+        demoJob = demoScope.launch { if (variant == 1) runApproachDemo() else runDemo() }
     }
 
     fun stopDemo() {
@@ -365,6 +379,123 @@ class EfisSensorProvider(
         }
     }
 
+    /**
+     * Demo 2 — final approach toward the nearest aerodrome. The aircraft starts ~5 km out
+     * at circuit height on the extended runway axis and flies a descending final while
+     * wandering left/right of the axis and above/below the 3° plane, so the CMNAPP tunnel,
+     * the AXE (lateral) and PLAN (glide) deviations all move clearly. Loops.
+     *
+     * Geometry is self-contained (integrates its own lat/lon) and anchored near LFRK so
+     * the CMNAPP AUTO resolver locks onto that field. Approach axis QFU ≈ 040° (arbitrary
+     * plausible runway); the CMNAPP instrument derives its own QFU from the field, but the
+     * lateral/vertical wander is what makes AXE/PLAN swing.
+     */
+    private suspend fun runApproachDemo() {
+        val frameMs = 40L
+        // Anchor on LFRK (Caen-Carpiquet)'s REAL ARP + a real runway heading, so the CMNAPP
+        // AUTO resolver (which picks the nearest aerodrome and a QFU from its circuit text
+        // "12/30 - QFU 124/304") locks onto the SAME field and axis this demo flies. If the
+        // two disagree the instrument's cross-track blows up (e.g. thousands of metres) and
+        // the runway never appears to approach — so they must match.
+        val thrLat = 49.1733
+        val thrLon = -0.4500
+        val fieldElevFt = 243f          // LFRK elevation
+        val qfuDeg = 304.0              // land toward 304 (approach from the SE)
+        val mPerDegLat = 111_320.0
+        val mPerDegLon = 111_320.0 * kotlin.math.cos(Math.toRadians(thrLat))
+        // Unit vectors: fwd points along the landing direction (toward threshold heading),
+        // right is 90° clockwise of fwd. Ship sits "behind" the threshold on final.
+        val hdg = Math.toRadians(qfuDeg)
+        val fwdE = kotlin.math.sin(hdg); val fwdN = kotlin.math.cos(hdg)
+        val rightE = kotlin.math.cos(hdg); val rightN = -kotlin.math.sin(hdg)
+        val glideRad = Math.toRadians(3.0)
+
+        clearTrail()
+
+        suspend fun animate(durationMs: Long, onProgress: (Float) -> Unit) {
+            var elapsed = 0L
+            while (elapsed <= durationMs) {
+                if (!_demoActive.value) return
+                onProgress((elapsed.toFloat() / durationMs).coerceIn(0f, 1f))
+                delay(frameMs)
+                elapsed += frameMs
+            }
+        }
+
+        val startAlong = 3500.0         // start 3.5 km out on final (closer = faster visual)
+        val endAlong = 120.0            // reach just short of threshold
+        val approachSpeed = 120f        // km/h
+
+        // Place using an explicit height-above-field so the flare/go-around can hug the ground.
+        fun placeAbove(alongM: Double, crossM: Double, aboveFieldFt: Float, vsFtMin: Float, spdKmh: Float, track: Float, pitch: Float) {
+            val east = (-alongM) * fwdE + crossM * rightE
+            val north = (-alongM) * fwdN + crossM * rightN
+            val lat = thrLat + north / mPerDegLat
+            val lon = thrLon + east / mPerDegLon
+            _state.value = _state.value.copy(
+                hasFix = true, hasPosition = true,
+                latitude = lat, longitude = lon,
+                gpsAltitudeFt = fieldElevFt + aboveFieldFt, verticalSpeedFtMin = vsFtMin,
+                gpsSpeedKmh = spdKmh, headingDeg = track, gpsTrackDeg = track,
+                pitchDeg = pitch, rollDeg = 0f, slip = 0f,
+            )
+            pushTrail(lat, lon)
+        }
+
+        val nominalVs = -approachSpeed / 3.6f * kotlin.math.tan(glideRad).toFloat() * 3.280839895f * 60f
+
+        while (_demoActive.value) {
+            // 1a) Established final, 3.5 km → ~2.4 km: hold ~2 s perfectly ON AXIS and ON PLANE
+            //     so the aircraft/PLAN read solid GREEN.
+            animate(2000) { t ->
+                val alongM = startAlong + (2400.0 - startAlong) * t
+                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
+                placeAbove(alongM, 0.0, planeFt, nominalVs, approachSpeed, qfuDeg.toFloat(), -3f)
+            }
+            // 1b) Drop below the glide plane and hold ~2 s clearly BELOW (~-140 ft, well past
+            //     the ±60 ft tolerance) so the aircraft/PLAN read solid RED ("too low").
+            animate(2000) { t ->
+                val alongM = 2400.0 + (1900.0 - 2400.0) * t
+                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
+                placeAbove(alongM, 0.0, planeFt - 140f, nominalVs, approachSpeed, qfuDeg.toFloat(), -3.5f)
+            }
+            // 1c) Recapture and continue the final to the THRESHOLD (alongM → ~0) while
+            //     descending to 300 ft AGL — the go-around is flown at 300 ft over the seuil.
+            //     AXE swings (±110 m) and PLAN wanders back around the plane, decaying. The
+            //     height blends from the 3° plane toward 300 ft AGL right at the threshold so
+            //     the runway ends up passing under the aircraft.
+            val goAroundAglFt = 300f
+            animate(9_000) { t ->
+                val alongM = 1900.0 + (0.0 - 1900.0) * t         // → threshold
+                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
+                val decay = (1f - t)
+                val crossM = 110.0 * kotlin.math.sin(t * Math.PI * 4.0) * decay
+                val aboveFt = (70.0 * kotlin.math.sin(t * Math.PI * 3.0 + 1.0) * decay).toFloat()
+                val track = (qfuDeg + kotlin.math.cos(t * Math.PI * 4.0) * 6.0 * decay).toFloat()
+                // Blend the nominal-plane height toward the 300 ft go-around gate as we near
+                // the threshold, so we arrive at exactly 300 ft AGL over the seuil.
+                val hAgl = (planeFt + aboveFt) * decay + goAroundAglFt * t
+                placeAbove(alongM, crossM, hAgl.coerceAtLeast(goAroundAglFt), nominalVs, approachSpeed, track, -3f)
+            }
+            // 2) LOW PASS: hold 300 ft AGL level and track down the axis past the threshold
+            //    (alongM 0 → −400) so the runway visibly slides under and behind the aircraft
+            //    before any climb begins.
+            animate(3500) { t ->
+                val alongM = 0.0 - 400.0 * t                     // over the field, still low
+                placeAbove(alongM, 0.0, goAroundAglFt, 0f, approachSpeed, qfuDeg.toFloat(), 0f)
+            }
+            // 3) GO-AROUND: full power, pitch up, strong climb back to circuit height while
+            //    continuing past the field (along goes further negative).
+            animate(5000) { t ->
+                val alongM = -400.0 - 400.0 * t                  // continue past the field
+                val aboveFt = goAroundAglFt + (920f - goAroundAglFt) * t   // climb 300 → 920 ft AGL
+                placeAbove(alongM, 0.0, aboveFt, 900f, approachSpeed - 10f + 30f * t, qfuDeg.toFloat(), 10f)
+            }
+            // 4) Brief hold at circuit height, then the loop restarts a fresh final.
+            animate(1500) { placeAbove(-800.0, 0.0, 920f, 0f, approachSpeed, qfuDeg.toFloat(), 0f) }
+        }
+    }
+
     fun start() {
         rotationSensor?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
         accelSensor?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
@@ -399,5 +530,6 @@ class EfisSensorProvider(
 
     private companion object {
         const val MAX_TRAIL = 2000
+        const val DEMO_VARIANTS = 2
     }
 }

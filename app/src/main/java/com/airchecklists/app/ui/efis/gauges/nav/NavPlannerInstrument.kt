@@ -140,8 +140,10 @@ fun NavPlannerInstrument(modifier: Modifier = Modifier) {
     }
 
     Column(modifier = modifier.fillMaxSize().background(CompactStyle.Bg)) {
-        // ---- Top: map (left) + notes (right) ----
-        Row(modifier = Modifier.fillMaxWidth().weight(1.1f)) {
+        // ---- Top: map (left) + notes (right). Kept deliberately a bit shorter so the LOG
+        // below gets the lion's share of the height (esp. in fullscreen, where the extra
+        // room should grow the LOG, not the map/notes). ----
+        Row(modifier = Modifier.fillMaxWidth().weight(0.9f)) {
             PanelBox("CARTE", modifier = Modifier.weight(1f).fillMaxSize().padding(4.dp)) {
                 NavRouteMap(route, modifier = Modifier.fillMaxSize(), mapHolder = mapHolder)
             }
@@ -156,7 +158,7 @@ fun NavPlannerInstrument(modifier: Modifier = Modifier) {
         }
 
         // ---- Log: leg values (RM/DIST/TSV) straddle consecutive terrains ----
-        PanelBox("LOG", modifier = Modifier.fillMaxWidth().weight(1.4f).padding(4.dp)) {
+        PanelBox("LOG", modifier = Modifier.fillMaxWidth().weight(1.9f).padding(4.dp)) {
             Column(Modifier.fillMaxSize()) {
                 // Header aligned to the exact same weights as the value columns.
                 // Neutral background: this is a TABLE column header, not a title bar,

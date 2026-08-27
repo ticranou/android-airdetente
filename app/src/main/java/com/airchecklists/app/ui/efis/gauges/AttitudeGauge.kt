@@ -37,8 +37,8 @@ fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier
                     )
                     drawRect(
                         brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                            0f to androidx.compose.ui.graphics.Color(0xFF9A6A38),
-                            1f to androidx.compose.ui.graphics.Color(0xFF3A2612),
+                            0f to com.airchecklists.app.ui.efis.gauges.compact.CompactStyle.GroundMapTop,
+                            1f to com.airchecklists.app.ui.efis.gauges.compact.CompactStyle.GroundMapBot,
                             startY = cy, endY = cy + big,
                         ),
                         topLeft = Offset(cx - big, cy), size = Size(big * 2, big),

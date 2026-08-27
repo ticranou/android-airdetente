@@ -91,7 +91,7 @@ private fun DrawScope.drawHorizon(tm: TextMeasurer, r: Rect, pitch: Float, roll:
                 )
                 drawRect(
                     brush = Brush.verticalGradient(
-                        0f to Color(0xFF9A6A38), 1f to Color(0xFF3A2612),
+                        0f to CompactStyle.GroundMapTop, 1f to CompactStyle.GroundMapBot,
                         startY = cy, endY = cy + big,
                     ),
                     topLeft = Offset(cx - big, cy), size = Size(big * 2, big),

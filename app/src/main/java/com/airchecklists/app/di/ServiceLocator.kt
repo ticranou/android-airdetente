@@ -313,19 +313,19 @@ object ServiceLocator {
     }
 
     private fun sampleVacCharts(): List<VacChart> = listOf(
-        VacChart(id = id(), icao = "LFAJ", airfieldName = "Argentan", altitude = "581ft", circuit = "04/22 - QFU 041/221", frequencies = "A/A 123.500", latitude = 48.70944, longitude = 0.00278),
-        VacChart(id = id(), icao = "LFAX", airfieldName = "Mortagne-au-Perche", altitude = "886ft", circuit = "07/25 - QFU 067/247", frequencies = "A/A 123.500", latitude = 48.5439, longitude = 0.5361),
-        VacChart(id = id(), icao = "LFOF", airfieldName = "Alençon", altitude = "476ft", circuit = "07/25 - QFU 068/248", frequencies = "A/A 118.330", latitude = 48.4478, longitude = 0.1097),
-        VacChart(id = id(), icao = "LFOL", airfieldName = "L'Aigle", altitude = "787ft", circuit = "07/25 - QFU 065/245", frequencies = "A/A 126.855", latitude = 48.7442, longitude = 0.6428),
-        VacChart(id = id(), icao = "LFAO", airfieldName = "Bagnoles-de-l'Orne", altitude = "714ft", circuit = "12/30 - QFU 120/300", frequencies = "A/A 123.500", latitude = 48.5458, longitude = -0.3939),
-        VacChart(id = id(), icao = "LFAS", airfieldName = "Falaise", altitude = "513ft", circuit = "06/24 - QFU 061/241", frequencies = "A/A 123.180", latitude = 48.9264, longitude = -0.1442),
-        VacChart(id = id(), icao = "LFOG", airfieldName = "Flers", altitude = "663ft", circuit = "05/23 - QFU 054/234", frequencies = "A/A 123.500", latitude = 48.7519, longitude = -0.4139),
-        VacChart(id = id(), icao = "LFOM", airfieldName = "Lessay", altitude = "96ft", circuit = "06/24 - QFU 064/244", frequencies = "A/A 128.930", latitude = 49.2033, longitude = -1.5069),
-        VacChart(id = id(), icao = "LFPD", airfieldName = "Bernay", altitude = "555ft", circuit = "10/28 - QFU 097/277", frequencies = "A/A 119.230", latitude = 49.1058, longitude = 0.5928),
-        VacChart(id = id(), icao = "LFRF", airfieldName = "Granville", altitude = "45ft", circuit = "06/24 - QFU 065/245", frequencies = "A/A 118.105", hasWeather = true, latitude = 48.8831, longitude = -1.5642),
-        VacChart(id = id(), icao = "LFRK", airfieldName = "Caen-Carpiquet", altitude = "243ft", circuit = "12/30 - QFU 124/304", frequencies = "TWR 134.530 · ATIS 123.080", hasWeather = true, latitude = 49.1733, longitude = -0.4500),
-        VacChart(id = id(), icao = "LFRW", airfieldName = "Avranches", altitude = "25ft", circuit = "03/21 - QFU 033/213", frequencies = "A/A 119.785", latitude = 48.7017, longitude = -1.3181),
-        VacChart(id = id(), icao = "LFRD", airfieldName = "Dinard-Pleurtuit", altitude = "219ft", circuit = "17/35 - QFU 170/350", frequencies = "TWR 120.155 · ATIS 124.580", hasWeather = true, latitude = 48.5878, longitude = -2.0800),
+        VacChart(id = id(), icao = "LFAJ", airfieldName = "Argentan", altitude = "581ft", circuit = "04/22 - QFU 041/221", runwayLengthM = 810, frequencies = "A/A 123.500", latitude = 48.70944, longitude = 0.00278),
+        VacChart(id = id(), icao = "LFAX", airfieldName = "Mortagne-au-Perche", altitude = "886ft", circuit = "07/25 - QFU 067/247", runwayLengthM = 900, frequencies = "A/A 123.500", latitude = 48.5439, longitude = 0.5361),
+        VacChart(id = id(), icao = "LFOF", airfieldName = "Alençon", altitude = "476ft", circuit = "07/25 - QFU 068/248", runwayLengthM = 1440, frequencies = "A/A 118.330", latitude = 48.4478, longitude = 0.1097),
+        VacChart(id = id(), icao = "LFOL", airfieldName = "L'Aigle", altitude = "787ft", circuit = "07/25 - QFU 065/245", runwayLengthM = 800, frequencies = "A/A 126.855", latitude = 48.7442, longitude = 0.6428),
+        VacChart(id = id(), icao = "LFAO", airfieldName = "Bagnoles-de-l'Orne", altitude = "714ft", circuit = "12/30 - QFU 120/300", runwayLengthM = 850, frequencies = "A/A 123.500", latitude = 48.5458, longitude = -0.3939),
+        VacChart(id = id(), icao = "LFAS", airfieldName = "Falaise", altitude = "513ft", circuit = "06/24 - QFU 061/241", runwayLengthM = 1000, frequencies = "A/A 123.180", latitude = 48.9264, longitude = -0.1442),
+        VacChart(id = id(), icao = "LFOG", airfieldName = "Flers", altitude = "663ft", circuit = "05/23 - QFU 054/234", runwayLengthM = 900, frequencies = "A/A 123.500", latitude = 48.7519, longitude = -0.4139),
+        VacChart(id = id(), icao = "LFOM", airfieldName = "Lessay", altitude = "96ft", circuit = "06/24 - QFU 064/244", runwayLengthM = 1000, frequencies = "A/A 128.930", latitude = 49.2033, longitude = -1.5069),
+        VacChart(id = id(), icao = "LFPD", airfieldName = "Bernay", altitude = "555ft", circuit = "10/28 - QFU 097/277", runwayLengthM = 900, frequencies = "A/A 119.230", latitude = 49.1058, longitude = 0.5928),
+        VacChart(id = id(), icao = "LFRF", airfieldName = "Granville", altitude = "45ft", circuit = "06/24 - QFU 065/245", runwayLengthM = 1080, frequencies = "A/A 118.105", hasWeather = true, latitude = 48.8831, longitude = -1.5642),
+        VacChart(id = id(), icao = "LFRK", airfieldName = "Caen-Carpiquet", altitude = "243ft", circuit = "12/30 - QFU 124/304", runwayLengthM = 1780, frequencies = "TWR 134.530 · ATIS 123.080", hasWeather = true, latitude = 49.1733, longitude = -0.4500),
+        VacChart(id = id(), icao = "LFRW", airfieldName = "Avranches", altitude = "25ft", circuit = "03/21 - QFU 033/213", runwayLengthM = 750, frequencies = "A/A 119.785", latitude = 48.7017, longitude = -1.3181),
+        VacChart(id = id(), icao = "LFRD", airfieldName = "Dinard-Pleurtuit", altitude = "219ft", circuit = "17/35 - QFU 170/350", runwayLengthM = 2200, frequencies = "TWR 120.155 · ATIS 124.580", hasWeather = true, latitude = 48.5878, longitude = -2.0800),
     )
 
     private fun id() = UUID.randomUUID().toString()

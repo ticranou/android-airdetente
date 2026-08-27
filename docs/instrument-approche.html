@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Approche finale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🛬</div>
+      <div>
+        <h1>Approche finale</h1>
+        <p class="subtitle">CMNAPP — « highway in the sky » vers la piste</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip num">CMNAPP · numérique · 100%-3L</span>
+      <span class="chip">GPS · Altitude</span>
+      <span class="chip" style="color:#E8843A">Indicatif · non certifié</span>
+    </div>
+
+    <div class="card">
+      <h2>Possibilités</h2>
+      <ul class="feat">
+        <li>Vue <b>tunnel 3D</b> vers la piste sur fond ciel/sol : trois cadres emboîtés en perspective fuyant vers un point de fuite unique où se trouve la piste (trapèze + seuil + QFU).</li>
+        <li>Cadres liés à la <b>hauteur du tour de piste</b> (altitude terrain de la carte VAC + 1000 ft) : <b style="color:#35C759">vert 500 ft</b>, <b style="color:#FFC107">jaune 1000 ft</b>, <b style="color:#E8843A">orange 1500 ft</b>.</li>
+        <li>La silhouette d'ULM se décale selon l'<b>écart d'axe</b> (droite/gauche) et l'<b>écart de plan</b> (au-dessus/en dessous du plan à 3°) : <b style="color:#35C759">verte</b> dans les tolérances (±15 m d'axe, ±60 ft de plan), <b style="color:#E8843A">orange</b> en dehors.</li>
+        <li>Bandeau de 5 valeurs : <b>IAS</b>, <b>altitude</b>, <b>vario</b>, <b>AXE</b> (écart latéral en m G/D), <b>PLAN</b> (écart au plan en ft / 3°).</li>
+      </ul>
+      <h3>Cible d'approche</h3>
+      <ul class="feat">
+        <li><b>AUTO</b> par défaut : l'aérodrome le plus proche (base aérodromes hors-ligne), avec le QFU issu de la fiche, choisi selon le sens d'arrivée.</li>
+        <li>Le point de référence de l'aérodrome sert de <b>proxy du seuil</b> ; le QFU est déterminé au pas de <b>10°</b>.</li>
+      </ul>
+      <h3>Gestes</h3>
+      <div class="gesture"><span class="g">–</span> Appui long : <b>verrouiller</b> un terrain et un QFU précis, ou revenir en <b>AUTO</b>.</div>
+      <h3>Note</h3>
+      <ul class="feat">
+        <li>Aide <b>strictement indicative et non certifiée</b> : géométrie pure, <b>sans conscience du relief ni des obstacles</b>. À ne jamais utiliser comme guidage d'approche.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      Repère en haut à gauche de l'instrument : un tiret « – » = appui long (choix de la cible).
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

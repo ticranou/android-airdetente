@@ -22,6 +22,7 @@
       ["instrument-flightrecorder.html", "Enregistreur de vol"],
       ["instrument-efis.html", "EFIS"],
       ["instrument-movingmap.html", "Moving Map"],
+      ["instrument-approche.html", "Approche finale"],
     ]},
     { title: "Réglages", items: [
       ["reglages-apparence.html", "Affichage"],

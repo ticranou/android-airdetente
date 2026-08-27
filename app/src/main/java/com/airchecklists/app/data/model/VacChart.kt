@@ -14,6 +14,9 @@ data class VacChart(
     val airfieldName: String,     // "Argentan"
     val altitude: String = "",    // "581ft"
     val circuit: String = "",     // "(1600ft) 04G/22G"
+    /** Usable runway length in metres, as read from the VAC chart (TORA/LDA figure).
+     *  Null when unknown → the approach assistant falls back to a default and flags it. */
+    val runwayLengthM: Int? = null,
     /** Free-text frequency/frequencies, e.g. "A/A 123.500" or "TWR 118.7". */
     val frequencies: String = "",
     /** Airfield reference point (decimal degrees). Used to sort terrains by

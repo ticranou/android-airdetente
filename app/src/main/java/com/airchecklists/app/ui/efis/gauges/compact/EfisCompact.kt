@@ -70,7 +70,7 @@ fun EfisCompact(
         val w = size.width
         val h = size.height
         val headerH = h * 0.13f
-        val footerH = h * 0.17f
+        val footerH = h * 0.14f
 
         // Backgrounds.
         drawRect(CompactStyle.Bg, size = size)
@@ -97,16 +97,16 @@ fun EfisCompact(
         // --- Main area (leave a gap above the footer speed tape) ---
         val main = Rect(6f, headerH + 4f, w - 6f, h - footerH - h * 0.03f)
         val colW = main.width * 0.23f
-        val titleRowH = main.height * 0.26f
+        val titleRowH = main.height * 0.22f
         val altiTitleRect = Rect(main.left, main.top, main.left + colW, main.top + titleRowH)
         val varioTitleRect = Rect(main.right - colW, main.top, main.right, main.top + titleRowH)
         val ballRect = Rect(altiTitleRect.right, main.top, varioTitleRect.left, main.top + titleRowH)
 
-        // Titles (two clearly separated lines).
-        compactText(tm, "ALTI", altiTitleRect.center.x, altiTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Accent2)
-        compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.altLabel(altUnit)})", altiTitleRect.center.x, altiTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Accent2)
-        compactText(tm, "VARIO", varioTitleRect.center.x, varioTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Accent2)
-        compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.vsLabel(altUnit)})", varioTitleRect.center.x, varioTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Accent2)
+        // Titles (two clearly separated lines) — grey label + grey unit.
+        compactText(tm, "ALTI", altiTitleRect.center.x, altiTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Dim)
+        compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.altLabel(altUnit)})", altiTitleRect.center.x, altiTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Dim)
+        compactText(tm, "VARIO", varioTitleRect.center.x, varioTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Dim)
+        compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.vsLabel(altUnit)})", varioTitleRect.center.x, varioTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Dim)
 
         // Slip ball (centre of titles row); its pill matches the horizon width.
         val horizonLeft = main.left + colW + 12f
@@ -234,7 +234,7 @@ private fun DrawScope.drawHorizonBox(tm: TextMeasurer, r: Rect, pitch: Float, ro
                 )
                 drawRect(
                     brush = Brush.verticalGradient(
-                        0f to Color(0xFF9A6A38), 1f to Color(0xFF3A2612),
+                        0f to CompactStyle.GroundMapTop, 1f to CompactStyle.GroundMapBot,
                         startY = cy, endY = cy + big,
                     ),
                     topLeft = Offset(cx - big, cy), size = Size(big * 2, big),

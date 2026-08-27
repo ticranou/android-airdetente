@@ -27,6 +27,10 @@ object CompactStyle {
     val Dim = Color(0xFFAAAAAA)
     val Sky = Color(0xFF2B84C8)
     val Ground = Color(0xFF6B4A2B)
+    // Chart-style ground (aeronautical tan → earth), shared by the horizon instruments
+    // and CMNAPP so the ground looks like a sectional map rather than flat brown.
+    val GroundMapTop = Color(0xFFBFA377)   // hazy far terrain (chart tan)
+    val GroundMapBot = Color(0xFF6E5A34)   // near terrain (darker earth)
     val Accent = Color(0xFFFFC107)
     val Accent2 = Color(0xFFE8843A)  // orange titles (ALTI / VARIO)
     val Climb = Color(0xFF35C759)
@@ -43,6 +47,7 @@ fun DrawScope.compactText(
     bold: Boolean = false,
     mono: Boolean = false,
     center: Boolean = true,
+    anchorRight: Boolean = false,
 ) {
     val m = tm.measure(
         text,
@@ -53,7 +58,11 @@ fun DrawScope.compactText(
             fontFamily = if (mono) FontFamily.Monospace else FontFamily.Default,
         ),
     )
-    val tx = if (center) x - m.size.width / 2f else x
+    val tx = when {
+        anchorRight -> x - m.size.width      // right edge at x (text extends left)
+        center -> x - m.size.width / 2f
+        else -> x
+    }
     drawText(m, topLeft = Offset(tx, y - m.size.height / 2f))
 }
 

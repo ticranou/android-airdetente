@@ -698,14 +698,15 @@ private fun downloadImage(url: String): ImageBitmap {
     }
 }
 
-// ---- Dark basemap tiles (CARTO), drawn UNDER the radar to help localisation ----
+// ---- Dark basemap tiles (Esri) drawn UNDER the radar to help localisation ----
 
-/** Max zoom we fetch basemap tiles at (CARTO serves higher, but this is plenty and
- *  lets higher view zooms magnify one level like the radar does). */
+/** Max zoom we fetch basemap tiles at (the provider serves higher, but this is plenty
+ *  and lets higher view zooms magnify one level like the radar does). */
 private const val MAX_BASE_Z = 10
 
-/** Loads CARTO "dark_all" raster tiles around (lat,lon) for view zoom [viewZ],
- *  reusing the same block/scale model as [loadRadar]. */
+/** Loads Esri "World Dark Gray Base" raster tiles around (lat,lon) for view zoom [viewZ],
+ *  reusing the same block/scale model as [loadRadar]. Free, no API key required
+ *  (CARTO's public basemap CDN now watermarks unauthenticated tiles). */
 internal suspend fun loadBasemap(lat: Double, lon: Double, viewZ: Int, span: Int): RadarBitmaps? = withContext(Dispatchers.IO) {
     runCatching {
         val tileZ = minOf(viewZ, MAX_BASE_Z)
@@ -723,7 +724,8 @@ internal suspend fun loadBasemap(lat: Double, lon: Double, viewZ: Int, span: Int
             val tx = ((xC + dx) % n + n) % n
             val ty = yC + dy
             if (ty < 0 || ty >= n) continue
-            val url = "https://a.basemaps.cartocdn.com/dark_all/$tileZ/$tx/$ty.png"
+            // Esri tile URLs use {z}/{y}/{x} order (not {z}/{x}/{y}).
+            val url = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/$tileZ/$ty/$tx"
             val img = runCatching { downloadImage(url) }.getOrNull() ?: continue
             tiles.add(TileImage(dx, dy, img))
         }

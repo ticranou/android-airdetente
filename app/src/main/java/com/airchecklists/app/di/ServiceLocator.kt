@@ -152,7 +152,7 @@ object ServiceLocator {
         )
     }
 
-    /** Flight recorder (rolling buffer). Started/stopped with the cockpit screen. */
+    /** Flight recorder (rolling buffer). Runs with the flight service (app lifetime). */
     val flightRecorder: com.airchecklists.app.data.sensors.FlightRecorder by lazy {
         val p = preferences.preferences.value
         com.airchecklists.app.data.sensors.FlightRecorder(
@@ -160,6 +160,7 @@ object ServiceLocator {
             store = com.airchecklists.app.data.local.FlightRecorderStore(appContext),
             caps = capabilities,
             positionProvider = { efisProvider.state.value },
+            isDemo = { efisProvider.demoActive.value },
         ).apply {
             bufferMinutes = p.fdrBufferMinutes
             flushMinutes = p.fdrFlushMinutes

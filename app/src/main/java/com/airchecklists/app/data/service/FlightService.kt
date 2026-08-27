@@ -25,11 +25,16 @@ class FlightService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_QUIT) {
+            // Final flush + persist before the service goes away.
+            com.airchecklists.app.di.ServiceLocator.flightRecorder.stop()
             stopForegroundCompat()
             stopSelf()
             return START_NOT_STICKY
         }
         startForeground(NOTIF_ID, buildNotification())
+        // The recorder runs for the whole flight (service lifetime), not just while the
+        // cockpit screen is visible, so it keeps capturing when the user switches apps.
+        com.airchecklists.app.di.ServiceLocator.flightRecorder.start()
         return START_STICKY
     }
 

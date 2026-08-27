@@ -1,10 +1,14 @@
 package com.airchecklists.app.data.sensors
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import com.airchecklists.app.data.local.FlightRecorderStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,11 +61,16 @@ class FlightRecorder(
     private val store: FlightRecorderStore,
     private val caps: DeviceCapabilities,
     // Position source: the app's fused EfisState (real GPS in flight, scripted in
-    // demo mode). Using it keeps the recorded track in sync with the moving map.
+    // demo mode). Used only while demo is active OR as a fallback before our own
+    // GPS listener has produced a fix — see positionJob.
     private val positionProvider: () -> EfisState,
+    // True when the EFIS demo is running. In demo we take the scripted EfisState so
+    // the recorded track matches the moving map; otherwise we use our own GPS below.
+    private val isDemo: () -> Boolean,
 ) {
     private val appContext = context.applicationContext
     private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val locationManager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     private val accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     private val gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -78,6 +87,14 @@ class FlightRecorder(
     @Volatile private var paused = false
     @Volatile var bufferMinutes: Int = 10
     @Volatile var flushMinutes: Int = 2
+
+    // Our own GPS fix (independent of the screen-bound EfisSensorProvider), so the
+    // recorder keeps a live track when the cockpit screen is backgrounded.
+    @Volatile private var lastGpsLat = 0.0
+    @Volatile private var lastGpsLon = 0.0
+    @Volatile private var lastGpsAltFt = 0.0
+    @Volatile private var lastGpsSpeedKmh = 0.0
+    @Volatile private var lastGpsMs = 0L
 
     private var flushJob: Job? = null
     private var positionJob: Job? = null
@@ -114,13 +131,16 @@ class FlightRecorder(
         accel?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME) }
         gyro?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME) }
         pressure?.let { sensorManager.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_NORMAL) }
-        // Position at ~1 Hz from the app's fused state (real GPS or demo).
+        startLocation()
+        // Position at ~1 Hz. In demo we take the fused EfisState (scripted track); in
+        // real flight we take our own GPS listener (keeps recording when the cockpit
+        // screen is backgrounded), falling back to EfisState if no fix yet.
         positionJob = scope.launch {
             while (started) {
-                val s = positionProvider()
-                if (s.hasPosition) {
-                    add(FdrKind.GPS, s.latitude, s.longitude, s.gpsSpeedKmh.toDouble())
-                    add(FdrKind.ALT, s.gpsAltitudeFt.toDouble())
+                val fix = readPosition()
+                if (fix != null) {
+                    add(FdrKind.GPS, fix.lat, fix.lon, fix.speedKmh)
+                    add(FdrKind.ALT, fix.altFt)
                 }
                 delay(1000L)
             }
@@ -135,11 +155,63 @@ class FlightRecorder(
         publish()
     }
 
+    /** A single position sample, from whichever source is authoritative right now. */
+    private data class Fix(val lat: Double, val lon: Double, val altFt: Double, val speedKmh: Double)
+
+    /** Pick the position source: scripted EfisState in demo, own GPS otherwise. */
+    private fun readPosition(): Fix? {
+        if (isDemo()) {
+            val s = positionProvider()
+            return if (s.hasPosition) {
+                Fix(s.latitude, s.longitude, s.gpsAltitudeFt.toDouble(), s.gpsSpeedKmh.toDouble())
+            } else null
+        }
+        // Real flight: prefer our own independent GPS fix.
+        if (lastGpsMs != 0L) {
+            return Fix(lastGpsLat, lastGpsLon, lastGpsAltFt, lastGpsSpeedKmh)
+        }
+        // Fallback before our listener has delivered a fix (e.g. screen active, GPS warming up).
+        val s = positionProvider()
+        return if (s.hasPosition) {
+            Fix(s.latitude, s.longitude, s.gpsAltitudeFt.toDouble(), s.gpsSpeedKmh.toDouble())
+        } else null
+    }
+
+    /** Register our own GPS updates (independent of EfisSensorProvider). */
+    @SuppressLint("MissingPermission")
+    private fun startLocation() {
+        val hasPerm = appContext.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED ||
+            appContext.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!hasPerm) return
+        runCatching {
+            val provider = when {
+                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
+                else -> null
+            }
+            if (provider != null) {
+                locationManager.requestLocationUpdates(provider, 1000L, 0f, locationListener)
+            }
+        }
+    }
+
+    private val locationListener = LocationListener { loc: Location ->
+        lastGpsLat = loc.latitude
+        lastGpsLon = loc.longitude
+        if (loc.hasAltitude()) lastGpsAltFt = loc.altitude * 3.28084
+        lastGpsSpeedKmh = if (loc.hasSpeed()) loc.speed * 3.6 else lastGpsSpeedKmh
+        lastGpsMs = System.currentTimeMillis()
+    }
+
     fun stop() {
         if (!started) return
         started = false
         flushCycleStartMs = 0L
         sensorManager.unregisterListener(sensorListener)
+        runCatching { locationManager.removeUpdates(locationListener) }
+        lastGpsMs = 0L
         positionJob?.cancel(); positionJob = null
         flushJob?.cancel(); flushJob = null
         flush()   // persist whatever we have

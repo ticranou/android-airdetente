@@ -70,16 +70,15 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         viewModel.start()
-        com.airchecklists.app.di.ServiceLocator.flightRecorder.start()
+        // Note: the flight recorder is NOT tied to this screen — it runs with the
+        // foreground FlightService (app lifetime) so it keeps capturing in background.
         val obs = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     viewModel.start()
-                    com.airchecklists.app.di.ServiceLocator.flightRecorder.start()
                 }
                 Lifecycle.Event.ON_PAUSE -> {
                     viewModel.stop()
-                    com.airchecklists.app.di.ServiceLocator.flightRecorder.stop()
                 }
                 else -> {}
             }
@@ -88,7 +87,6 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(obs)
             viewModel.stop()
-            com.airchecklists.app.di.ServiceLocator.flightRecorder.stop()
         }
     }
 

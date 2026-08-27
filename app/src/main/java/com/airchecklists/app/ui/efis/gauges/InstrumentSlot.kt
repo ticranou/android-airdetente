@@ -3,6 +3,8 @@ package com.airchecklists.app.ui.efis.gauges
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,6 +52,14 @@ fun InstrumentSlot(
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         val round = Modifier.gaugeCell()
         val fill = Modifier.fillMaxSize().padding(4.dp)
+        // Single-line numeric instruments render at a fixed natural height, vertically
+        // centred by the enclosing Box; a taller merged cell's surplus becomes black
+        // margin above/below (the dashboard background) so content never scatters.
+        val slotFill = if (instrument.isSingleLine) {
+            Modifier.fillMaxWidth().heightIn(max = instrument.singleLineHeightDp.dp).padding(4.dp)
+        } else {
+            fill
+        }
         // Guard: instruments needing orientation (attitude/heading/ball/EFIS) can't
         // work without a gyroscope/magnetometer → show an explicit "unavailable"
         // placeholder instead of frozen/wrong readings.
@@ -67,10 +77,10 @@ fun InstrumentSlot(
             EfisInstrument.AIRSPEED -> AirspeedGauge(state.gpsSpeedKmh, speedUnit, showValues, speedArcs, round)
 
             EfisInstrument.ATTITUDE_COMPACT -> AttitudeCompact(state, speedUnit, true, speedArcs, altUnit, fill)
-            EfisInstrument.HEADING_COMPACT -> HeadingCompact(state.headingDeg, true, fill)
-            EfisInstrument.BALL_COMPACT -> BallCompact(state.rollDeg, state.slip, fill)
-            EfisInstrument.AIRSPEED_COMPACT -> AirspeedCompact(state.gpsSpeedKmh, speedUnit, true, speedArcs, fill)
-            EfisInstrument.ALTVARIO_COMPACT -> AltVarioCompact(state.gpsAltitudeFt, state.verticalSpeedFtMin, true, altUnit, fill)
+            EfisInstrument.HEADING_COMPACT -> HeadingCompact(state.headingDeg, true, slotFill)
+            EfisInstrument.BALL_COMPACT -> BallCompact(state.rollDeg, state.slip, slotFill)
+            EfisInstrument.AIRSPEED_COMPACT -> AirspeedCompact(state.gpsSpeedKmh, speedUnit, true, speedArcs, slotFill)
+            EfisInstrument.ALTVARIO_COMPACT -> AltVarioCompact(state.gpsAltitudeFt, state.verticalSpeedFtMin, true, altUnit, slotFill)
             EfisInstrument.EFIS_COMPACT -> EfisCompact(state, speedUnit, true, speedArcs, altUnit, fill)
             // The map now renders the live MapLibre basemap directly in the cell
             // (no click-to-fullscreen).
@@ -78,19 +88,20 @@ fun InstrumentSlot(
                 state, trail, speedUnit, speedArcs, mapOrientation, altUnit, fill,
             )
             EfisInstrument.CHRONO -> com.airchecklists.app.ui.efis.gauges.chrono.ChronoInstrument(fill)
-            EfisInstrument.CHRONO_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.ChronoDigital(fill)
+            EfisInstrument.CHRONO_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.ChronoDigital(slotFill)
             EfisInstrument.COUNTDOWN_ANALOG -> com.airchecklists.app.ui.efis.gauges.chrono.CountdownAnalogInstrument(fill)
-            EfisInstrument.COUNTDOWN_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.CountdownDigital(fill)
+            EfisInstrument.COUNTDOWN_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.CountdownDigital(slotFill)
             EfisInstrument.HORAMETER -> com.airchecklists.app.ui.efis.gauges.chrono.HorameterInstrument(fill)
-            EfisInstrument.HORAMETER_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.HorameterDigital(fill)
+            EfisInstrument.HORAMETER_COMPACT -> com.airchecklists.app.ui.efis.gauges.chrono.HorameterDigital(slotFill)
             EfisInstrument.WEATHER_RADAR -> com.airchecklists.app.ui.efis.gauges.weather.WeatherRadarInstrument(fill)
             EfisInstrument.WEATHER_RADAR_COMPACT -> com.airchecklists.app.ui.efis.gauges.weather.WeatherRadarDigital(fill)
             EfisInstrument.TERRAINS -> com.airchecklists.app.ui.efis.gauges.terrain.TerrainsInstrument(fill)
-            EfisInstrument.TERRAINS_COMPACT -> com.airchecklists.app.ui.efis.gauges.terrain.TerrainsDigital(fill)
+            EfisInstrument.TERRAINS_COMPACT -> com.airchecklists.app.ui.efis.gauges.terrain.TerrainsDigital(slotFill)
             EfisInstrument.WATCH -> WatchGauge(showValues, fill)
-            EfisInstrument.WATCH_COMPACT -> com.airchecklists.app.ui.efis.gauges.compact.WatchDigital(fill)
+            EfisInstrument.WATCH_COMPACT -> com.airchecklists.app.ui.efis.gauges.compact.WatchDigital(slotFill)
             EfisInstrument.NAV_PLANNER -> com.airchecklists.app.ui.efis.gauges.nav.NavPlannerInstrument(fill)
             EfisInstrument.ANLFDR -> FlightRecorderInstrument(round)
+            EfisInstrument.NUMFDR -> com.airchecklists.app.ui.efis.gauges.compact.FlightRecorderDigital(slotFill)
         }
     }
     }

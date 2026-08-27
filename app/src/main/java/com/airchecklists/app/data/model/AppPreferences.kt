@@ -56,6 +56,7 @@ enum class EfisInstrument {
     WATCH_COMPACT,       // Montre numérique (rectangulaire)
     NAV_PLANNER,         // Prépa navigation (plein écran, 6 lignes)
     ANLFDR,              // Flight Recorder (enregistreur de vol, jauge ronde)
+    NUMFDR,              // Flight Recorder numérique (rectangulaire, 100%-1L)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -65,13 +66,38 @@ enum class EfisInstrument {
             AIRSPEED_COMPACT, ALTVARIO_COMPACT, EFIS_COMPACT, MOVING_MAP,
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
-            TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER,
+            TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
         get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR)
+
+    /** True for the numeric "single-line" instruments (label "…-1L"): they render
+     *  at a fixed natural height, vertically centred, instead of stretching to fill
+     *  an over-sized merged cell (the surplus becomes black margin). Excludes the
+     *  multi-line compacts (ATTITUDE_COMPACT, EFIS_COMPACT, MOVING_MAP,
+     *  WEATHER_RADAR_COMPACT) and every analog/round gauge. */
+    val isSingleLine: Boolean
+        get() = this in setOf(
+            HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
+            CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
+            WATCH_COMPACT, NUMFDR,
+        )
+
+    /** Natural (capped) height in dp for a single-line instrument. Content-dense
+     *  ones get more room: the horameter draws a label ABOVE each cell plus a
+     *  two-line duration; terrains shows 3 ICAO cards (18sp); the FDR shows a badge
+     *  over a chip row. The rest (single value cell or tape) fit the base height.
+     *  Only meaningful when [isSingleLine]. */
+    val singleLineHeightDp: Int
+        get() = when (this) {
+            HORAMETER_COMPACT -> 120
+            TERRAINS_COMPACT -> 110
+            NUMFDR -> 96
+            else -> 88
+        }
 
     /** Instruments that need a working orientation (pitch/roll/magnetic heading):
      *  attitude, heading and slip-ball variants, plus the combined EFIS block.

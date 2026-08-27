@@ -171,7 +171,7 @@
     <string name="efis_instr_nav">CMNNAV - Prépa Navigation (100%-6L)</string>
     <string name="efis_instr_fdr">ANLFDR - Enregistreur de vol</string>
     <string name="efis_instr_fdr_c">NUMFDR - Enregistreur de vol (100%-1L)</string>
-    <string name="efis_instr_approach">CMNAPP - Approche finale (100%-3L)</string>
+    <string name="efis_instr_approach">NUMAPP - Approche finale (100%-3L)</string>
     <string name="settings_fdr">Enregistreur de vol</string>
     <string name="settings_fdr_hint">Les instruments ANLFDR / NUMFDR enregistrent les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). L\'enregistrement tourne en continu tant que l\'application est active (service de vol), y compris en arrière-plan.</string>
     <string name="settings_fdr_buffer">Durée conservée</string>

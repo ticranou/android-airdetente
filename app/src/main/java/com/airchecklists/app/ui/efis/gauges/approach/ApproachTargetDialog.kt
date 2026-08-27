@@ -25,7 +25,7 @@ import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.ui.terrain.QfuParser
 
 /**
- * Long-press override dialog for CMNAPP. Two steps:
+ * Long-press override dialog for NUMAPP. Two steps:
  *  1. pick a terrain (nearest first) — or "AUTO" to release the lock;
  *  2. pick the landing QFU parsed from that terrain's circuit (or a default when none).
  * Emits the chosen [ApproachTarget] (LOCKED) via [onLock], or clears the lock via [onAuto].

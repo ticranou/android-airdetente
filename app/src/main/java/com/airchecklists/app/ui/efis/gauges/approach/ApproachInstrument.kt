@@ -57,7 +57,7 @@ private val RWY = Color(0xFF2A2A2A)
 private val RWY_MARK = Color(0xFFEDEDED)
 
 /**
- * CMNAPP — final-approach aid ("highway in the sky"). A 3D tunnel toward the landing
+ * NUMAPP — final-approach aid ("highway in the sky"). A 3D tunnel toward the landing
  * runway drawn on a Canvas over a sky/ground gradient: three nested perspective gates
  * (green 500 / yellow 1000 / orange 1500 ft above the circuit height = field elev +
  * 1000 ft) receding to a single vanishing point where the runway sits. A rear-view

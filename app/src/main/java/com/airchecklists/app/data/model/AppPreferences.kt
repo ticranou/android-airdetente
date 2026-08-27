@@ -57,7 +57,7 @@ enum class EfisInstrument {
     NAV_PLANNER,         // Prépa navigation (plein écran, 6 lignes)
     ANLFDR,              // Flight Recorder (enregistreur de vol, jauge ronde)
     NUMFDR,              // Flight Recorder numérique (rectangulaire, 100%-1L)
-    CMNAPP,              // Aide à l'approche finale (highway-in-the-sky, 100%-3L)
+    NUMAPP,              // Aide à l'approche finale (highway-in-the-sky, 100%-3L)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -68,7 +68,7 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            CMNAPP,
+            NUMAPP,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
@@ -118,7 +118,7 @@ enum class EfisInstrument {
         get() = when (this) {
             MOVING_MAP -> AppPreferences.EFIS_MAX_ROWS
             EFIS_COMPACT -> 3
-            CMNAPP -> 3
+            NUMAPP -> 3
             ATTITUDE_COMPACT -> 2
             else -> 1
         }

@@ -7,7 +7,7 @@ import com.airchecklists.app.ui.terrain.QfuParser
 import kotlin.math.abs
 
 /**
- * A resolved landing target for the CMNAPP approach instrument: the runway threshold
+ * A resolved landing target for the NUMAPP approach instrument: the runway threshold
  * proxy (v1 = the aerodrome reference point), the field elevation, and the chosen
  * landing QFU (true degrees).
  *

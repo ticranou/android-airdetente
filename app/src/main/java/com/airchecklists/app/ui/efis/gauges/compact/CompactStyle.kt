@@ -28,7 +28,7 @@ object CompactStyle {
     val Sky = Color(0xFF2B84C8)
     val Ground = Color(0xFF6B4A2B)
     // Chart-style ground (aeronautical tan → earth), shared by the horizon instruments
-    // and CMNAPP so the ground looks like a sectional map rather than flat brown.
+    // and NUMAPP so the ground looks like a sectional map rather than flat brown.
     val GroundMapTop = Color(0xFFBFA377)   // hazy far terrain (chart tan)
     val GroundMapBot = Color(0xFF6E5A34)   // near terrain (darker earth)
     val Accent = Color(0xFFFFC107)

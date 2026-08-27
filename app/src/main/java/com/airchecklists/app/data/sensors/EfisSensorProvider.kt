@@ -382,17 +382,17 @@ class EfisSensorProvider(
     /**
      * Demo 2 — final approach toward the nearest aerodrome. The aircraft starts ~5 km out
      * at circuit height on the extended runway axis and flies a descending final while
-     * wandering left/right of the axis and above/below the 3° plane, so the CMNAPP tunnel,
+     * wandering left/right of the axis and above/below the 3° plane, so the NUMAPP tunnel,
      * the AXE (lateral) and PLAN (glide) deviations all move clearly. Loops.
      *
      * Geometry is self-contained (integrates its own lat/lon) and anchored near LFRK so
-     * the CMNAPP AUTO resolver locks onto that field. Approach axis QFU ≈ 040° (arbitrary
-     * plausible runway); the CMNAPP instrument derives its own QFU from the field, but the
+     * the NUMAPP AUTO resolver locks onto that field. Approach axis QFU ≈ 040° (arbitrary
+     * plausible runway); the NUMAPP instrument derives its own QFU from the field, but the
      * lateral/vertical wander is what makes AXE/PLAN swing.
      */
     private suspend fun runApproachDemo() {
         val frameMs = 40L
-        // Anchor on LFRK (Caen-Carpiquet)'s REAL ARP + a real runway heading, so the CMNAPP
+        // Anchor on LFRK (Caen-Carpiquet)'s REAL ARP + a real runway heading, so the NUMAPP
         // AUTO resolver (which picks the nearest aerodrome and a QFU from its circuit text
         // "12/30 - QFU 124/304") locks onto the SAME field and axis this demo flies. If the
         // two disagree the instrument's cross-track blows up (e.g. thousands of metres) and

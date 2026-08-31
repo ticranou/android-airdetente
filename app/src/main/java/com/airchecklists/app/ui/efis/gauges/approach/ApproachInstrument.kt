@@ -206,12 +206,14 @@ private fun DrawScope.drawApproach(
     val latOk = ApproachGeometry.onAxis(errors.lateralM)
     val planeOk = ApproachGeometry.onPlane(errors.aboveFt)
     if (hasTarget) {
-        // Centreline reference (vertical dashed): green when on axis, else white. Starts
-        // BELOW the central ICAO chip so it doesn't run through it and hurt legibility.
+        // Centreline reference (vertical dashed): green when on axis, else white. Runs from
+        // just below the central ICAO chip down to just above the aim reticle, so it marks
+        // the axis toward the vanishing point without slicing through the aircraft symbol
+        // and the runway on the floor.
         val dash = PathEffect.dashPathEffect(floatArrayOf(11f, 8f))
         drawLine(
             color = if (latOk) GATE_500 else CompactStyle.Mark,
-            start = Offset(aimX, bodyTop + 44f), end = Offset(aimX, sceneBottom - 4f),
+            start = Offset(aimX, bodyTop + 44f), end = Offset(aimX, aimY - 18f),
             strokeWidth = 3f, pathEffect = dash,
         )
     }
@@ -253,14 +255,8 @@ private fun DrawScope.drawApproach(
     drawNumTitleBar(bezel, w, headerH)
     drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
     drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
-    compactText(tm, "Assistant Approche", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
-    // Target ICAO / status on the right of the header.
-    val sub = when {
-        !state.hasPosition -> "—"
-        target == null -> "—"
-        else -> target.icao
-    }
-    compactText(tm, sub, w - 8f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim, center = false, anchorRight = true)
+    compactText(tm, "APPROCHE", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
+    // (ICAO is shown in the dedicated sky chip below; not repeated in the title bar.)
 }
 
 /** Draws a small framed info chip on the sky. [x] is the left edge when [anchorLeft]
@@ -353,18 +349,16 @@ private fun DrawScope.drawTunnel(
         val bw = (2f * thrHalf / bars) * 0.55f
         drawLine(RWY_MARK, Offset(bx, thr.y - 1f), Offset(bx, thr.y + 3f + 3f * nearness), strokeWidth = bw.coerceIn(1.5f, 8f))
     }
-    // QFU label at the threshold (two digits, e.g. "30" for 304°). Grows with nearness.
+    // QFU painted on the threshold (two digits, e.g. "30" for 304°) — the runway
+    // designator, like the real numbers on the tarmac. Grows with nearness.
     if (!qfuTrueDeg.isNaN()) {
         val qfuTens = ((qfuTrueDeg / 10f).roundToInt() % 36).let { if (it <= 0) it + 36 else it }
         val qfuText = qfuTens.toString().padStart(2, '0')
         compactText(tm, qfuText, thr.x, thr.y - 12f - 10f * nearness,
             sizeSp = 12f + 10f * nearness, bold = true, color = RWY_MARK)
     }
-    // Runway length caption from the VAC chart (or "long. ?" when unknown) — feeds the
-    // touchdown feasibility below.
-    val lenText = runwayLengthM?.let { "$it m" } ?: "long. ?"
-    compactText(tm, lenText, thr.x, thr.y + 6f + 6f * nearness,
-        sizeSp = 9f + 4f * nearness, color = if (runwayLengthM != null) RWY_MARK else GATE_1500, center = true)
+    // (Runway length is shown in the sky chip at the top; not repeated here to avoid
+    // text piling up under the runway.)
 
     // ---- Touchdown markers for 300 / 500 / 1000 ft/min. ----
     // Distance travelled over the ground before reaching field level at each rate:

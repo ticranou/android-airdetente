@@ -28,10 +28,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.CornerRadius
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
+import com.airchecklists.app.ui.efis.gauges.GaugeLobe
+import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
+import com.airchecklists.app.ui.efis.gauges.GaugeColors
+import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 
 /** One hour-meter reading, stored as hundredths of an hour (e.g. 106.22 -> 10622),
  *  or null when not entered yet. */
@@ -95,7 +100,6 @@ private fun durationLabel(top: Int?, bottom: Int?): String? {
 }
 
 private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: String, duration: String?) {
-    // Round black face + bezel (same style as the chronometer).
     val (cx, cy, r) = gaugeFace()
     compactText(tm, "HORAMETRE", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
@@ -103,17 +107,32 @@ private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: 
     val cellW = r * 1.25f
     val cellH = r * 0.34f
     fun cell(cyc: Float, text: String) {
-        drawRect(Color(0xFF141414), topLeft = Offset(cx - cellW / 2, cyc - cellH / 2), size = Size(cellW, cellH))
-        drawRect(Color(0xFF5A5A5A), topLeft = Offset(cx - cellW / 2, cyc - cellH / 2), size = Size(cellW, cellH), style = Stroke(width = 2f))
+        val rad = CornerRadius(cellH / 2f, cellH / 2f)
+        val tl = Offset(cx - cellW / 2, cyc - cellH / 2)
+        val sz = Size(cellW, cellH)
+        drawRoundRect(Color(0xFF141414), topLeft = tl, size = sz, cornerRadius = rad)
+        drawRoundRect(Color(0xFF5A5A5A), topLeft = tl, size = sz, cornerRadius = rad, style = Stroke(width = 2f))
         compactText(tm, text, cx, cyc, sizeSp = 30f, bold = true, mono = true, color = CompactStyle.Mark)
     }
-    cell(cy - r * 0.20f, topText)
-    cell(cy + r * 0.28f, botText)
+    // Cells shifted up to leave room for the lobe.
+    cell(cy - r * 0.32f, topText)
+    cell(cy + r * 0.16f, botText)
 
-    // Flight duration below the two cells (orange, like the mockup).
-    if (duration != null) {
-        compactText(tm, duration, cx, cy + r * 0.66f, sizeSp = 15f, bold = true, color = CompactStyle.Accent2)
-    }
+    // Duration lobe at the bottom — split into minutes line + hhmm line.
+    val parts = duration?.split(" – ")
+    val minStr = parts?.getOrNull(0) ?: ""
+    val hmStr  = parts?.getOrNull(1) ?: ""
+    drawGaugeLobes(
+        tm, cx, cy, r,
+        left   = GaugeLobe("", "", GaugeColors.MarkDim),
+        centre = GaugeLobeCentre(
+            primary      = if (duration != null) minStr else "—",
+            sub          = hmStr,
+            primaryColor = CompactStyle.Accent2,
+            subColor     = GaugeColors.Mark,
+        ),
+        right  = GaugeLobe("", "", GaugeColors.MarkDim),
+    )
 }
 
 /**

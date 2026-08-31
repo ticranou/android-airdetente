@@ -19,6 +19,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 
 private val FDR_GREEN = Color(0xFF32C832)
 private val FDR_ORANGE = Color(0xFFE8843A)
@@ -117,28 +119,7 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
             )
         }
 
-        gaugeText(tm, "FLIGHT RECORDER", cx, cy - r * 0.66f, sizeSp = 9f, color = GaugeColors.MarkDim)
-
-        // Status badge (Recording / Paused) in a rounded pill.
-        val recording = status.recording
-        val badgeColor = if (recording) FDR_GREEN else FDR_ORANGE
-        val badgeText = if (recording) "Recording" else "Paused"
-        val bw = r * 1.02f; val bh = r * 0.26f
-        val btop = cy - r * 0.50f
-        drawRoundRect(
-            color = Color(0xF2101010),
-            topLeft = Offset(cx - bw / 2, btop),
-            size = Size(bw, bh),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(bh / 2, bh / 2),
-        )
-        drawRoundRect(
-            color = badgeColor,
-            topLeft = Offset(cx - bw / 2, btop),
-            size = Size(bw, bh),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(bh / 2, bh / 2),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f),
-        )
-        gaugeText(tm, badgeText, cx, btop + bh / 2, sizeSp = 14f, bold = true, color = badgeColor)
+        gaugeTitle(tm, "FLIGHT RECORDER", cx, cy, r)
 
         // Parameter list with availability dots, centred as a block within the circle.
         data class Row(val label: String, val ok: Boolean)
@@ -149,8 +130,8 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
             Row("Inclinaison", status.hasGyro),
             Row("Baromètre", status.hasBaro),
         )
-        val labelSp = (r * 0.095f).coerceIn(8f, 12f)   // compact, scaled to gauge size
-        val labelStyle = androidx.compose.ui.text.TextStyle(color = GaugeColors.Mark, fontSize = labelSp.sp)
+        val labelSp = (r * 0.095f).coerceIn(8f, 12f)
+        val labelStyle = TextStyle(color = GaugeColors.Mark, fontSize = labelSp.sp)
         val dotR = r * 0.045f
         val gap = r * 0.09f
         val widest = rows.maxOf { tm.measure(it.label, labelStyle).size.width }
@@ -159,12 +140,28 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
         val dotX = blockLeft + dotR
         val textX = blockLeft + dotR * 2 + gap
         val step = r * 0.185f
-        val listTop = cy - r * 0.08f     // a bit lower → gap under the "Recording" badge
+        val listTop = cy - r * 0.50f   // starts higher now that badge is in the lobe
         rows.forEachIndexed { i, row ->
             val ry = listTop + i * step
             drawCircle(if (row.ok) FDR_GREEN else FDR_ORANGE, radius = dotR, center = Offset(dotX, ry))
             gaugeTextLeft(tm, row.label, textX, ry, sizeSp = labelSp, color = GaugeColors.Mark)
         }
+
+        // Status lobe at the bottom — ellipse centrale seule (pas de lobes latéraux).
+        val recording = status.recording
+        val badgeColor = if (recording) FDR_GREEN else FDR_ORANGE
+        val badgeText = if (recording) "Recording" else "Paused"
+        val badgeSp = (r * 0.145f).coerceIn(13f, 20f)
+        val badgeMeasured = tm.measure(badgeText, TextStyle(color = badgeColor, fontSize = badgeSp.sp, fontWeight = FontWeight.Bold))
+        val padH = r * 0.08f; val padV = r * 0.05f
+        val cW = 1.6f * r
+        val cH = (badgeMeasured.size.height + padV * 2f).coerceAtLeast(r * 0.28f)
+        val cCentreY = cy + r + r * 0.06f - cH / 2f
+        val chipBg = Color(0xE8101418); val chipBorder = Color(0x99FFFFFF)
+        drawOval(chipBg,     topLeft = androidx.compose.ui.geometry.Offset(cx - cW / 2f, cCentreY - cH / 2f), size = Size(cW, cH))
+        drawOval(chipBorder, topLeft = androidx.compose.ui.geometry.Offset(cx - cW / 2f, cCentreY - cH / 2f), size = Size(cW, cH),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = (r * 0.013f).coerceAtLeast(1.2f)))
+        drawText(badgeMeasured, topLeft = androidx.compose.ui.geometry.Offset(cx - badgeMeasured.size.width / 2f, cCentreY - badgeMeasured.size.height / 2f))
     }
 
     if (showExport) {

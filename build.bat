@@ -67,15 +67,16 @@ set "RESULT=%ERRORLEVEL%"
 echo.
 if "%RESULT%"=="0" (
   echo === BUILD REUSSI ===
-  set "APKDIR=%CD%\app\build\outputs\apk\debug"
   REM --- Copier l'APK en AirDetente.apk a la racine du projet ---
-  if exist "%APKDIR%\app-debug.apk" (
-    copy /y "%APKDIR%\app-debug.apk" "%CD%\AirDetente.apk" >nul
+  REM  On evite %APKDIR%/%CD% assignes-et-lus dans un meme bloc parenthese
+  REM  (expansion immediate : la variable serait vide). Chemins en dur relatifs.
+  if exist "app\build\outputs\apk\debug\app-debug.apk" (
+    copy /y "app\build\outputs\apk\debug\app-debug.apk" "AirDetente.apk" >nul
     echo APK genere :
     echo   %CD%\AirDetente.apk
   ) else (
-    echo APK genere :
-    echo   %APKDIR%\app-debug.apk
+    echo [ATTENTION] app-debug.apk introuvable, copie ignoree.
+    echo   %CD%\app\build\outputs\apk\debug\app-debug.apk
   )
 ) else (
   echo === BUILD ECHOUE ^(code %RESULT%^) ===

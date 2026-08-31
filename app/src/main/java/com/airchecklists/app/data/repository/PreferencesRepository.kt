@@ -117,6 +117,8 @@ class PreferencesRepository(private val store: SettingsStore) {
         it.copy(fdrFlushMinutes = min.coerceIn(AppPreferences.FDR_MIN_FLUSH_MIN, AppPreferences.FDR_MAX_FLUSH_MIN))
     }
 
+    suspend fun setSafeskyApiKey(key: String?) = persist { it.copy(safeskyApiKey = key?.trim()?.ifBlank { null }) }
+
     suspend fun setInstrumentState(state: com.airchecklists.app.data.model.InstrumentPersistState) =
         persist { it.copy(instruments = state) }
 

@@ -423,8 +423,7 @@ class EfisSensorProvider(
         }
 
         val startAlong = 3500.0         // start 3.5 km out on final (closer = faster visual)
-        val endAlong = 120.0            // reach just short of threshold
-        val approachSpeed = 120f        // km/h
+        val approachSpeed = 110f        // km/h — realistic final-approach speed
 
         // Place using an explicit height-above-field so the flare/go-around can hug the ground.
         fun placeAbove(alongM: Double, crossM: Double, aboveFieldFt: Float, vsFtMin: Float, spdKmh: Float, track: Float, pitch: Float) {
@@ -442,54 +441,72 @@ class EfisSensorProvider(
             pushTrail(lat, lon)
         }
 
-        val nominalVs = -approachSpeed / 3.6f * kotlin.math.tan(glideRad).toFloat() * 3.280839895f * 60f
+        // Height of the nominal 3° plane above field at a given along-track distance (ft).
+        fun planeFtAt(alongM: Double): Float =
+            (kotlin.math.tan(glideRad) * alongM.coerceAtLeast(0.0) * 3.280839895).toFloat()
+
+        // Ground speed (m/s) along the final, from the approach speed.
+        val gsMs = approachSpeed / 3.6                                   // ≈ 30.6 m/s
+        // Nominal vertical speed to stay on the 3° plane at this speed (negative = descending).
+        val nominalVs = -(gsMs * kotlin.math.tan(glideRad) * 3.280839895 * 60.0).toFloat()  // ≈ −315 ft/min
 
         while (_demoActive.value) {
-            // 1a) Established final, 3.5 km → ~2.4 km: hold ~2 s perfectly ON AXIS and ON PLANE
-            //     so the aircraft/PLAN read solid GREEN.
-            animate(2000) { t ->
-                val alongM = startAlong + (2400.0 - startAlong) * t
-                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
-                placeAbove(alongM, 0.0, planeFt, nominalVs, approachSpeed, qfuDeg.toFloat(), -3f)
+            // Realistic descent profile, integrating the along-track distance from the ground
+            // speed and the height from the chosen vertical speed. We drive the LOG scenario:
+            //  1a) ~3 s ABOVE the plane at a gentle 500 ft/min (slower correction) — sits high;
+            //  1b) increase to 700 ft/min to sink back THROUGH the plane, weaving around the
+            //      axis (localizer S-turns) — passes clearly below;
+            //  1c) recapture axis AND plane and track it smoothly down to the threshold, where
+            //      we go around at 100 ft AGL.
+            var alongM = startAlong
+            var aglFt = planeFtAt(startAlong) + 140f    // start ~140 ft ABOVE the 3° plane
+
+            // 1a) 3 s at 500 ft/min: descends slower than the plane demands (~315 ft/min would
+            //     hold it), so relative to the plane we stay high → aircraft/PLAN read high.
+            animate(3000) { _ ->
+                alongM -= gsMs * (frameMs / 1000.0)
+                aglFt += (-500f) * (frameMs / 60000f)
+                val above = aglFt - planeFtAt(alongM)
+                placeAbove(alongM, 0.0, aglFt, -500f, approachSpeed, qfuDeg.toFloat(), -3f)
             }
-            // 1b) Drop below the glide plane and hold ~2 s clearly BELOW (~-140 ft, well past
-            //     the ±60 ft tolerance) so the aircraft/PLAN read solid RED ("too low").
-            animate(2000) { t ->
-                val alongM = 2400.0 + (1900.0 - 2400.0) * t
-                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
-                placeAbove(alongM, 0.0, planeFt - 140f, nominalVs, approachSpeed, qfuDeg.toFloat(), -3.5f)
+            // 1b) 700 ft/min while weaving gently ±40 m around the axis: sinks through the plane
+            //     and ends clearly BELOW it (RED), staying reasonably close to the axis.
+            animate(6000) { t ->
+                alongM -= gsMs * (frameMs / 1000.0)
+                aglFt += (-700f) * (frameMs / 60000f)
+                val crossM = 40.0 * kotlin.math.sin(t * Math.PI * 3.0)      // gentle S-turns near the axis
+                val track = (qfuDeg + kotlin.math.cos(t * Math.PI * 3.0) * 4.0).toFloat()
+                placeAbove(alongM, crossM, aglFt, -700f, approachSpeed, track, -3.5f)
             }
-            // 1c) Recapture and continue the final to the THRESHOLD (alongM → ~0) while
-            //     descending to 300 ft AGL — the go-around is flown at 300 ft over the seuil.
-            //     AXE swings (±110 m) and PLAN wanders back around the plane, decaying. The
-            //     height blends from the 3° plane toward 300 ft AGL right at the threshold so
-            //     the runway ends up passing under the aircraft.
-            val goAroundAglFt = 300f
+            // 1c) Recapture: blend cross-track back to the axis and height back onto the 3° plane,
+            //     then track the plane down to the threshold. Go around at 100 ft AGL.
+            val goAroundAglFt = 100f
+            val recaptureAgl = aglFt
             animate(9_000) { t ->
-                val alongM = 1900.0 + (0.0 - 1900.0) * t         // → threshold
-                val planeFt = (kotlin.math.tan(glideRad) * alongM * 3.280839895).toFloat()
-                val decay = (1f - t)
-                val crossM = 110.0 * kotlin.math.sin(t * Math.PI * 4.0) * decay
-                val aboveFt = (70.0 * kotlin.math.sin(t * Math.PI * 3.0 + 1.0) * decay).toFloat()
-                val track = (qfuDeg + kotlin.math.cos(t * Math.PI * 4.0) * 6.0 * decay).toFloat()
-                // Blend the nominal-plane height toward the 300 ft go-around gate as we near
-                // the threshold, so we arrive at exactly 300 ft AGL over the seuil.
-                val hAgl = (planeFt + aboveFt) * decay + goAroundAglFt * t
-                placeAbove(alongM, crossM, hAgl.coerceAtLeast(goAroundAglFt), nominalVs, approachSpeed, track, -3f)
+                alongM -= gsMs * (frameMs / 1000.0)
+                val planeHere = planeFtAt(alongM)
+                // Ease height from wherever we were onto the plane over the first ~40% of the leg.
+                val blend = (t / 0.4f).coerceIn(0f, 1f)
+                val target = planeHere.coerceAtLeast(goAroundAglFt)
+                aglFt = recaptureAgl + (target - recaptureAgl) * blend
+                // Damp the cross-track weave to zero as we settle on the axis.
+                val crossM = 35.0 * kotlin.math.sin(t * Math.PI * 2.0) * (1f - blend)
+                val track = (qfuDeg + kotlin.math.cos(t * Math.PI * 2.0) * 3.0 * (1f - blend)).toFloat()
+                placeAbove(alongM.coerceAtLeast(0.0), crossM, aglFt.coerceAtLeast(goAroundAglFt), nominalVs, approachSpeed, track, -3f)
             }
-            // 2) LOW PASS: hold 300 ft AGL level and track down the axis past the threshold
+            // 2) LOW PASS: hold 100 ft AGL level and track down the axis past the threshold
             //    (alongM 0 → −400) so the runway visibly slides under and behind the aircraft
             //    before any climb begins.
             animate(3500) { t ->
-                val alongM = 0.0 - 400.0 * t                     // over the field, still low
-                placeAbove(alongM, 0.0, goAroundAglFt, 0f, approachSpeed, qfuDeg.toFloat(), 0f)
+                val a = 0.0 - 400.0 * t                          // over the field, still low
+                placeAbove(a, 0.0, goAroundAglFt, 0f, approachSpeed, qfuDeg.toFloat(), 0f)
             }
             // 3) GO-AROUND: full power, pitch up, strong climb back to circuit height while
             //    continuing past the field (along goes further negative).
             animate(5000) { t ->
-                val alongM = -400.0 - 400.0 * t                  // continue past the field
-                val aboveFt = goAroundAglFt + (920f - goAroundAglFt) * t   // climb 300 → 920 ft AGL
-                placeAbove(alongM, 0.0, aboveFt, 900f, approachSpeed - 10f + 30f * t, qfuDeg.toFloat(), 10f)
+                val a = -400.0 - 400.0 * t                       // continue past the field
+                val aboveFt = goAroundAglFt + (920f - goAroundAglFt) * t   // climb 100 → 920 ft AGL
+                placeAbove(a, 0.0, aboveFt, 900f, approachSpeed - 10f + 30f * t, qfuDeg.toFloat(), 10f)
             }
             // 4) Brief hold at circuit height, then the loop restarts a fresh final.
             animate(1500) { placeAbove(-800.0, 0.0, 920f, 0f, approachSpeed, qfuDeg.toFloat(), 0f) }

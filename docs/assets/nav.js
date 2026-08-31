@@ -20,6 +20,8 @@
       ["instrument-meteo.html", "Météo (radar + vent)"],
       ["instrument-montre.html", "Montre"],
       ["instrument-flightrecorder.html", "Enregistreur de vol"],
+      ["instrument-trafic.html", "Trafic Safesky"],
+      ["instrument-proximite.html", "Proximité sol (TAWS)"],
       ["instrument-efis.html", "EFIS"],
       ["instrument-movingmap.html", "Moving Map"],
       ["instrument-approche.html", "Approche finale"],

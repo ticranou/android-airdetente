@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Proximité sol (TAWS)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">⛰</div>
+      <div>
+        <h1>Proximité sol (TAWS)</h1>
+        <p class="subtitle">ANLPRX — avertissement de proximité terrain</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLPRX · analogique · jauge ronde</span>
+      <span class="chip num">GPS · Altitude · MNT SRTM (~30 m)</span>
+      <span class="chip" style="color:#E8843A">Indicatif · non certifié</span>
+    </div>
+
+    <div class="card">
+      <h2>Ce que ça fait</h2>
+      <ul class="feat">
+        <li>Calcule la <b>hauteur AGL</b> (Above Ground Level) en temps réel en soustrayant l'altitude terrain SRTM de votre altitude GPS.</li>
+        <li>Affiche cette hauteur en grand au centre, colorée selon le niveau d'alerte.</li>
+        <li>Émet des <b>alertes visuelles progressives</b> (TAWS simplifié) dès que la hauteur sol descend sous les seuils.</li>
+        <li>Mise à jour toutes les <b>3 secondes</b>.</li>
+      </ul>
+
+      <h3>Niveaux d'alerte</h3>
+      <table class="tbl">
+        <tr><th>AGL</th><th>Niveau</th><th>Couleur</th><th>Anneaux</th></tr>
+        <tr><td>&gt; 1 500 ft</td><td><b>CLEAR</b></td><td style="color:#35C759">Vert</td><td>—</td></tr>
+        <tr><td>700 – 1 500 ft</td><td><b>CAUTION</b></td><td style="color:#FFCC00">Jaune</td><td>Anneau jaune extérieur actif</td></tr>
+        <tr><td>300 – 700 ft</td><td><b>WARNING</b></td><td style="color:#FF9500">Orange</td><td>Anneaux jaune + orange actifs</td></tr>
+        <tr><td>&lt; 300 ft</td><td><b>PULL UP</b></td><td style="color:#FF3B30">Rouge</td><td>Tous anneaux + triangle rouge ↑</td></tr>
+      </table>
+
+      <h3>Lecture des trois anneaux</h3>
+      <ul class="feat">
+        <li>Trois cercles concentriques indiquent visuellement la « zone de sécurité » restante :</li>
+        <li>Anneau <b>extérieur</b> (90 % du rayon) — s'allume <b style="color:#FFCC00">jaune</b> au niveau CAUTION.</li>
+        <li>Anneau <b>médian</b> (75 %) — s'allume <b style="color:#FF9500">orange</b> au niveau WARNING.</li>
+        <li>Anneau <b>intérieur</b> (60 %) — s'allume <b style="color:#FF3B30">rouge</b> au niveau PULL UP. Un triangle rouge apparaît en haut de l'instrument.</li>
+        <li>En dessous du seuil CLEAR, tous les anneaux restent <b>gris discrets</b>.</li>
+      </ul>
+
+      <h3>Trois pastilles (lobes)</h3>
+      <ul class="feat">
+        <li><b>V/S</b> (gauche) — vitesse verticale en ft/min : <b style="color:#35C759">vert</b> montée, <b style="color:#FF5252">rouge</b> descente, blanc = palier.</li>
+        <li><b>Centre</b> — label du niveau d'alerte (CLEAR / CAUTION / WARNING / PULL UP) + altitude MSL GPS.</li>
+        <li><b>MSL</b> (droite) — altitude terrain SRTM au sol en ft (élévation du point au sol, pas votre altitude).</li>
+      </ul>
+
+      <h3>Données terrain : SRTM GL1 (~30 m)</h3>
+      <ul class="feat">
+        <li>L'instrument utilise le <b>MNT SRTM GL1</b> de la NASA : résolution ~30 m (1 arc-seconde), couverture mondiale.</li>
+        <li>Les tuiles sont téléchargées <b>automatiquement à la demande</b> depuis le miroir AWS public NASA lors de la première utilisation dans une zone (~25 MB par carreau de 1°×1°). Une fois téléchargée, la tuile est conservée en cache local et ne nécessite plus de connexion.</li>
+        <li>Pendant le téléchargement d'une tuile, l'instrument affiche <b>CHARG.</b> — les alertes reprennent dès la fin du téléchargement.</li>
+        <li>Sans GPS ou sans tuile disponible (réseau absent, téléchargement échoué) : l'instrument affiche <b>---</b> et les anneaux restent inactifs.</li>
+      </ul>
+
+      <h3>Précision et limites</h3>
+      <ul class="feat">
+        <li>Le SRTM date de 2000. Il ne connaît pas les <b>obstacles artificiels</b> (antennes, lignes haute tension, éoliennes).</li>
+        <li>L'altitude GPS (<b>ellipsoïde WGS84</b>) diffère de l'altitude MSL d'environ ±30 à 60 m selon la région. Le calcul AGL peut être biaisé de cette valeur.</li>
+        <li>La résolution 30 m ne reconnaît pas les escarpements rocheux de moins de 30 m de large.</li>
+        <li>Aide <b>strictement indicative et non certifiée</b>. Ne remplace pas la vigilance du pilote ni un vrai TAWS certifié.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      Aucun geste spécifique sur cet instrument. Les tuiles terrain sont mises en cache dans la mémoire interne de l'appareil.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

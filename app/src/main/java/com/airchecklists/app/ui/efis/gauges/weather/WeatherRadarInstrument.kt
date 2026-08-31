@@ -61,6 +61,10 @@ import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
+import com.airchecklists.app.ui.efis.gauges.GaugeLobe
+import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
+import com.airchecklists.app.ui.efis.gauges.GaugeColors
+import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -140,7 +144,6 @@ fun WeatherRadarInstrument(modifier: Modifier = Modifier) {
     ) {
         val (cx, cy, r) = gaugeFace()
         if (!hasPos) {
-            compactText(tm, "METEO", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
             compactText(tm, "position GPS ?", cx, cy, sizeSp = 13f, color = CompactStyle.Dim)
             return@Canvas
         }
@@ -153,7 +156,6 @@ fun WeatherRadarInstrument(modifier: Modifier = Modifier) {
         drawShip(cx, cy, r)
         drawWinds(tm, winds, cx, cy, r, arrowWide = true)
         // Title drawn LAST so the radar tiles never cover it.
-        compactText(tm, "METEO", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
     }
 
@@ -618,14 +620,31 @@ internal fun DrawScope.drawTrackAhead(cx: Float, cy: Float, headingDeg: Float, l
 }
 
 private fun DrawScope.drawWinds(tm: TextMeasurer, winds: WindsAloft?, cx: Float, cy: Float, r: Float, arrowWide: Boolean) {
+    val accent = CompactStyle.Accent2
+    val dim    = GaugeColors.MarkDim
+
     if (winds != null) {
-        val wx = cx + r * 0.42f
-        val wy = cy - r * 0.30f
-        drawWindArrow(wx, wy, r * 0.16f, winds.directionDeg)
-        compactText(tm, "FL20", wx, wy - r * 0.24f, sizeSp = 10f, color = CompactStyle.Dim)
-        compactText(tm, "%03d°/%dkt".format(winds.directionDeg, winds.speedKt), cx, cy + r * 0.72f, sizeSp = 13f, bold = true, color = CompactStyle.Accent2)
+        val dirStr   = "%03d°".format(winds.directionDeg)
+        val speedStr = "${winds.speedKt}kt"
+        drawGaugeLobes(
+            tm, cx, cy, r,
+            left   = GaugeLobe("VENT", dirStr,   accent),
+            centre = GaugeLobeCentre(primary = "", sub = "", primaryColor = dim),
+            right  = GaugeLobe("VENT", speedStr, accent),
+        )
+        // Draw the wind arrow inside the centre lobe — bigger, grey.
+        // Centre lobe geometry mirrors GaugeLobes.kt: cW=1.6r, cH≈r*0.28, centreY = cy+r+0.06r - cH/2
+        val cH = r * 0.28f
+        val cCentreY = cy + r + r * 0.06f - cH / 2f
+        drawWindArrow(cx, cCentreY, r * 0.16f, winds.directionDeg, color = Color(0xFFAAAAAA))
     } else {
-        compactText(tm, "vent FL20 —", cx, cy + r * 0.72f, sizeSp = 12f, color = CompactStyle.Dim)
+        // No wind data — draw empty lobes with "—"
+        drawGaugeLobes(
+            tm, cx, cy, r,
+            left   = GaugeLobe("VENT", "—", dim),
+            centre = GaugeLobeCentre(primary = "FL20", primaryColor = dim),
+            right  = GaugeLobe("VENT", "—", dim),
+        )
     }
 }
 
@@ -633,8 +652,8 @@ private fun DrawScope.drawWinds(tm: TextMeasurer, winds: WindsAloft?, cx: Float,
 /** A clean red wind arrow centred on (x,y): straight shaft + filled triangular
  *  head, pointing where the wind blows TO (fromDeg + 180); 0° = up, clockwise.
  *  [len] is the half-length (tip is len from centre). */
-private fun DrawScope.drawWindArrow(x: Float, y: Float, len: Float, fromDeg: Int) {
-    val red = Color(0xFFFF3B30)
+private fun DrawScope.drawWindArrow(x: Float, y: Float, len: Float, fromDeg: Int, color: Color = Color(0xFFFF3B30)) {
+    val red = color
     val toRad = Math.toRadians((fromDeg + 180).toDouble())
     val ux = sin(toRad).toFloat()          // unit vector toward the tip
     val uy = -cos(toRad).toFloat()

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Trafic Safesky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">📡</div>
+      <div>
+        <h1>Trafic Safesky</h1>
+        <p class="subtitle">ANLTRF — radar de trafic aérien en temps réel</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLTRF · analogique · jauge ronde</span>
+      <span class="chip num">GPS · Réseau · Clé API Safesky</span>
+      <span class="chip" style="color:#E8843A">Indicatif · non certifié</span>
+    </div>
+
+    <div class="card">
+      <h2>Ce que ça fait</h2>
+      <ul class="feat">
+        <li>Affiche en temps réel les <b>aéronefs visibles par Safesky</b> autour de votre position, dans un rayon de <b>5 nm</b>.</li>
+        <li>Chaque trafic apparaît comme un <b>point coloré</b> sur le radar circulaire, avec son <b>écart d'altitude</b> par rapport à vous (ex. <b>+500ft</b> = 500 ft au-dessus).</li>
+        <li>La position relative est calculée en <b>projection plane</b> (nord en haut). Votre appareil est représenté par un <b>triangle blanc</b> au centre.</li>
+        <li>Deux <b>anneaux de distance</b> discrets : cercle intérieur = <b>1 nm</b>, cercle extérieur = <b>3 nm</b>.</li>
+        <li>Mise à jour automatique toutes les <b>5 secondes</b>.</li>
+      </ul>
+
+      <h3>Couleurs des trafics</h3>
+      <ul class="feat">
+        <li><b style="color:#FF3B30">Rouge</b> — drone</li>
+        <li><b style="color:#FFCC00">Jaune</b> — parapente / parachute</li>
+        <li><b style="color:#64D2FF">Cyan</b> — planeur</li>
+        <li><b style="color:#FF9F0A">Orange</b> — hélicoptère</li>
+        <li><b style="color:#FFFFFF">Blanc</b> — avion, ULM, et autres</li>
+      </ul>
+
+      <h3>Trois pastilles (lobes)</h3>
+      <ul class="feat">
+        <li><b>CONN</b> (gauche) — statut de la connexion Safesky : <b style="color:#35C759">OK</b> (données reçues) / <b style="color:#FF5252">DÉCO</b> (erreur réseau ou clé invalide) / <b>---</b> (clé non saisie).</li>
+        <li><b>Centre</b> — nombre de trafics dans le rayon + distance du trafic le plus proche (en nm).</li>
+        <li><b>NIVEAU</b> (droite) — niveau de danger global :</li>
+      </ul>
+      <table class="tbl">
+        <tr><th>Niveau</th><th>Condition</th><th>Couleur</th></tr>
+        <tr><td><b>DANGER</b></td><td>Trafic à &lt; 500 ft ET &lt; 1 nm</td><td style="color:#FF3B30">Rouge</td></tr>
+        <tr><td><b>ALERTE</b></td><td>Trafic à &lt; 1 500 ft ET &lt; 2 nm</td><td style="color:#FF9500">Orange</td></tr>
+        <tr><td><b>OK</b></td><td>Trafics présents, hors seuils</td><td style="color:#35C759">Vert</td></tr>
+        <tr><td><b>---</b></td><td>Aucun trafic dans le rayon</td><td style="color:#888">Gris</td></tr>
+      </table>
+
+      <h3>Configuration (Réglages ▸ Cockpits)</h3>
+      <ul class="feat">
+        <li>Entrez votre <b>clé API Safesky</b> dans le champ dédié. La clé est stockée <b>uniquement sur votre appareil</b> (fichier local chiffré, non synchronisé) et n'est jamais transmise à d'autres serveurs que Safesky.</li>
+        <li>Obtenez une clé gratuite sur <b>safesky.app</b> → Compte → API.</li>
+        <li>Sans clé : l'instrument reste visible mais affiche <b>---</b> partout — aucune erreur, aucun crash.</li>
+      </ul>
+
+      <h3>Note</h3>
+      <ul class="feat">
+        <li>Safesky ne couvre que les appareils équipés d'un transpondeur Mode-S/ADS-B, FLARM, ou de l'application Safesky. <b>L'absence de trafic ne signifie pas ciel libre.</b></li>
+        <li>Nécessite GPS et réseau mobile/Wi-Fi.</li>
+        <li>Aide indicative et non certifiée — ne remplace pas le principe <i>see and avoid</i>.</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      Aucun geste spécifique sur cet instrument.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

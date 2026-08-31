@@ -136,6 +136,10 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setFdrFlushMinutes(min) }
     }
 
+    fun setSafeskyApiKey(key: String?) {
+        viewModelScope.launch { prefsRepo.setSafeskyApiKey(key) }
+    }
+
     // ---- Dashboards ----
 
     /** Create a new empty dashboard and return its id (for immediate editing). */

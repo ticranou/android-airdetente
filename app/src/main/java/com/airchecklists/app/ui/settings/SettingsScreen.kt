@@ -292,6 +292,7 @@ fun SettingsScreen(
                     onEfisShowValues = viewModel::setEfisShowValues,
                     onFdrBufferMinutes = viewModel::setFdrBufferMinutes,
                     onFdrFlushMinutes = viewModel::setFdrFlushMinutes,
+                    onSafeskyApiKey = viewModel::setSafeskyApiKey,
                     onAddDashboard = { onEditDashboard(viewModel.addDashboard("Nouveau tableau")) },
                     onEditDashboard = onEditDashboard,
                     onDeleteDashboard = { dashboardToDelete = it },
@@ -740,6 +741,7 @@ private fun CockpitsSection(
     onEfisShowValues: (Boolean) -> Unit,
     onFdrBufferMinutes: (Int) -> Unit,
     onFdrFlushMinutes: (Int) -> Unit,
+    onSafeskyApiKey: (String?) -> Unit,
     onAddDashboard: () -> Unit,
     onEditDashboard: (String) -> Unit,
     onDeleteDashboard: (com.airchecklists.app.data.model.Dashboard) -> Unit,
@@ -896,6 +898,15 @@ private fun CockpitsSection(
         max = AppPreferences.FDR_MAX_FLUSH_MIN,
         onChange = onFdrFlushMinutes,
     )
+
+    // Safesky API key (ANLTRF traffic radar).
+    SectionHeader(stringResource(R.string.settings_safesky))
+    Text(
+        stringResource(R.string.settings_safesky_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    SafeskyKeyField(value = prefs.safeskyApiKey ?: "", onChanged = { onSafeskyApiKey(it.ifBlank { null }) })
 
     // Dashboards (saved instrument layouts).
     SectionHeader(stringResource(R.string.settings_dashboards))
@@ -1197,3 +1208,24 @@ private fun SectionHeader(text: String) {
 /** Small helper: make a whole ListItem row clickable. */
 private fun Modifier.clickableRow(onClick: () -> Unit): Modifier =
     this.fillMaxWidth().clickable(onClick = onClick)
+
+/** Text field for the Safesky API key, masked like a password with a show/hide toggle. */
+@Composable
+private fun SafeskyKeyField(value: String, onChanged: (String) -> Unit) {
+    var text by remember(value) { mutableStateOf(value) }
+    var visible by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it; onChanged(it) },
+        label = { Text(stringResource(R.string.settings_safesky_key_label)) },
+        singleLine = true,
+        visualTransformation = if (visible) androidx.compose.ui.text.input.VisualTransformation.None
+                               else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        trailingIcon = {
+            TextButton(onClick = { visible = !visible }) {
+                Text(if (visible) "Masquer" else "Afficher", style = MaterialTheme.typography.labelSmall)
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    )
+}

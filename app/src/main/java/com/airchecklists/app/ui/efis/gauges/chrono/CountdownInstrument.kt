@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.CornerRadius
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -146,18 +147,21 @@ private fun DrawScope.drawCountdownRound(
         val unset = setMs <= 0L
         // Consigne (small, coloured) just above the cell.
         compactText(tm, if (unset) "--:--" else fmtMin(setMs), cx, cyc - cellH * 0.85f, sizeSp = 13f, bold = true, color = color)
-        drawRect(Color(0xFF141414), topLeft = Offset(cx - cellW / 2, cyc - cellH / 2), size = Size(cellW, cellH))
-        drawRect(Color(0xFF5A5A5A), topLeft = Offset(cx - cellW / 2, cyc - cellH / 2), size = Size(cellW, cellH), style = Stroke(width = 2f))
+        val rad = CornerRadius(cellH / 2f, cellH / 2f)
+        val tl = Offset(cx - cellW / 2, cyc - cellH / 2)
+        val sz = Size(cellW, cellH)
+        drawRoundRect(Color(0xFF141414), topLeft = tl, size = sz, cornerRadius = rad)
+        drawRoundRect(Color(0xFF5A5A5A), topLeft = tl, size = sz, cornerRadius = rad, style = Stroke(width = 2f))
         val txt = if (!unset && remMs <= 0L) Color(0xFFFF4136) else CompactStyle.Mark
         compactText(tm, if (unset) "--:--" else fmt(remMs), cx, cyc, sizeSp = 26f, bold = true, mono = true, color = txt)
-        // Thin progress bar under the cell.
+        // Thin progress bar under the cell — doubled height.
         val frac = if (setMs > 0) (1f - remMs.toFloat() / setMs).coerceIn(0f, 1f) else 0f
         val by = cyc + cellH / 2 + r * 0.05f
-        drawRect(Color(0xFF3A3A3A), topLeft = Offset(cx - cellW / 2, by - 2.5f), size = Size(cellW, 5f))
-        drawRect(color, topLeft = Offset(cx - cellW / 2, by - 2.5f), size = Size(cellW * frac, 5f))
+        drawRect(Color(0xFF3A3A3A), topLeft = Offset(cx - cellW / 2, by - 5f), size = Size(cellW, 10f))
+        drawRect(color, topLeft = Offset(cx - cellW / 2, by - 5f), size = Size(cellW * frac, 10f))
     }
     timer(cy - r * 0.26f, topSet, topRem, topColor)
-    timer(cy + r * 0.48f, botSet, botRem, botColor)
+    timer(cy + r * 0.44f, botSet, botRem, botColor)
 }
 
 private fun fmt(ms: Long): String {

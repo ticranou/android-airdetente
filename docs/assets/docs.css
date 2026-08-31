@@ -168,3 +168,9 @@ ul.feat li b { color: #fff; }
 }
 .nav a { color: var(--accent); text-decoration: none; font-weight: 700; margin: 0 8px; }
 .nav a:hover { text-decoration: underline; }
+
+/* Data tables used in instrument docs */
+.tbl { width:100%; border-collapse:collapse; margin:12px 0; font-size:14px; }
+.tbl th { background:#1b2028; color:var(--ink-soft); font-weight:600; padding:6px 10px; text-align:left; border-bottom:1px solid var(--line); }
+.tbl td { padding:6px 10px; border-bottom:1px solid var(--line); color:var(--ink); }
+.tbl tr:last-child td { border-bottom:none; }

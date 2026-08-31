@@ -58,6 +58,9 @@ enum class EfisInstrument {
     ANLFDR,              // Flight Recorder (enregistreur de vol, jauge ronde)
     NUMFDR,              // Flight Recorder numérique (rectangulaire, 100%-1L)
     NUMAPP,              // Aide à l'approche finale (highway-in-the-sky, 100%-3L)
+    ANLAPP,              // Aide à l'approche finale analogique (ILS cross-pointer, jauge ronde)
+    ANLTRF,              // Trafic Safesky (radar aérien, jauge ronde)
+    ANLPRX,              // Proximité sol TAWS (SRTM, jauge ronde)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -74,7 +77,7 @@ enum class EfisInstrument {
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX)
 
     /** True for the numeric "single-line" instruments (label "…-1L"): they render
      *  at a fixed natural height, vertically centred, instead of stretching to fill
@@ -405,6 +408,8 @@ data class AppPreferences(
     /** Flight recorder rolling-buffer length (minutes, min 5) and disk-flush period. */
     val fdrBufferMinutes: Int = 10,
     val fdrFlushMinutes: Int = 2,
+    /** Safesky API key for the ANLTRF traffic radar instrument (null = not configured). */
+    val safeskyApiKey: String? = null,
     /** Durable state of the stateful instruments + heading/altitude targets. */
     val instruments: InstrumentPersistState = InstrumentPersistState(),
     /** Saved navigation plan (ordered terrain ICAOs + notes). */

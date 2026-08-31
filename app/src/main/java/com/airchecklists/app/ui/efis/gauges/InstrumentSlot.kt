@@ -103,6 +103,9 @@ fun InstrumentSlot(
             EfisInstrument.ANLFDR -> FlightRecorderInstrument(round)
             EfisInstrument.NUMFDR -> com.airchecklists.app.ui.efis.gauges.compact.FlightRecorderDigital(slotFill)
             EfisInstrument.NUMAPP -> com.airchecklists.app.ui.efis.gauges.approach.ApproachInstrument(state, speedUnit, altUnit, fill)
+            EfisInstrument.ANLAPP -> com.airchecklists.app.ui.efis.gauges.approach.ApproachGaugeAnalog(state, round)
+            EfisInstrument.ANLTRF -> com.airchecklists.app.ui.efis.gauges.traffic.TrafficAnalogInstrument(round)
+            EfisInstrument.ANLPRX -> com.airchecklists.app.ui.efis.gauges.proximity.ProximityAnalogInstrument(round)
         }
     }
     }

@@ -187,6 +187,22 @@ fun DrawScope.gaugeText(
     drawText(m, topLeft = Offset(x - m.size.width / 2f, y - m.size.height / 2f))
 }
 
+/**
+ * Standard instrument title for the full-face "data" gauges (Flight Recorder, Approach…),
+ * so their titles all land at the same height. [cx],[cy],[r] come from [gaugeFace].
+ * Dial gauges (SPEED/ALT/V/S…) keep their own near-the-arc placement.
+ */
+fun DrawScope.gaugeTitle(
+    tm: TextMeasurer,
+    text: String,
+    cx: Float,
+    cy: Float,
+    r: Float,
+    color: Color = GaugeColors.MarkDim,
+) {
+    gaugeText(tm, text, cx, cy - r * 0.78f, sizeSp = 9f, color = color)
+}
+
 /** Point on a circle for angle in aviation degrees (0° = up, clockwise). */
 fun polar(cx: Float, cy: Float, r: Float, deg: Float): Offset {
     val rad = Math.toRadians((deg - 90).toDouble())

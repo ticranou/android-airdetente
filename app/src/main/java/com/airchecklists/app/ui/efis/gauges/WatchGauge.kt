@@ -29,7 +29,6 @@ fun WatchGauge(showValue: Boolean, modifier: Modifier = Modifier) {
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val (cx, cy, r) = gaugeFace(bezel)
-        gaugeText(tm, "MONTRE", cx, cy - r * 0.32f, sizeSp = 11f, color = GaugeColors.MarkDim)
 
         // Hour ticks (12) + minute ticks (60).
         for (i in 0 until 60) {

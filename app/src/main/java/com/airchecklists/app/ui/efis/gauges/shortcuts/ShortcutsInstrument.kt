@@ -55,7 +55,10 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val speedUnit = prefs.value.efisSpeedUnit
     val altUnit = prefs.value.altitudeUnit
-    val speedArcs = remember { null }
+    val speedArcs = remember(ServiceLocator.currentAircraft()) {
+        ServiceLocator.currentAircraft()
+            ?.let { com.airchecklists.app.data.model.SpeedArcs.from(it).takeIf { a -> a.hasAny } }
+    }
 
     val slots = remember(prefs.value.instruments.shortcutSlots) {
         val raw = prefs.value.instruments.shortcutSlots

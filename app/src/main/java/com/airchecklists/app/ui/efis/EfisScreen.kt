@@ -42,7 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -294,8 +294,39 @@ private fun DashboardGrid(
                         .height(cellH * cell.rowSpan)
                         .then(
                             if (canFocus) Modifier.pointerInput(Unit) {
-                                detectTransformGestures { _, _, zoom, _ ->
-                                    if (zoom > 1.3f) focusCellIdx = i
+                                // Detect a pinch (2 fingers moving apart) without consuming
+                                // single-finger events so the HorizontalPager can still scroll.
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        // Wait for any down event (Initial pass = before children).
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        val pressed = event.changes.filter { it.pressed }
+                                        if (pressed.size < 2) continue
+                                        // Two fingers down: measure initial distance.
+                                        val p1 = pressed[0].position
+                                        val p2 = pressed[1].position
+                                        val initDist = (p2 - p1).getDistance().coerceAtLeast(1f)
+                                        // Track until both fingers lift or scale threshold reached.
+                                        var triggered = false
+                                        loop@ while (true) {
+                                            val ev = awaitPointerEvent(PointerEventPass.Initial)
+                                            val cur = ev.changes.filter { it.pressed }
+                                            if (cur.size < 2) break@loop
+                                            val c1 = cur[0].position
+                                            val c2 = cur[1].position
+                                            val dist = (c2 - c1).getDistance()
+                                            if (dist / initDist > 1.3f) {
+                                                triggered = true
+                                                // Drain until all fingers lift.
+                                                while (true) {
+                                                    val drain = awaitPointerEvent(PointerEventPass.Initial)
+                                                    if (drain.changes.all { !it.pressed }) break
+                                                }
+                                                break@loop
+                                            }
+                                        }
+                                        if (triggered) focusCellIdx = i
+                                    }
                                 }
                             } else Modifier,
                         ),

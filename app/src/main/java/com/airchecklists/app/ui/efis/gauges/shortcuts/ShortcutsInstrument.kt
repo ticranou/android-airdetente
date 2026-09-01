@@ -1,5 +1,6 @@
 package com.airchecklists.app.ui.efis.gauges.shortcuts
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -23,11 +24,11 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.foundation.Canvas
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.InstrumentPickerDialog
+import com.airchecklists.app.ui.components.efisInstrumentLabel
 import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
@@ -37,11 +38,6 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 
 private const val N = 3
 
-/**
- * CMNSCT — Raccourcis : 3 cellules côte à côte, chacune représentant un instrument
- * choisi par l'utilisateur. Tap sur une cellule → ouvre l'instrument dans une
- * boîte de dialogue plein écran. Long-press → config des 3 raccourcis.
- */
 @Composable
 fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
@@ -50,18 +46,21 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val speedUnit = prefs.value.efisSpeedUnit
     val altUnit = prefs.value.altitudeUnit
-    val speedArcs = remember { null } // no arcs for shortcuts context
+    val speedArcs = remember { null }
 
-    // Persist slots via InstrumentPersistState.shortcutSlots.
     val slots = remember(prefs.value.instruments.shortcutSlots) {
         val raw = prefs.value.instruments.shortcutSlots
-        // Ensure exactly 3 entries.
         List(N) { i -> raw.getOrElse(i) { EfisInstrument.NONE } }
     }
 
-    // Which instrument is open in the full-screen dialog (-1 = none).
+    // Resolve human-readable labels in Composable scope (can't call stringResource in DrawScope).
+    // Take only the part after " - " (e.g. "ANLCAP - Conservateur" → "Conservateur").
+    val labels = slots.map { instr ->
+        if (instr == EfisInstrument.NONE) "-----"
+        else efisInstrumentLabel(instr).substringAfter(" - ", missingDelimiterValue = instr.name)
+    }
+
     var openIdx by remember { mutableIntStateOf(-1) }
-    // Which slot is being configured (picker dialog).
     var configIdx by remember { mutableIntStateOf(-1) }
 
     Canvas(
@@ -78,42 +77,36 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
             )
         },
     ) {
-        val w = size.width; val h = size.height
+        val w = size.width
+        val h = size.height
         val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
+
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
         drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         compactText(tm, "RACCOURCIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
 
-        val mainTop = headerH
-        val cellH = (h - mainTop) * 0.33f
-        val cy = mainTop + (h - mainTop) / 2f
         val slotW = w / N
+        val bodyCy = headerH + (h - headerH) / 2f
 
-        // Vertical separators.
+        // Vertical separators spanning the full body area.
         for (i in 1 until N) {
             val x = slotW * i
-            drawLine(Color(0xFF3A3A3A), Offset(x, cy - cellH / 2), Offset(x, cy + cellH / 2), strokeWidth = 1.5f)
+            drawLine(Color(0xFF3A3A3A), Offset(x, headerH), Offset(x, h), strokeWidth = 1.5f)
         }
 
-        // Labels for each slot.
+        // Label for each slot, centered in the body.
         for (i in 0 until N) {
             val cx = slotW * i + slotW / 2f
-            val instr = slots[i]
-            if (instr == EfisInstrument.NONE) {
-                // Empty slot: show a dim dash.
-                compactText(tm, "—", cx, cy, sizeSp = 20f, color = CompactStyle.Dim)
-            } else {
-                // Show the instrument code (prefix, e.g. "ANLCAP").
-                val label = efisShortCode(instr)
-                compactText(tm, label, cx, cy - cellH * 0.14f, sizeSp = 14f, bold = true, color = CompactStyle.Mark)
-                // Draw a small "open" indicator arrow below the label.
-                val arrowY = cy + cellH * 0.22f
-                val aw = slotW * 0.18f
-                drawLine(CompactStyle.Dim, Offset(cx - aw, arrowY), Offset(cx, arrowY + aw * 0.7f), strokeWidth = 1.5f)
-                drawLine(CompactStyle.Dim, Offset(cx + aw, arrowY), Offset(cx, arrowY + aw * 0.7f), strokeWidth = 1.5f)
-            }
+            val label = labels[i]
+            val isEmpty = slots[i] == EfisInstrument.NONE
+            compactText(
+                tm, label, cx, bodyCy,
+                sizeSp = if (isEmpty) 16f else 15f,
+                bold = !isEmpty,
+                color = if (isEmpty) CompactStyle.Dim else CompactStyle.Mark,
+            )
         }
     }
 
@@ -131,11 +124,8 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     .background(Color.Black),
                 contentAlignment = Alignment.Center,
             ) {
-                // Render the instrument in a square aspect (most round gauges expect it).
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(4.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     InstrumentSlot(
@@ -160,15 +150,8 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
             onSelect = { chosen ->
                 val newSlots = slots.toMutableList().also { it[configIdx] = chosen }
                 ServiceLocator.updateInstruments { it.copy(shortcutSlots = newSlots) }
-                // Advance to next slot, or close.
                 configIdx = if (configIdx < N - 1) configIdx + 1 else -1
             },
         )
     }
-}
-
-/** Returns the instrument's code prefix (everything before " - " in the label). */
-private fun efisShortCode(instr: EfisInstrument): String {
-    // The enum name maps directly to the code (e.g. ANLCAP, NUMCHR, CMNSCT…).
-    return instr.name
 }

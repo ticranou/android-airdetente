@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -407,6 +411,17 @@ private fun FocusDialog(
             decorFitsSystemWindows = false,
         ),
     ) {
+        val dialogView = LocalView.current
+        SideEffect {
+            val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
+            if (dialogWindow != null) {
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                dialogWindow.setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()

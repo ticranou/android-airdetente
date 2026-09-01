@@ -4,27 +4,35 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.di.ServiceLocator
@@ -122,21 +130,42 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                 decorFitsSystemWindows = false,
             ),
         ) {
-            Box(
+            val dialogView = LocalView.current
+            SideEffect {
+                val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
+                if (dialogWindow != null) {
+                    WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                    dialogWindow.setLayout(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                }
+            }
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center,
+                    .background(Color.Black)
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                InstrumentSlot(
-                    instrument = instr,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = true,
-                    speedArcs = speedArcs,
-                    altUnit = altUnit,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    InstrumentSlot(
+                        instrument = instr,
+                        state = state,
+                        speedUnit = speedUnit,
+                        showValues = true,
+                        speedArcs = speedArcs,
+                        altUnit = altUnit,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                Button(
+                    onClick = { openIdx = -1 },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                ) {
+                    Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

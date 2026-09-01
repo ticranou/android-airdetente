@@ -186,7 +186,7 @@
     <string name="settings_focus_long_press_value">Durée : %1$d s</string>
     <string name="settings_focus_duration">Fermeture automatique du mode Focus</string>
     <string name="settings_focus_duration_value">Durée : %1$d s</string>
-    <string name="settings_focus_close">Quitter le Focus (%1$ds)</string>    <string name="settings_fdr_hint">Les instruments ANLFDR / NUMFDR enregistrent les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). L\'enregistrement tourne en continu tant que l\'application est active (service de vol), y compris en arrière-plan.</string>
+    <string name="settings_focus_close">Fermer le Focus (%1$ds)</string>    <string name="settings_fdr_hint">Les instruments ANLFDR / NUMFDR enregistrent les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). L\'enregistrement tourne en continu tant que l\'application est active (service de vol), y compris en arrière-plan.</string>
     <string name="settings_fdr_buffer">Durée conservée</string>
     <string name="settings_fdr_flush">Sauvegarde disque</string>
     <string name="settings_fdr_minutes">%1$d min</string>

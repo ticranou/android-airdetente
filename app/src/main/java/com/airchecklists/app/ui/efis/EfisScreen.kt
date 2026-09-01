@@ -42,9 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +64,6 @@ import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
 import com.airchecklists.app.ui.simpleViewModelFactory
-import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
 fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
@@ -138,7 +136,6 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
                 trail = trail,
                 mapOrientation = prefs.mapOrientation,
                 altUnit = prefs.altitudeUnit,
-                focusLongPressSec = prefs.focusLongPressSec,
                 focusDurationSec = prefs.focusDurationSec,
                 onOpenMap = onOpenMap,
             )
@@ -252,7 +249,6 @@ private fun DashboardGrid(
     trail: List<DoubleArray>,
     mapOrientation: com.airchecklists.app.data.model.MapOrientation,
     altUnit: com.airchecklists.app.data.model.AltitudeUnit,
-    focusLongPressSec: Int,
     focusDurationSec: Int,
     onOpenMap: () -> Unit,
 ) {
@@ -297,42 +293,9 @@ private fun DashboardGrid(
                         .width(cellW * cell.colSpan)
                         .height(cellH * cell.rowSpan)
                         .then(
-                            if (canFocus) Modifier.pointerInput(focusLongPressSec) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        // Initial pass: intercept before children so their
-                                        // own long-press (config dialogs at ~600ms) doesn't
-                                        // prevent us from measuring the full 4s duration.
-                                        awaitFirstDown(requireUnconsumed = false)
-                                        val startTime = System.currentTimeMillis()
-                                        val threshold = focusLongPressSec * 1000L
-                                        var lifted = false
-                                        while (true) {
-                                            val remaining = threshold - (System.currentTimeMillis() - startTime)
-                                            val event = withTimeoutOrNull(remaining.coerceAtLeast(0L)) {
-                                                awaitPointerEvent(PointerEventPass.Initial)
-                                            }
-                                            if (event == null) {
-                                                // Threshold reached: trigger Focus.
-                                                focusCellIdx = i
-                                                // Drain until all fingers up.
-                                                while (true) {
-                                                    val ev = awaitPointerEvent(PointerEventPass.Initial)
-                                                    if (ev.changes.all { !it.pressed }) break
-                                                }
-                                                break
-                                            }
-                                            if (event.changes.any { !it.pressed }) {
-                                                lifted = true; break
-                                            }
-                                        }
-                                        if (lifted) {
-                                            while (true) {
-                                                val ev = awaitPointerEvent(PointerEventPass.Initial)
-                                                if (ev.changes.all { !it.pressed }) break
-                                            }
-                                        }
-                                    }
+                            if (canFocus) Modifier.pointerInput(Unit) {
+                                detectTransformGestures { _, _, zoom, _ ->
+                                    if (zoom > 1.3f) focusCellIdx = i
                                 }
                             } else Modifier,
                         ),

@@ -140,6 +140,14 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setSafeskyApiKey(key) }
     }
 
+    fun setFocusLongPressSec(sec: Int) {
+        viewModelScope.launch { prefsRepo.setFocusLongPressSec(sec) }
+    }
+
+    fun setFocusDurationSec(sec: Int) {
+        viewModelScope.launch { prefsRepo.setFocusDurationSec(sec) }
+    }
+
     // ---- Dashboards ----
 
     /** Create a new empty dashboard and return its id (for immediate editing). */

@@ -415,6 +415,10 @@ data class AppPreferences(
     val safeskyApiKey: String? = null,
     /** Durable state of the stateful instruments + heading/altitude targets. */
     val instruments: InstrumentPersistState = InstrumentPersistState(),
+    /** Long-press duration (seconds) to trigger instrument focus mode. */
+    val focusLongPressSec: Int = 4,
+    /** Auto-close duration (seconds) for the focus mode countdown. */
+    val focusDurationSec: Int = 30,
     /** Saved navigation plan (ordered terrain ICAOs + notes). */
     val navPlan: NavPlan = NavPlan(),
 ) {
@@ -430,6 +434,10 @@ data class AppPreferences(
         const val FDR_MAX_BUFFER_MIN = 60
         const val FDR_MIN_FLUSH_MIN = 1
         const val FDR_MAX_FLUSH_MIN = 10
+        const val FOCUS_LONG_PRESS_MIN_SEC = 3
+        const val FOCUS_LONG_PRESS_MAX_SEC = 7
+        const val FOCUS_DURATION_MIN_SEC = 10
+        const val FOCUS_DURATION_MAX_SEC = 120
     }
 
     /** efisSlots resized to exactly efisCols*efisRows (pad with NONE / truncate). */

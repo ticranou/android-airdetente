@@ -119,6 +119,14 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setSafeskyApiKey(key: String?) = persist { it.copy(safeskyApiKey = key?.trim()?.ifBlank { null }) }
 
+    suspend fun setFocusLongPressSec(sec: Int) = persist {
+        it.copy(focusLongPressSec = sec.coerceIn(AppPreferences.FOCUS_LONG_PRESS_MIN_SEC, AppPreferences.FOCUS_LONG_PRESS_MAX_SEC))
+    }
+
+    suspend fun setFocusDurationSec(sec: Int) = persist {
+        it.copy(focusDurationSec = sec.coerceIn(AppPreferences.FOCUS_DURATION_MIN_SEC, AppPreferences.FOCUS_DURATION_MAX_SEC))
+    }
+
     suspend fun setInstrumentState(state: com.airchecklists.app.data.model.InstrumentPersistState) =
         persist { it.copy(instruments = state) }
 

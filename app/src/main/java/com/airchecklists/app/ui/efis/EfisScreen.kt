@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -32,27 +34,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.airchecklists.app.R
 import com.airchecklists.app.data.model.Dashboard
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
 import com.airchecklists.app.ui.simpleViewModelFactory
+import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
 fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
@@ -125,6 +136,8 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
                 trail = trail,
                 mapOrientation = prefs.mapOrientation,
                 altUnit = prefs.altitudeUnit,
+                focusLongPressSec = prefs.focusLongPressSec,
+                focusDurationSec = prefs.focusDurationSec,
                 onOpenMap = onOpenMap,
             )
         }
@@ -237,12 +250,18 @@ private fun DashboardGrid(
     trail: List<DoubleArray>,
     mapOrientation: com.airchecklists.app.data.model.MapOrientation,
     altUnit: com.airchecklists.app.data.model.AltitudeUnit,
+    focusLongPressSec: Int,
+    focusDurationSec: Int,
     onOpenMap: () -> Unit,
 ) {
     val cols = com.airchecklists.app.data.model.EFIS_COLS
     val rows = dashboard.rows
     val cells = dashboard.normalizedCells
     val title = dashboard.name.trim()
+
+    // Focus mode state: index of the focused cell (-1 = none).
+    var focusCellIdx by remember { mutableIntStateOf(-1) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Reserved title band at the top of the cockpit (does not overlap instruments).
         // Left-aligned; the page markers are drawn on the right by the caller. Shown only
@@ -269,22 +288,148 @@ private fun DashboardGrid(
                 if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed
                 val row = i / cols
                 val col = i % cols
-                InstrumentSlot(
-                    instrument = cell.instrument,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = showValues,
-                    speedArcs = speedArcs,
-                    altUnit = altUnit,
-                    trail = trail,
-                    mapOrientation = mapOrientation,
-                    accentColor = cell.accentColor,
-                    bezelStyleOverride = cell.bezelStyle,
-                    onOpenMap = onOpenMap,
+                val canFocus = cell.instrument != EfisInstrument.NAV_PLANNER
+                Box(
                     modifier = Modifier
                         .offset(x = cellW * col, y = cellH * row)
                         .width(cellW * cell.colSpan)
-                        .height(cellH * cell.rowSpan),
+                        .height(cellH * cell.rowSpan)
+                        .then(
+                            if (canFocus) Modifier.pointerInput(focusLongPressSec) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitFirstDown(requireUnconsumed = false)
+                                        val startTime = System.currentTimeMillis()
+                                        val threshold = focusLongPressSec * 1000L
+                                        var cancelled = false
+                                        while (true) {
+                                            val event = withTimeoutOrNull(threshold - (System.currentTimeMillis() - startTime)) {
+                                                awaitPointerEvent()
+                                            }
+                                            if (event == null) {
+                                                // Timeout reached = long press triggered.
+                                                focusCellIdx = i
+                                                break
+                                            }
+                                            val anyUp = event.changes.any { !it.pressed }
+                                            if (anyUp) { cancelled = true; break }
+                                        }
+                                        if (cancelled) {
+                                            // Wait for all pointers to lift before next cycle.
+                                            event@ while (true) {
+                                                val ev = awaitPointerEvent()
+                                                if (ev.changes.all { !it.pressed }) break@event
+                                            }
+                                        }
+                                    }
+                                }
+                            } else Modifier,
+                        ),
+                ) {
+                    InstrumentSlot(
+                        instrument = cell.instrument,
+                        state = state,
+                        speedUnit = speedUnit,
+                        showValues = showValues,
+                        speedArcs = speedArcs,
+                        altUnit = altUnit,
+                        trail = trail,
+                        mapOrientation = mapOrientation,
+                        accentColor = cell.accentColor,
+                        bezelStyleOverride = cell.bezelStyle,
+                        onOpenMap = onOpenMap,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+        }
+    }
+
+    // Focus mode dialog.
+    if (focusCellIdx in cells.indices) {
+        val focusCell = cells[focusCellIdx]
+        if (!focusCell.covered && focusCell.instrument != EfisInstrument.NONE) {
+            FocusDialog(
+                instrument = focusCell.instrument,
+                accentColor = focusCell.accentColor,
+                bezelStyleOverride = focusCell.bezelStyle,
+                state = state,
+                speedUnit = speedUnit,
+                showValues = showValues,
+                speedArcs = speedArcs,
+                altUnit = altUnit,
+                trail = trail,
+                mapOrientation = mapOrientation,
+                focusDurationSec = focusDurationSec,
+                onDismiss = { focusCellIdx = -1 },
+            )
+        }
+    }
+}
+
+/** Full-screen focus dialog for a single instrument with a countdown auto-close button. */
+@Composable
+private fun FocusDialog(
+    instrument: EfisInstrument,
+    accentColor: Long?,
+    bezelStyleOverride: com.airchecklists.app.data.model.GaugeBezelStyle?,
+    state: EfisState,
+    speedUnit: com.airchecklists.app.data.model.EfisSpeedUnit,
+    showValues: Boolean,
+    speedArcs: com.airchecklists.app.data.model.SpeedArcs?,
+    altUnit: com.airchecklists.app.data.model.AltitudeUnit,
+    trail: List<DoubleArray>,
+    mapOrientation: com.airchecklists.app.data.model.MapOrientation,
+    focusDurationSec: Int,
+    onDismiss: () -> Unit,
+) {
+    var remaining by remember(focusDurationSec) { mutableIntStateOf(focusDurationSec) }
+
+    // Countdown ticker.
+    LaunchedEffect(focusDurationSec) {
+        while (remaining > 0) {
+            kotlinx.coroutines.delay(1000L)
+            remaining--
+        }
+        onDismiss()
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.Black)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            InstrumentSlot(
+                instrument = instrument,
+                state = state,
+                speedUnit = speedUnit,
+                showValues = showValues,
+                speedArcs = speedArcs,
+                altUnit = altUnit,
+                trail = trail,
+                mapOrientation = mapOrientation,
+                accentColor = accentColor,
+                bezelStyleOverride = bezelStyleOverride,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_focus_close, remaining),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }

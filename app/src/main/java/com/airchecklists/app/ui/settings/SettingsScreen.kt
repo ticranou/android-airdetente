@@ -291,6 +291,8 @@ fun SettingsScreen(
                     onAltitudeUnit = viewModel::setAltitudeUnit,
                     onEfisResponsiveness = viewModel::setEfisResponsiveness,
                     onEfisShowValues = viewModel::setEfisShowValues,
+                    onFocusLongPressSec = viewModel::setFocusLongPressSec,
+                    onFocusDurationSec = viewModel::setFocusDurationSec,
                     onFdrBufferMinutes = viewModel::setFdrBufferMinutes,
                     onFdrFlushMinutes = viewModel::setFdrFlushMinutes,
                     onSafeskyApiKey = viewModel::setSafeskyApiKey,
@@ -740,6 +742,8 @@ private fun CockpitsSection(
     onAltitudeUnit: (com.airchecklists.app.data.model.AltitudeUnit) -> Unit,
     onEfisResponsiveness: (Float) -> Unit,
     onEfisShowValues: (Boolean) -> Unit,
+    onFocusLongPressSec: (Int) -> Unit,
+    onFocusDurationSec: (Int) -> Unit,
     onFdrBufferMinutes: (Int) -> Unit,
     onFdrFlushMinutes: (Int) -> Unit,
     onSafeskyApiKey: (String?) -> Unit,
@@ -877,6 +881,52 @@ private fun CockpitsSection(
             )
         }
     }
+
+    // Focus mode settings.
+    SectionHeader(stringResource(R.string.settings_focus_section))
+    Text(
+        stringResource(R.string.settings_focus_long_press),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text("${AppPreferences.FOCUS_LONG_PRESS_MIN_SEC}s", style = MaterialTheme.typography.labelSmall)
+        Slider(
+            value = prefs.focusLongPressSec.toFloat(),
+            onValueChange = { onFocusLongPressSec(it.toInt()) },
+            valueRange = AppPreferences.FOCUS_LONG_PRESS_MIN_SEC.toFloat()..AppPreferences.FOCUS_LONG_PRESS_MAX_SEC.toFloat(),
+            steps = AppPreferences.FOCUS_LONG_PRESS_MAX_SEC - AppPreferences.FOCUS_LONG_PRESS_MIN_SEC - 1,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+        )
+        Text("${AppPreferences.FOCUS_LONG_PRESS_MAX_SEC}s", style = MaterialTheme.typography.labelSmall)
+    }
+    Text(
+        stringResource(R.string.settings_focus_long_press_value, prefs.focusLongPressSec),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Text(
+        stringResource(R.string.settings_focus_duration),
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 8.dp),
+    )
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text("${AppPreferences.FOCUS_DURATION_MIN_SEC}s", style = MaterialTheme.typography.labelSmall)
+        Slider(
+            value = prefs.focusDurationSec.toFloat(),
+            onValueChange = { onFocusDurationSec(it.toInt()) },
+            valueRange = AppPreferences.FOCUS_DURATION_MIN_SEC.toFloat()..AppPreferences.FOCUS_DURATION_MAX_SEC.toFloat(),
+            steps = (AppPreferences.FOCUS_DURATION_MAX_SEC - AppPreferences.FOCUS_DURATION_MIN_SEC) / 5 - 1,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+        )
+        Text("${AppPreferences.FOCUS_DURATION_MAX_SEC}s", style = MaterialTheme.typography.labelSmall)
+    }
+    Text(
+        stringResource(R.string.settings_focus_duration_value, prefs.focusDurationSec),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 
     // Flight recorder (ANLFDR): rolling buffer length + disk-flush period.
     SectionHeader(stringResource(R.string.settings_fdr))

@@ -29,6 +29,7 @@ enum class EfisVarioSource {
 @Serializable
 enum class EfisInstrument {
     NONE,
+    CMNSCT,              // Raccourcis (3 instruments en accès rapide)
     HEADING,             // Conservateur de cap analogique
     HEADING_COMPACT,     // Conservateur de cap digital (1 ligne)
     AIRSPEED,            // Vitesse analogique
@@ -71,7 +72,7 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP,
+            NUMAPP, CMNSCT,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
@@ -337,6 +338,7 @@ data class InstrumentPersistState(
     val fdrPaused: Boolean = false,
     val targetHeading: Int? = null,
     val targetAltitude: Int? = null,
+    val shortcutSlots: List<EfisInstrument> = listOf(EfisInstrument.NONE, EfisInstrument.NONE, EfisInstrument.NONE),
 )
 
 /** A navigation plan: an ordered list of terrain ICAO codes + free-text notes. */

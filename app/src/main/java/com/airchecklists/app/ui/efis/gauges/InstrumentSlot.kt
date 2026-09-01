@@ -69,6 +69,7 @@ fun InstrumentSlot(
             UnavailableInstrument(round = instrument.isAnalog, modifier = if (instrument.isAnalog) round else fill)
         } else when (instrument) {
             EfisInstrument.NONE -> Unit
+            EfisInstrument.CMNSCT -> com.airchecklists.app.ui.efis.gauges.shortcuts.ShortcutsInstrument(slotFill)
             EfisInstrument.ALTIMETER -> AltimeterGauge(state.gpsAltitudeFt, showValues, altUnit, round)
             EfisInstrument.VARIOMETER -> VarioGauge(state.verticalSpeedFtMin, showValues, altUnit, round)
             EfisInstrument.ATTITUDE -> AttitudeGauge(state.pitchDeg, state.rollDeg, round)

@@ -298,7 +298,6 @@ fun SettingsScreen(
                     onEditDashboard = onEditDashboard,
                     onDuplicateDashboard = { srcId -> onEditDashboard(viewModel.duplicateDashboard(srcId, "(copie)")) },
                     onDeleteDashboard = { dashboardToDelete = it },
-                    onToggleCockpit = viewModel::setDashboardShowInCockpit,
                     onReorderDashboards = viewModel::reorderDashboards,
                     onMapOrientation = viewModel::setMapOrientation,
                     onMapShowZoomButtons = viewModel::setMapShowZoomButtons,
@@ -748,7 +747,6 @@ private fun CockpitsSection(
     onEditDashboard: (String) -> Unit,
     onDuplicateDashboard: (String) -> Unit,
     onDeleteDashboard: (com.airchecklists.app.data.model.Dashboard) -> Unit,
-    onToggleCockpit: (id: String, show: Boolean) -> Unit,
     onReorderDashboards: (orderedIds: List<String>) -> Unit,
     onMapOrientation: (com.airchecklists.app.data.model.MapOrientation) -> Unit,
     onMapShowZoomButtons: (Boolean) -> Unit,
@@ -925,16 +923,6 @@ private fun CockpitsSection(
     ) { dash ->
         Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
             Text(dash.name, style = MaterialTheme.typography.bodyLarge)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                androidx.compose.material3.Checkbox(
-                    checked = dash.showInCockpit,
-                    onCheckedChange = { onToggleCockpit(dash.id, it) },
-                )
-                Text(
-                    stringResource(R.string.settings_dashboard_in_cockpit),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
         }
         RowActionsMenu(
             actions = listOf(

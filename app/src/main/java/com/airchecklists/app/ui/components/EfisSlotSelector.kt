@@ -40,6 +40,7 @@ import com.airchecklists.app.data.model.EfisInstrument
 fun efisInstrumentLabel(instrument: EfisInstrument): String = stringResource(
     when (instrument) {
         EfisInstrument.NONE -> R.string.efis_instr_none
+        EfisInstrument.CMNSCT -> R.string.efis_instr_sct
         EfisInstrument.ALTIMETER -> R.string.efis_instr_altimeter
         EfisInstrument.VARIOMETER -> R.string.efis_instr_variometer
         EfisInstrument.ATTITUDE -> R.string.efis_instr_attitude
@@ -123,10 +124,11 @@ fun EfisSlotSelector(
     }
 }
 
-/** Searchable, filterable instrument picker. */
+/** Searchable, filterable instrument picker — exposed so other instruments (e.g.
+ *  CMNSCT shortcuts) can reuse the same dialog without duplicating it. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InstrumentPickerDialog(
+fun InstrumentPickerDialog(
     current: EfisInstrument,
     onDismiss: () -> Unit,
     onSelect: (EfisInstrument) -> Unit,

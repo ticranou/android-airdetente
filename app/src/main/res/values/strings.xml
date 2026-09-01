@@ -94,7 +94,7 @@
     <string name="settings_dashboards">Tableaux de bord</string>
     <string name="settings_dashboards_hint">Chaque tableau de bord est une disposition d\'instruments. Cochez ceux à afficher dans le Cockpit ; slidez gauche/droite pour passer de l\'un à l\'autre.</string>
     <string name="settings_dashboard_in_cockpit">Afficher dans le Cockpit</string>
-    <string name="settings_dashboard_show_title">Afficher le titre du cockpit</string>
+    <string name="settings_dashboard_show_title">Afficher le titre du Cockpit</string>
     <string name="settings_dashboard_add">Ajouter un tableau de bord</string>
     <string name="settings_map">Cartes</string>
     <string name="settings_map_orientation">Orientation de la carte</string>
@@ -142,6 +142,7 @@
     <string name="instr_filter_analog">Analogique</string>
     <string name="instr_filter_digital">Numérique</string>
     <string name="efis_instr_none">CMN - Vide</string>
+    <string name="efis_instr_sct">CMNSCT - Raccourcis</string>
     <string name="efis_instr_altimeter">ANLALT - Altimètre</string>
     <string name="efis_instr_variometer">ANLVAR - Variomètre</string>
     <string name="efis_instr_attitude">ANLHRZ - Horizon</string>

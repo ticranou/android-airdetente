@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -64,7 +65,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     var configIdx by remember { mutableIntStateOf(-1) }
 
     Canvas(
-        modifier = modifier.fillMaxSize().pointerInput(slots) {
+        modifier = modifier.fillMaxWidth().height(52.dp).pointerInput(slots) {
             detectTapGestures(
                 onLongPress = { pos ->
                     val idx = (pos.x / (size.width.toFloat() / N)).toInt().coerceIn(0, N - 1)
@@ -115,29 +116,27 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
         val instr = slots[openIdx]
         Dialog(
             onDismissRequest = { openIdx = -1 },
-            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnClickOutside = true,
+                decorFitsSystemWindows = false,
+            ),
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.90f)
-                    .clip(RoundedCornerShape(12.dp))
+                    .fillMaxSize()
                     .background(Color.Black),
                 contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(4.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    InstrumentSlot(
-                        instrument = instr,
-                        state = state,
-                        speedUnit = speedUnit,
-                        showValues = true,
-                        speedArcs = speedArcs,
-                        altUnit = altUnit,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                InstrumentSlot(
+                    instrument = instr,
+                    state = state,
+                    speedUnit = speedUnit,
+                    showValues = true,
+                    speedArcs = speedArcs,
+                    altUnit = altUnit,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
     }

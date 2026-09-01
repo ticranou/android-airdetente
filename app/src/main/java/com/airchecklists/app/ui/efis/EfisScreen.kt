@@ -401,13 +401,15 @@ private fun FocusDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnClickOutside = true,
+            decorFitsSystemWindows = false,
+        ),
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .fillMaxHeight(0.85f)
-                .clip(RoundedCornerShape(12.dp))
+                .fillMaxSize()
                 .background(Color.Black)
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

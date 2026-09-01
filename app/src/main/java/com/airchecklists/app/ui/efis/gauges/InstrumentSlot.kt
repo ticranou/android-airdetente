@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -69,7 +70,9 @@ fun InstrumentSlot(
             UnavailableInstrument(round = instrument.isAnalog, modifier = if (instrument.isAnalog) round else fill)
         } else when (instrument) {
             EfisInstrument.NONE -> Unit
-            EfisInstrument.CMNSCT -> com.airchecklists.app.ui.efis.gauges.shortcuts.ShortcutsInstrument(slotFill)
+            EfisInstrument.CMNSCT -> com.airchecklists.app.ui.efis.gauges.shortcuts.ShortcutsInstrument(
+                Modifier.fillMaxWidth().wrapContentHeight().padding(4.dp)
+            )
             EfisInstrument.ALTIMETER -> AltimeterGauge(state.gpsAltitudeFt, showValues, altUnit, round)
             EfisInstrument.VARIOMETER -> VarioGauge(state.verticalSpeedFtMin, showValues, altUnit, round)
             EfisInstrument.ATTITUDE -> AttitudeGauge(state.pitchDeg, state.rollDeg, round)

@@ -25,16 +25,18 @@ mobile** (moving map) hors-ligne.
   « Vide ») :
   - **Analogiques** (cadrans ronds) : Conservateur, Anémomètre, Altimètre,
     Variomètre, Horizon, Bille, Chronomètre, Compte à rebours, Horamètre, Terrains
-    proches, Météo (radar + vent FL20), **Montre**.
+    proches, Météo (radar + vent FL20), **Montre**, **Trafic Safesky**, **Proximité sol TAWS**.
   - **Numériques** (rectangulaires, tailles normalisées 50/100 % × 1/2/3/5 lignes) :
     Conservateur, Anémomètre, Altimètre/Variomètre, Bille, Horizon, Chronomètre,
     Compte à rebours, Horamètre, Terrains proches, Radar météo, **Montre**, EFIS
-    (bloc 3 lignes), Moving Map (bloc 5 lignes).
+    (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes).
+  - **Commun** : **Raccourcis (CMNSCT)** — 3 slots configurables (instruments ou tableaux de bord) pour accès rapide ; tap ouvre l'instrument/tableau en plein écran, long-press configure le slot.
   - **Gestes** (indiqués sur chaque instrument par un tiret = appui long, deux
     points = double-tap) : cap et **altitude** à suivre par appui long (curseur/bug
     magenta) ; chrono double-tap = start/stop, appui long = reset ; rebours
     double-tap = start/stop, appui long = saisie ; horamètre appui long = saisie ;
     terrains double-tap = VAC, appui long = liste ; météo appui long = carte.
+  - **Pinch-to-zoom Focus** : deux doigts écartés (scale > 1.3×) sur un instrument pour zoomer en mode Focus (instrument plein écran avec compte à rebours auto-fermeture, durée configurable 10–120 s).
   - Sources de cap (magnétique / route GPS), de vario (GPS / baromètre), unité de
     vitesse (km/h / kt) et réactivité réglables.
 - **Terrains / VAC** : liste des terrains, fiche détaillée, ouverture de la carte

@@ -161,12 +161,23 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.deleteDashboard(id) }
     }
 
+    /** Clone the dashboard [srcId] and return the new dashboard's id (for immediate editing). */
+    fun duplicateDashboard(srcId: String, nameSuffix: String): String {
+        val newId = java.util.UUID.randomUUID().toString()
+        viewModelScope.launch { prefsRepo.duplicateDashboard(srcId, newId, nameSuffix) }
+        return newId
+    }
+
     fun setDashboardName(id: String, name: String) {
         viewModelScope.launch { prefsRepo.setDashboardName(id, name) }
     }
 
     fun setDashboardShowInCockpit(id: String, show: Boolean) {
         viewModelScope.launch { prefsRepo.setDashboardShowInCockpit(id, show) }
+    }
+
+    fun setDashboardShowTitle(id: String, show: Boolean) {
+        viewModelScope.launch { prefsRepo.setDashboardShowTitle(id, show) }
     }
 
     fun setDashboardRows(id: String, rows: Int) {

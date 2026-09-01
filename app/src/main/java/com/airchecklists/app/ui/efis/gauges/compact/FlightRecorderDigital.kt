@@ -167,16 +167,16 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
         val badgeColor = if (recording) FDR_GREEN else FDR_ORANGE
         val badgeText = if (recording) "Recording" else "Paused"
         val badgeCy = bodyTop + bodyH * 0.38f
-        val bh = (bodyH * 0.52f).coerceIn(30f, 54f)
+        val bh = (bodyH * 0.60f).coerceIn(34f, 62f)
         // Font a bit smaller than the pill height so the word sits comfortably
         // inside it (not crowding the rounded top/bottom).
-        val badgeSp = (bh * 0.42f).coerceIn(15f, 24f)
+        val badgeSp = (bh * 0.40f).coerceIn(15f, 24f)
         val badgeMeasure = tm.measure(
             badgeText,
             TextStyle(color = badgeColor, fontSize = badgeSp.sp, fontWeight = FontWeight.Bold),
         )
-        // Generous horizontal padding so the word breathes inside the pill.
-        val bw = (badgeMeasure.size.width + bh * 1.6f).coerceAtMost(w * 0.92f)
+        // Generous horizontal padding so the border isn't glued to the word.
+        val bw = (badgeMeasure.size.width + bh * 2.2f).coerceAtMost(w * 0.96f)
         drawRoundRect(
             color = Color(0xF2101010),
             topLeft = Offset(w / 2f - bw / 2f, badgeCy - bh / 2f),

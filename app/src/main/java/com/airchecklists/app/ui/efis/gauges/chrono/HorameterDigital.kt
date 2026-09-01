@@ -21,9 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -69,16 +66,11 @@ fun HorameterDigital(modifier: Modifier = Modifier) {
         val mainTop = headerH
         val mainH = h - mainTop
         // Cells sit a bit lower, leaving room for a label ABOVE each one.
-        val cellW = w * 0.32f
         val cellH = mainH * 0.52f
         val cy = mainTop + mainH * 0.58f
         fun cell(cx: Float, label: String, value: String) {
-            // Label centred above the cell.
+            // Label centred above the value (no background/border).
             compactText(tm, label, cx, cy - cellH / 2 - mainH * 0.14f, sizeSp = 11f, color = CompactStyle.Dim)
-            drawRoundRect(Color(0xFF1C1C1C), topLeft = Offset(cx - cellW / 2, cy - cellH / 2),
-                size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f))
-            drawRoundRect(Color(0xFF5A5A5A), topLeft = Offset(cx - cellW / 2, cy - cellH / 2),
-                size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f), style = Stroke(width = 1.5f))
             compactText(tm, value, cx, cy, sizeSp = 24f, bold = true, color = CompactStyle.Mark)
         }
         cell(w * 0.22f, "Départ", start.display())

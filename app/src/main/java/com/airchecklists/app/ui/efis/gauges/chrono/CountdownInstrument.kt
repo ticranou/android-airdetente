@@ -24,12 +24,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.geometry.CornerRadius
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -145,20 +143,17 @@ private fun DrawScope.drawCountdownRound(
     val cellH = r * 0.34f
     fun timer(cyc: Float, setMs: Long, remMs: Long, color: Color) {
         val unset = setMs <= 0L
-        // Consigne (small, coloured) just above the cell.
-        compactText(tm, if (unset) "--:--" else fmtMin(setMs), cx, cyc - cellH * 0.85f, sizeSp = 13f, bold = true, color = color)
-        val rad = CornerRadius(cellH / 2f, cellH / 2f)
-        val tl = Offset(cx - cellW / 2, cyc - cellH / 2)
-        val sz = Size(cellW, cellH)
-        drawRoundRect(Color(0xFF141414), topLeft = tl, size = sz, cornerRadius = rad)
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = tl, size = sz, cornerRadius = rad, style = Stroke(width = 2f))
+        // Consigne (configured duration) placed ABOVE the remaining value.
+        if (!unset) compactText(tm, fmtMin(setMs), cx, cyc - r * 0.24f, sizeSp = 13f, bold = true, color = color)
+        // Value (remaining)
         val txt = if (!unset && remMs <= 0L) Color(0xFFFF4136) else CompactStyle.Mark
         compactText(tm, if (unset) "--:--" else fmt(remMs), cx, cyc, sizeSp = 26f, bold = true, mono = true, color = txt)
-        // Thin progress bar under the cell — doubled height.
+        // Thin progress bar below
         val frac = if (setMs > 0) (1f - remMs.toFloat() / setMs).coerceIn(0f, 1f) else 0f
-        val by = cyc + cellH / 2 + r * 0.05f
-        drawRect(Color(0xFF3A3A3A), topLeft = Offset(cx - cellW / 2, by - 5f), size = Size(cellW, 10f))
-        drawRect(color, topLeft = Offset(cx - cellW / 2, by - 5f), size = Size(cellW * frac, 10f))
+        val barY = cyc + r * 0.19f
+        val barW = r * 1.20f
+        drawRect(Color(0xFF3A3A3A), topLeft = Offset(cx - barW / 2, barY - 5f), size = Size(barW, 10f))
+        drawRect(color, topLeft = Offset(cx - barW / 2, barY - 5f), size = Size(barW * frac, 10f))
     }
     timer(cy - r * 0.26f, topSet, topRem, topColor)
     timer(cy + r * 0.44f, botSet, botRem, botColor)

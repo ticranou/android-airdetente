@@ -19,16 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.geometry.CornerRadius
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -107,11 +103,6 @@ private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: 
     val cellW = r * 1.25f
     val cellH = r * 0.34f
     fun cell(cyc: Float, text: String) {
-        val rad = CornerRadius(cellH / 2f, cellH / 2f)
-        val tl = Offset(cx - cellW / 2, cyc - cellH / 2)
-        val sz = Size(cellW, cellH)
-        drawRoundRect(Color(0xFF141414), topLeft = tl, size = sz, cornerRadius = rad)
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = tl, size = sz, cornerRadius = rad, style = Stroke(width = 2f))
         compactText(tm, text, cx, cyc, sizeSp = 30f, bold = true, mono = true, color = CompactStyle.Mark)
     }
     // Cells shifted up to leave room for the lobe.

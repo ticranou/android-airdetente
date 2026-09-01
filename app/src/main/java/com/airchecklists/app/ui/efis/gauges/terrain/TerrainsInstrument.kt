@@ -174,7 +174,6 @@ private fun DrawScope.drawFace(tm: TextMeasurer, nearest: List<NearTerrain>, has
     for (i in nearest.indices) {
         val t = nearest[i]
         val rowCy = bandTop + rowH * (i + 0.5f)
-        drawRect(Color(0xFF141414), topLeft = Offset(left, rowCy - cellH / 2), size = Size(cellW, cellH))
         drawRect(Color(0xFF3A3A3A), topLeft = Offset(left, rowCy - cellH / 2), size = Size(cellW, cellH), style = Stroke(width = 1.5f))
         // ICAO (left, accent for the nearest), distance·bearing (right).
         val icaoColor = if (i == 0) CompactStyle.Accent else CompactStyle.Mark

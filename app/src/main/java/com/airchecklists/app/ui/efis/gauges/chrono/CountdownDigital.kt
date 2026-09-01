@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -106,33 +105,37 @@ fun CountdownDigital(modifier: Modifier = Modifier) {
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
         drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-        // Title + configured duration (consigne) on the right of the title bar.
-        compactText(tm, "REBOURS", w * 0.40f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
-        compactText(tm, if (cd.setMs <= 0L) "--:--" else fmtMs(cd.setMs), w * 0.86f, headerH / 2f, sizeSp = 12f, bold = true, color = Color(0xFF2E9BE6))
+        // Title only (consigne moved above the value cell, like NUMCHR/ANLCWN).
+        compactText(tm, "REBOURS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 
         val rem = cd.remainingNow()
         val mainTop = headerH
         val mainH = h - headerH
-        // Same cell height AND same top gap as the chrono (cell top at mainTop + 0.19*mainH).
-        val cellW = w * 0.82f
-        val cellH = mainH * 0.62f
         val cy = mainTop + mainH * 0.50f
-        drawRoundRect(Color(0xFF1C1C1C), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f))
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f), style = Stroke(width = 1.5f))
         val unset = cd.setMs <= 0L
+        // Rebours icon to the left of the value (open clock body + crown + down hand).
+        val iconR = mainH * 0.20f
+        val iconCx = w * 0.20f
+        drawArc(CompactStyle.Dim, startAngle = -150f, sweepAngle = 300f, useCenter = false,
+            topLeft = Offset(iconCx - iconR, cy - iconR), size = Size(iconR * 2f, iconR * 2f),
+            style = Stroke(width = 2f))
+        drawLine(CompactStyle.Dim, Offset(iconCx - iconR * 0.25f, cy - iconR),
+            Offset(iconCx + iconR * 0.25f, cy - iconR), strokeWidth = 3f)
+        drawLine(CompactStyle.Dim, Offset(iconCx, cy), Offset(iconCx, cy + iconR * 0.75f), strokeWidth = 1.5f)
+        // Consigne (configured duration) placed ABOVE the remaining value.
+        if (!unset) compactText(tm, fmtMs(cd.setMs), w * 0.58f, cy - mainH * 0.33f, sizeSp = 12f, bold = true, color = Color(0xFF2E9BE6))
         val col = if (!unset && rem <= 0L) Color(0xFFFF4136) else CompactStyle.Mark
-        compactText(tm, if (unset) "--:--" else fmtMs(rem), w / 2f, cy, sizeSp = 26f, bold = true, mono = true, color = col)
+        compactText(tm, if (unset) "--:--" else fmtMs(rem), w * 0.58f, cy, sizeSp = 26f, bold = true, mono = true, color = col)
 
-        // Progress bar directly under the cell, slightly thicker for visibility.
+        // Progress bar directly under the value.
         val frac = if (cd.setMs > 0) (1f - rem.toFloat() / cd.setMs).coerceIn(0f, 1f) else 0f
-        val barLeft = w / 2f - cellW / 2
+        val barW = w * 0.72f
+        val barLeft = w * 0.58f - barW / 2f
         val barH = 9f
-        val barY = cy + cellH / 2 + 8f
-        drawRect(Color(0xFF3A3A3A), topLeft = Offset(barLeft, barY), size = Size(cellW, barH))
-        drawRect(Color(0xFF2E9BE6), topLeft = Offset(barLeft, barY), size = Size(cellW * frac, barH))
+        val barY = cy + mainH * 0.24f
+        drawRect(Color(0xFF3A3A3A), topLeft = Offset(barLeft, barY), size = Size(barW, barH))
+        drawRect(Color(0xFF2E9BE6), topLeft = Offset(barLeft, barY), size = Size(barW * frac, barH))
     }
 
     if (showDialog) {

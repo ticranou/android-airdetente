@@ -9,8 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.airchecklists.app.data.model.EfisSpeedUnit
@@ -34,7 +32,7 @@ fun AirspeedCompact(
         val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        drawRect(androidx.compose.ui.graphics.Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
 
         val title = if (unit == EfisSpeedUnit.KNOTS) "VITESSE (kt)" else "VITESSE (km/h)"
         compactText(tm, title, w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

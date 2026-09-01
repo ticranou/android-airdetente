@@ -55,8 +55,6 @@ fun BallCompact(rollDeg: Float, slip: Float, modifier: Modifier = Modifier) {
         val pcy = mainTop + mainH * 0.5f
         drawRoundRect(Color(0xFF2A2A2A), topLeft = Offset(pillCx - pillW / 2f, pcy - pillH / 2f),
             size = Size(pillW, pillH), cornerRadius = CornerRadius(pillH / 2f, pillH / 2f))
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = Offset(pillCx - pillW / 2f, pcy - pillH / 2f),
-            size = Size(pillW, pillH), cornerRadius = CornerRadius(pillH / 2f, pillH / 2f), style = Stroke(width = 1.5f))
         val ballR = pillH * 0.40f
         listOf(-ballR - 6f, ballR + 6f).forEach { dx ->
             drawLine(CompactStyle.Mark, Offset(pillCx + dx, pcy - ballR - 4f), Offset(pillCx + dx, pcy + ballR + 4f), strokeWidth = 3f)

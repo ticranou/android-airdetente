@@ -11,15 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.geometry.CornerRadius
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -105,16 +101,12 @@ private fun DrawScope.drawChrono(
 
     val cellW = r * 1.25f
     val cellH = r * 0.36f
-    fun cell(cyc: Float, text: String, accentColor: Color) {
-        val rad = CornerRadius(cellH / 2f, cellH / 2f)
-        val tl = Offset(cx - cellW / 2, cyc - cellH / 2)
-        val sz = Size(cellW, cellH)
-        drawRoundRect(Color(0xFF141414), topLeft = tl, size = sz, cornerRadius = rad)
-        drawRoundRect(accentColor.copy(alpha = 0.6f), topLeft = tl, size = sz, cornerRadius = rad, style = Stroke(width = 2f))
-        compactText(tm, text, cx, cyc, sizeSp = 30f, bold = true, mono = true, color = CompactStyle.Mark)
+    fun cell(cyc: Float, text: String, color: Color) {
+        compactText(tm, text, cx, cyc, sizeSp = 30f, bold = true, mono = true, color = color)
     }
-    cell(cy - r * 0.22f, fmt(topMs), Color(0xFFE8843A))
-    cell(cy + r * 0.30f, fmt(botMs), Color(0xFF2E9BE6))
+    // Top chrono blue, bottom chrono orange.
+    cell(cy - r * 0.22f, fmt(topMs), Color(0xFF2E9BE6))
+    cell(cy + r * 0.30f, fmt(botMs), Color(0xFFE8843A))
 }
 
 /** Format millis as H:MM:SS (or MM:SS under an hour). */

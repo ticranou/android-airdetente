@@ -140,6 +140,24 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = prefs.effectiveDashboards.filterNot { it.id == id })
     }
 
+    /** Clone the dashboard [srcId] as a new dashboard with id [newId], inserted right
+     *  after the original. The clone keeps the same grid, cells and settings; only the
+     *  name gets a "(copie)" suffix. Cells are value objects (data classes) so the list
+     *  copy is an independent deep copy. No-op if [srcId] is unknown. */
+    suspend fun duplicateDashboard(srcId: String, newId: String, nameSuffix: String) = persist { prefs ->
+        val list = prefs.effectiveDashboards.toMutableList()
+        val idx = list.indexOfFirst { it.id == srcId }
+        if (idx < 0) return@persist prefs
+        val src = list[idx]
+        val clone = src.copy(
+            id = newId,
+            name = "${src.name} $nameSuffix".trim(),
+            cells = src.normalizedCells.map { it.copy() },
+        )
+        list.add(idx + 1, clone)
+        prefs.copy(dashboards = list)
+    }
+
     /** Update one dashboard's row count (columns are fixed at 2), resizing cells. */
     suspend fun setDashboardRows(id: String, rows: Int) = persist { prefs ->
         val r = rows.coerceIn(1, AppPreferences.EFIS_MAX_ROWS)
@@ -296,6 +314,10 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setDashboardShowInCockpit(id: String, show: Boolean) = persist { prefs ->
         prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(showInCockpit = show) else it })
+    }
+
+    suspend fun setDashboardShowTitle(id: String, show: Boolean) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(showTitle = show) else it })
     }
 
     /** Reorder dashboards to match the given id order (unknown ids keep their tail order). */

@@ -15,7 +15,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,7 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
         val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         compactText(tm, "CONSERVATEUR", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
 

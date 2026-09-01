@@ -86,7 +86,7 @@ fun EfisCompact(
         val heading = (state.headingDeg.roundToInt() % 360 + 360) % 360
 
         // --- Header: EFIS title + heading tape ---
-        compactText(tm, "EFIS", w / 2f, headerH * 0.18f, sizeSp = 10f, color = CompactStyle.Dim)
+        compactText(tm, "EFIS", w / 2f, headerH * 0.14f, sizeSp = 12f, color = CompactStyle.Dim)
         val headTape = Rect(0f, headerH * 0.28f, w, headerH)
         efisHeadingTape(tm, headTape, heading.toFloat(), showValue, targetHeading)
 

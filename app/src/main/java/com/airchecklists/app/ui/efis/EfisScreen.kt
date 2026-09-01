@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -129,20 +130,19 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
         }
 
         // Page indicator (only when several dashboards). Style + position are
-        // user-configurable in Réglages ▸ Cockpits.
+        // user-configurable in Réglages ▸ Cockpits. Aligned to the right so the
+        // markers don't sit under the left-aligned cockpit title.
         if (cockpitDashboards.size > 1) {
-            val alignment = when (prefs.cockpitPagerPosition) {
-                com.airchecklists.app.data.model.CockpitPagerPosition.TOP -> Alignment.TopCenter
-                com.airchecklists.app.data.model.CockpitPagerPosition.BOTTOM -> Alignment.BottomCenter
-            }
             val padTop = prefs.cockpitPagerPosition == com.airchecklists.app.data.model.CockpitPagerPosition.TOP
+            val alignment = if (padTop) Alignment.TopEnd else Alignment.BottomEnd
             CockpitPageIndicator(
                 style = prefs.cockpitPagerStyle,
                 count = cockpitDashboards.size,
                 current = pagerState.currentPage,
                 modifier = Modifier
                     .align(alignment)
-                    .padding(top = if (padTop) 4.dp else 0.dp, bottom = if (padTop) 0.dp else 8.dp),
+                    // At the top, leave room for the full-screen button (also TopEnd).
+                    .padding(top = if (padTop) 10.dp else 0.dp, bottom = if (padTop) 0.dp else 8.dp, end = if (padTop) 48.dp else 10.dp),
             )
         }
 
@@ -242,30 +242,51 @@ private fun DashboardGrid(
     val cols = com.airchecklists.app.data.model.EFIS_COLS
     val rows = dashboard.rows
     val cells = dashboard.normalizedCells
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val cellW = maxWidth / cols
-        val cellH = maxHeight / rows
-        cells.forEachIndexed { i, cell ->
-            if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed
-            val row = i / cols
-            val col = i % cols
-            InstrumentSlot(
-                instrument = cell.instrument,
-                state = state,
-                speedUnit = speedUnit,
-                showValues = showValues,
-                speedArcs = speedArcs,
-                altUnit = altUnit,
-                trail = trail,
-                mapOrientation = mapOrientation,
-                accentColor = cell.accentColor,
-                bezelStyleOverride = cell.bezelStyle,
-                onOpenMap = onOpenMap,
+    val title = dashboard.name.trim()
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Reserved title band at the top of the cockpit (does not overlap instruments).
+        // Left-aligned; the page markers are drawn on the right by the caller. Shown only
+        // when enabled per-cockpit in Réglages ▸ Cockpits.
+        if (dashboard.showTitle && title.isNotEmpty()) {
+            Text(
+                text = title,
+                color = Color(0xE6FFFFFF),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .offset(x = cellW * col, y = cellH * row)
-                    .width(cellW * cell.colSpan)
-                    .height(cellH * cell.rowSpan),
+                    .fillMaxWidth()
+                    .background(Color(0xFF0A0A0A))
+                    // Leave room on the right for the full-screen button + page markers.
+                    .padding(start = 12.dp, end = 96.dp, top = 5.dp, bottom = 5.dp),
             )
+        }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            val cellW = maxWidth / cols
+            val cellH = maxHeight / rows
+            cells.forEachIndexed { i, cell ->
+                if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed
+                val row = i / cols
+                val col = i % cols
+                InstrumentSlot(
+                    instrument = cell.instrument,
+                    state = state,
+                    speedUnit = speedUnit,
+                    showValues = showValues,
+                    speedArcs = speedArcs,
+                    altUnit = altUnit,
+                    trail = trail,
+                    mapOrientation = mapOrientation,
+                    accentColor = cell.accentColor,
+                    bezelStyleOverride = cell.bezelStyle,
+                    onOpenMap = onOpenMap,
+                    modifier = Modifier
+                        .offset(x = cellW * col, y = cellH * row)
+                        .width(cellW * cell.colSpan)
+                        .height(cellH * cell.rowSpan),
+                )
+            }
         }
     }
 }

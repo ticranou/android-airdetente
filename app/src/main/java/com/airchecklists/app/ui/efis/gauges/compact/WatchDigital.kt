@@ -11,9 +11,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -47,12 +44,6 @@ fun WatchDigital(modifier: Modifier = Modifier) {
             cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND),
         )
         val cy = headerH + (h - headerH) / 2f
-        val cellW = w * 0.82f
-        val cellH = (h - headerH) * 0.62f
-        drawRoundRect(Color(0xFF1C1C1C), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f))
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f), style = Stroke(width = 1.5f))
         compactText(tm, txt, w / 2f, cy, sizeSp = 26f, bold = true, mono = true, color = CompactStyle.Mark)
     }
 }

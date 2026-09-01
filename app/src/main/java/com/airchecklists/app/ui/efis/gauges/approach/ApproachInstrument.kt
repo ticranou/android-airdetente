@@ -10,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -21,12 +20,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.AltitudeFormat
 import com.airchecklists.app.data.model.AltitudeUnit
@@ -142,7 +137,9 @@ private fun DrawScope.drawApproach(
     val h = size.height
     val headerH = 22.dp.toPx().coerceAtMost(h * 0.20f)
     val readoutH = (h * 0.50f).coerceIn(104f, 140f)
-    val bodyTop = headerH
+    // Top info banner (QFU / ICAO / longueur), styled like the bottom readout strip.
+    val topBandH = (h * 0.18f).coerceIn(56f, 76f)
+    val bodyTop = headerH + topBandH
     val sceneBottom = h - readoutH
     val sceneH = sceneBottom - bodyTop
 
@@ -171,18 +168,6 @@ private fun DrawScope.drawApproach(
     drawRect(Color(0x47C8D7E1), topLeft = Offset(0f, vpY - 2f), size = Size(w, 4f))
 
     if (hasTarget) {
-        // Two framed info chips in the sky (top corners of the scene): landing QFU (runway
-        // designator, e.g. "QFU 30") on the left, runway length from the VAC chart on the right.
-        val qfuChip = if (target?.qfuKnown == true) {
-            val tens = ((target.qfuTrueDeg / 10f).roundToInt() % 36).let { if (it <= 0) it + 36 else it }
-            "QFU " + tens.toString().padStart(2, '0')
-        } else "QFU ?"
-        val lenChip = target?.runwayLengthM?.let { "$it m" } ?: "long. ?"
-        val lenColor = if (target?.runwayLengthM != null) CompactStyle.Mark else GATE_1500
-        drawSkyChip(tm, x = 8f, top = bodyTop + 6f, text = qfuChip, textColor = CompactStyle.Mark, anchorLeft = true)
-        drawSkyChip(tm, x = w / 2f, top = bodyTop + 6f, text = target?.icao ?: "—", textColor = CompactStyle.Accent, anchorLeft = true, center = true)
-        drawSkyChip(tm, x = w - 8f, top = bodyTop + 6f, text = lenChip, textColor = lenColor, anchorLeft = false)
-
         // Nearness 0 (≥4 km out) → 1 (at threshold): drives how "open"/big the tunnel and
         // runway are, so the runway visibly grows and rushes up as we close in.
         val nearness = (1.0 - (errors.alongM / 4000.0)).coerceIn(0.0, 1.0).toFloat()
@@ -251,6 +236,9 @@ private fun DrawScope.drawApproach(
     // ---- Readouts strip. ----
     drawReadouts(tm, w, sceneBottom, readoutH, state, speedUnit, altUnit, errors)
 
+    // ---- Top info banner (QFU / ICAO / longueur), same style as the bottom strip. ----
+    drawTopBanner(tm, w, headerH, topBandH, target)
+
     // ---- Title bar (drawn last, over the scene top). ----
     drawNumTitleBar(bezel, w, headerH)
     drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
@@ -259,25 +247,37 @@ private fun DrawScope.drawApproach(
     // (ICAO is shown in the dedicated sky chip below; not repeated in the title bar.)
 }
 
-/** Draws a small framed info chip on the sky. [x] is the left edge when [anchorLeft]
- *  (or the centre when [center]), else the right edge; [top] is the top of the chip. */
-private fun DrawScope.drawSkyChip(
-    tm: TextMeasurer, x: Float, top: Float, text: String, textColor: Color,
-    anchorLeft: Boolean, center: Boolean = false,
+/** Top info banner: three cells (QFU · terrain ICAO · longueur de piste), drawn in the
+ *  same style as the bottom readout strip — a translucent dark band with a small dim
+ *  label above a big value, and thin separators between cells. */
+private fun DrawScope.drawTopBanner(
+    tm: TextMeasurer, w: Float, top: Float, height: Float, target: ApproachTarget?,
 ) {
-    val padH = 11f; val padV = 6f
-    val m = tm.measure(text, TextStyle(color = textColor, fontSize = 15f.sp, fontWeight = FontWeight.Bold))
-    val boxW = m.size.width + padH * 2f
-    val boxH = m.size.height + padV * 2f
-    val left = when {
-        anchorLeft && center -> x - boxW / 2f
-        anchorLeft -> x
-        else -> x - boxW
+    drawRect(Color(0x99000000), topLeft = Offset(0f, top), size = Size(w, height))
+
+    val qfuV = if (target?.qfuKnown == true) {
+        val tens = ((target.qfuTrueDeg / 10f).roundToInt() % 36).let { if (it <= 0) it + 36 else it }
+        tens.toString().padStart(2, '0')
+    } else "?"
+    val icaoV = target?.icao ?: "—"
+    val lenV = target?.runwayLengthM?.let { "$it" } ?: "?"
+    val lenColor = if (target?.runwayLengthM != null) CompactStyle.Mark else GATE_1500
+
+    data class Cell(val l: String, val v: String, val c: Color)
+    val cells = listOf(
+        Cell("QFU", qfuV, CompactStyle.Mark),
+        Cell("TERRAIN", icaoV, CompactStyle.Accent),
+        Cell("LONG. m", lenV, lenColor),
+    )
+    val cw = w / cells.size
+    cells.forEachIndexed { i, c ->
+        val cx = cw * (i + 0.5f)
+        compactText(tm, c.l, cx, top + height * 0.24f, sizeSp = 9f, color = CompactStyle.Dim)
+        compactText(tm, c.v, cx, top + height * 0.68f, sizeSp = 18f, bold = true, color = c.c)
+        if (i > 0) {
+            drawLine(Color(0x1FFFFFFF), Offset(cw * i, top + 4f), Offset(cw * i, top + height - 4f), strokeWidth = 1f)
+        }
     }
-    // Semi-transparent dark panel + subtle border so it reads over the sky gradient.
-    drawRect(Color(0xB3101418), topLeft = Offset(left, top), size = Size(boxW, boxH))
-    drawRect(Color(0xFF6A7A88), topLeft = Offset(left, top), size = Size(boxW, boxH), style = Stroke(width = 1.5f))
-    drawText(m, topLeft = Offset(left + padH, top + padV))
 }
 
 /** The runway at the vanishing point + three "touchdown" markers projected on the tunnel

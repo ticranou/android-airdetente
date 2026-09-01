@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Download
@@ -295,6 +296,7 @@ fun SettingsScreen(
                     onSafeskyApiKey = viewModel::setSafeskyApiKey,
                     onAddDashboard = { onEditDashboard(viewModel.addDashboard("Nouveau tableau")) },
                     onEditDashboard = onEditDashboard,
+                    onDuplicateDashboard = { srcId -> onEditDashboard(viewModel.duplicateDashboard(srcId, "(copie)")) },
                     onDeleteDashboard = { dashboardToDelete = it },
                     onToggleCockpit = viewModel::setDashboardShowInCockpit,
                     onReorderDashboards = viewModel::reorderDashboards,
@@ -744,6 +746,7 @@ private fun CockpitsSection(
     onSafeskyApiKey: (String?) -> Unit,
     onAddDashboard: () -> Unit,
     onEditDashboard: (String) -> Unit,
+    onDuplicateDashboard: (String) -> Unit,
     onDeleteDashboard: (com.airchecklists.app.data.model.Dashboard) -> Unit,
     onToggleCockpit: (id: String, show: Boolean) -> Unit,
     onReorderDashboards: (orderedIds: List<String>) -> Unit,
@@ -936,6 +939,7 @@ private fun CockpitsSection(
         RowActionsMenu(
             actions = listOf(
                 RowAction(stringResource(R.string.action_edit), Icons.Filled.Edit) { onEditDashboard(dash.id) },
+                RowAction(stringResource(R.string.action_duplicate), Icons.Filled.ContentCopy) { onDuplicateDashboard(dash.id) },
                 RowAction(
                     stringResource(R.string.action_delete),
                     Icons.Filled.Delete,

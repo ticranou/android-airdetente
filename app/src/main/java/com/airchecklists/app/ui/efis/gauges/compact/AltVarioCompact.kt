@@ -11,11 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -53,7 +49,7 @@ fun AltVarioCompact(
         val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         compactText(tm, "ALTITUDE (${AltitudeFormat.altLabel(altUnit)})", w * 0.27f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
         compactText(tm, "VARIO (${AltitudeFormat.vsLabel(altUnit)})", w * 0.73f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
         // Gesture hint (long-press) in the title bar, top-left.
@@ -80,11 +76,7 @@ fun AltVarioCompact(
             else -> 28f
         }
         fun cell(cxc: Float, text: String) {
-            drawRoundRect(Color(0xFF1C1C1C), topLeft = Offset(cxc - cellW / 2, cy - cellH / 2),
-                size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f))
-            drawRoundRect(trendColor, topLeft = Offset(cxc - cellW / 2, cy - cellH / 2),
-                size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f), style = Stroke(width = 2f))
-            if (showValue) compactText(tm, text, cxc, cy, sizeSp = valueSp, bold = true, color = CompactStyle.Mark)
+            if (showValue) compactText(tm, text, cxc, cy, sizeSp = valueSp, bold = true, color = trendColor)
         }
         cell(w * 0.27f, altText)
         cell(w * 0.73f, varText)

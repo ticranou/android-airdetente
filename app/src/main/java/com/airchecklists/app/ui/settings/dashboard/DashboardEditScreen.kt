@@ -114,6 +114,14 @@ fun DashboardEditScreen(
                 Text(stringResource(R.string.settings_dashboard_in_cockpit))
             }
 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = dash.showTitle,
+                    onCheckedChange = { viewModel.setDashboardShowTitle(dash.id, it) },
+                )
+                Text(stringResource(R.string.settings_dashboard_show_title))
+            }
+
             Text(
                 stringResource(R.string.dashboard_grid_size),
                 style = MaterialTheme.typography.titleSmall,

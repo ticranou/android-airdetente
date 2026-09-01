@@ -252,9 +252,8 @@ fun DrawScope.efisHeadingTape(tm: TextMeasurer, r: Rect, heading: Float, showVal
     }
 
     if (showValue) {
-        // Prominent current-heading cell: subtle fill, bright accent border, big orange.
+        // Prominent current-heading cell: subtle fill, big orange (no yellow border).
         drawRect(Color(0xFF1E1E1E), topLeft = cell.topLeft, size = cell.size)
-        drawRect(CompactStyle.Accent, topLeft = cell.topLeft, size = cell.size, style = Stroke(width = 2f))
         val txt = "${heading.roundToInt()}"
         val sizeSp = if (heading.roundToInt() >= 100) 26f else 30f
         compactText(tm, txt, cx, cell.center.y - 1f, sizeSp = sizeSp, bold = true, color = CompactStyle.Accent)
@@ -373,7 +372,6 @@ fun DrawScope.efisSpeedTape(tm: TextMeasurer, r: Rect, speed: Float, unitLabel: 
 
     if (showValue) {
         drawRect(Color(0xFF1E1E1E), topLeft = cell.topLeft, size = cell.size)
-        drawRect(CompactStyle.Accent, topLeft = cell.topLeft, size = cell.size, style = Stroke(width = 2f))
         val txt = speed.roundToInt().toString()
         val sizeSp = if (speed.roundToInt() >= 100) 26f else 30f
         compactText(tm, txt, cx, cell.top + cell.height * 0.40f, sizeSp = sizeSp, bold = true, color = CompactStyle.Accent)

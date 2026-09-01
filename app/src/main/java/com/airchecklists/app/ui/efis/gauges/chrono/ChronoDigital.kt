@@ -13,14 +13,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import kotlin.math.cos
+import kotlin.math.sin
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -97,13 +97,18 @@ fun ChronoDigital(modifier: Modifier = Modifier) {
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 
         val cy = headerH + (h - headerH) / 2f
-        val cellW = w * 0.82f
-        val cellH = (h - headerH) * 0.62f
-        drawRoundRect(Color(0xFF1C1C1C), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f))
-        drawRoundRect(Color(0xFF5A5A5A), topLeft = Offset(w / 2f - cellW / 2, cy - cellH / 2),
-            size = Size(cellW, cellH), cornerRadius = CornerRadius(6f, 6f), style = Stroke(width = 1.5f))
-        compactText(tm, fmtHms(chrono.elapsed()), w / 2f, cy, sizeSp = 26f, bold = true, mono = true, color = CompactStyle.Mark)
+        // Chrono icon to the left of the value (clock face + hands + crown).
+        val iconR = (h - headerH) * 0.20f
+        val iconCx = w * 0.22f
+        drawCircle(CompactStyle.Dim, radius = iconR, center = Offset(iconCx, cy), style = Stroke(width = 2f))
+        val hAngle = Math.toRadians(-60.0)
+        drawLine(CompactStyle.Dim, Offset(iconCx, cy),
+            Offset(iconCx + (iconR * 0.55f * sin(hAngle)).toFloat(), cy - (iconR * 0.55f * cos(hAngle)).toFloat()),
+            strokeWidth = 2f)
+        drawLine(CompactStyle.Dim, Offset(iconCx, cy), Offset(iconCx, cy - iconR * 0.80f), strokeWidth = 1.5f)
+        drawLine(CompactStyle.Dim, Offset(iconCx - iconR * 0.25f, cy - iconR),
+            Offset(iconCx + iconR * 0.25f, cy - iconR), strokeWidth = 3f)
+        compactText(tm, fmtHms(chrono.elapsed()), w * 0.58f, cy, sizeSp = 26f, bold = true, mono = true, color = CompactStyle.Mark)
     }
 }
 

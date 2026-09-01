@@ -325,6 +325,15 @@ data class HorameterSnapshot(
  * survives a process kill/restart. Slots are keyed the same way as
  * ServiceLocator.instrumentState (analog top/bottom, numeric single, etc.).
  */
+/** What a CMNSCT shortcut slot points to: either an instrument or a dashboard. */
+@Serializable
+sealed class ShortcutTarget {
+    @Serializable
+    data class Instrument(val instrument: EfisInstrument) : ShortcutTarget()
+    @Serializable
+    data class Dashboard(val dashboardId: String) : ShortcutTarget()
+}
+
 @Serializable
 data class InstrumentPersistState(
     val chronoNum: ChronoSnapshot = ChronoSnapshot(),
@@ -339,6 +348,7 @@ data class InstrumentPersistState(
     val targetHeading: Int? = null,
     val targetAltitude: Int? = null,
     val shortcutSlots: List<EfisInstrument> = listOf(EfisInstrument.NONE, EfisInstrument.NONE, EfisInstrument.NONE),
+    val shortcutTargets: List<ShortcutTarget> = listOf(ShortcutTarget.Instrument(EfisInstrument.NONE), ShortcutTarget.Instrument(EfisInstrument.NONE), ShortcutTarget.Instrument(EfisInstrument.NONE)),
 )
 
 /** A navigation plan: an ordered list of terrain ICAO codes + free-text notes. */

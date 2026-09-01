@@ -244,7 +244,7 @@ private fun CockpitPageIndicator(
 /** Renders one dashboard's 2×N grid, placing each master cell as a block that
  *  spans its colSpan×rowSpan; covered/empty cells render nothing. */
 @Composable
-private fun DashboardGrid(
+internal fun DashboardGrid(
     dashboard: Dashboard,
     state: EfisState,
     speedUnit: com.airchecklists.app.data.model.EfisSpeedUnit,

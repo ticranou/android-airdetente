@@ -3,19 +3,28 @@ package com.airchecklists.app.ui.efis.gauges.shortcuts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,10 +44,11 @@ import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisInstrument
+import com.airchecklists.app.data.model.ShortcutTarget
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.InstrumentPickerDialog
 import com.airchecklists.app.ui.components.efisInstrumentLabel
-import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
+import com.airchecklists.app.ui.efis.DashboardGrid
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
@@ -46,6 +56,8 @@ import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 
 private const val N = 3
+
+private enum class ConfigStep { CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD }
 
 @Composable
 fun ShortcutsInstrument(modifier: Modifier = Modifier) {
@@ -55,36 +67,47 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val speedUnit = prefs.value.efisSpeedUnit
     val altUnit = prefs.value.altitudeUnit
+    val allDashboards = prefs.value.effectiveDashboards
     val speedArcs = remember(ServiceLocator.currentAircraft()) {
         ServiceLocator.currentAircraft()
             ?.let { com.airchecklists.app.data.model.SpeedArcs.from(it).takeIf { a -> a.hasAny } }
     }
 
-    val slots = remember(prefs.value.instruments.shortcutSlots) {
-        val raw = prefs.value.instruments.shortcutSlots
-        List(N) { i -> raw.getOrElse(i) { EfisInstrument.NONE } }
+    val targets = remember(prefs.value.instruments.shortcutTargets) {
+        val raw = prefs.value.instruments.shortcutTargets
+        List(N) { i -> raw.getOrElse(i) { ShortcutTarget.Instrument(EfisInstrument.NONE) } }
     }
 
-    // Resolve human-readable labels in Composable scope (can't call stringResource in DrawScope).
-    // Take only the part after " - " (e.g. "ANLCAP - Conservateur" → "Conservateur").
-    val labels = slots.map { instr ->
-        if (instr == EfisInstrument.NONE) "-----"
-        else efisInstrumentLabel(instr).substringAfter(" - ", missingDelimiterValue = instr.name)
+    // Label for each slot.
+    val labels = targets.map { target ->
+        when (target) {
+            is ShortcutTarget.Instrument ->
+                if (target.instrument == EfisInstrument.NONE) "-----"
+                else efisInstrumentLabel(target.instrument).substringAfter(" - ", missingDelimiterValue = target.instrument.name)
+            is ShortcutTarget.Dashboard ->
+                allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----"
+        }
     }
 
+    // Which slot is open for viewing (-1 = none).
     var openIdx by remember { mutableIntStateOf(-1) }
+    // Which slot is being configured (-1 = none) + which step of the config flow.
     var configIdx by remember { mutableIntStateOf(-1) }
+    var configStep by remember { mutableStateOf(ConfigStep.CHOOSE_TYPE) }
 
     Canvas(
-        modifier = modifier.fillMaxWidth().height(52.dp).pointerInput(slots) {
+        modifier = modifier.fillMaxWidth().height(52.dp).pointerInput(targets) {
             detectTapGestures(
                 onLongPress = { pos ->
                     val idx = (pos.x / (size.width.toFloat() / N)).toInt().coerceIn(0, N - 1)
                     configIdx = idx
+                    configStep = ConfigStep.CHOOSE_TYPE
                 },
                 onTap = { pos ->
                     val idx = (pos.x / (size.width.toFloat() / N)).toInt().coerceIn(0, N - 1)
-                    if (slots[idx] != EfisInstrument.NONE) openIdx = idx
+                    val t = targets[idx]
+                    val isEmpty = t is ShortcutTarget.Instrument && t.instrument == EfisInstrument.NONE
+                    if (!isEmpty) openIdx = idx
                 },
             )
         },
@@ -102,87 +125,259 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
         val slotW = w / N
         val bodyCy = headerH + (h - headerH) / 2f
 
-        // Vertical separators spanning the full body area.
         for (i in 1 until N) {
             val x = slotW * i
             drawLine(Color(0xFF3A3A3A), Offset(x, headerH), Offset(x, h), strokeWidth = 1.5f)
         }
 
-        // Label for each slot, centered in the body.
         for (i in 0 until N) {
             val cx = slotW * i + slotW / 2f
             val label = labels[i]
-            val isEmpty = slots[i] == EfisInstrument.NONE
+            val isEmpty = label == "-----"
+            // Small "DB" tag for dashboard shortcuts
+            val isDashboard = targets[i] is ShortcutTarget.Dashboard && !isEmpty
+            if (isDashboard) {
+                compactText(tm, "≡", cx - (slotW * 0.28f), bodyCy, sizeSp = 12f, color = CompactStyle.Accent)
+            }
             compactText(
                 tm, label, cx, bodyCy,
-                sizeSp = if (isEmpty) 16f else 15f,
+                sizeSp = if (isEmpty) 16f else 14f,
                 bold = !isEmpty,
                 color = if (isEmpty) CompactStyle.Dim else CompactStyle.Mark,
             )
         }
     }
 
-    // Full-screen instrument dialog.
+    // ── Open dialog ──────────────────────────────────────────────────────────
+
     if (openIdx in 0 until N) {
-        val instr = slots[openIdx]
-        Dialog(
-            onDismissRequest = { openIdx = -1 },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                dismissOnClickOutside = true,
-                decorFitsSystemWindows = false,
-            ),
-        ) {
-            val dialogView = LocalView.current
-            SideEffect {
-                val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
-                if (dialogWindow != null) {
-                    WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
-                    dialogWindow.setLayout(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    )
-                }
+        val target = targets[openIdx]
+        when (target) {
+            is ShortcutTarget.Instrument -> {
+                InstrumentFullScreenDialog(
+                    instrument = target.instrument,
+                    state = state,
+                    speedUnit = speedUnit,
+                    altUnit = altUnit,
+                    speedArcs = speedArcs,
+                    onDismiss = { openIdx = -1 },
+                )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
-                    .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    InstrumentSlot(
-                        instrument = instr,
+            is ShortcutTarget.Dashboard -> {
+                val dash = allDashboards.firstOrNull { it.id == target.dashboardId }
+                if (dash != null) {
+                    DashboardFullScreenDialog(
+                        dashboard = dash,
                         state = state,
                         speedUnit = speedUnit,
-                        showValues = true,
-                        speedArcs = speedArcs,
                         altUnit = altUnit,
-                        modifier = Modifier.fillMaxSize(),
+                        speedArcs = speedArcs,
+                        prefs = prefs.value,
+                        onDismiss = { openIdx = -1 },
                     )
-                }
-                Button(
-                    onClick = { openIdx = -1 },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                ) {
-                    Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 
-    // Config dialog: pick instruments for each slot in sequence.
+    // ── Config flow ──────────────────────────────────────────────────────────
+
     if (configIdx in 0 until N) {
-        InstrumentPickerDialog(
-            current = slots[configIdx],
-            onDismiss = { configIdx = -1 },
-            onSelect = { chosen ->
-                val newSlots = slots.toMutableList().also { it[configIdx] = chosen }
-                ServiceLocator.updateInstruments { it.copy(shortcutSlots = newSlots) }
-                configIdx = if (configIdx < N - 1) configIdx + 1 else -1
-            },
-        )
+        when (configStep) {
+            ConfigStep.CHOOSE_TYPE -> {
+                AlertDialog(
+                    onDismissRequest = { configIdx = -1 },
+                    title = { Text("Slot ${configIdx + 1} — Choisir le type") },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = { configStep = ConfigStep.PICK_INSTRUMENT },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Instruments") }
+                            Button(
+                                onClick = { configStep = ConfigStep.PICK_DASHBOARD },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Tableaux de bord") }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { configIdx = -1 }) { Text("Annuler") }
+                    },
+                )
+            }
+            ConfigStep.PICK_INSTRUMENT -> {
+                val currentInstr = (targets[configIdx] as? ShortcutTarget.Instrument)?.instrument
+                    ?: EfisInstrument.NONE
+                InstrumentPickerDialog(
+                    current = currentInstr,
+                    onDismiss = { configIdx = -1 },
+                    onSelect = { chosen ->
+                        save(targets, configIdx, ShortcutTarget.Instrument(chosen))
+                        configIdx = if (configIdx < N - 1) configIdx + 1 else -1
+                        if (configIdx >= 0) configStep = ConfigStep.CHOOSE_TYPE
+                    },
+                )
+            }
+            ConfigStep.PICK_DASHBOARD -> {
+                DashboardPickerDialog(
+                    dashboards = allDashboards,
+                    onDismiss = { configIdx = -1 },
+                    onSelect = { dash ->
+                        save(targets, configIdx, ShortcutTarget.Dashboard(dash.id))
+                        configIdx = if (configIdx < N - 1) configIdx + 1 else -1
+                        if (configIdx >= 0) configStep = ConfigStep.CHOOSE_TYPE
+                    },
+                )
+            }
+        }
     }
+}
+
+private fun save(targets: List<ShortcutTarget>, idx: Int, value: ShortcutTarget) {
+    val newTargets = targets.toMutableList().also { it[idx] = value }
+    ServiceLocator.updateInstruments { it.copy(shortcutTargets = newTargets) }
+}
+
+// ── Sub-dialogs ───────────────────────────────────────────────────────────────
+
+@Composable
+private fun InstrumentFullScreenDialog(
+    instrument: EfisInstrument,
+    state: com.airchecklists.app.data.sensors.EfisState,
+    speedUnit: com.airchecklists.app.data.model.EfisSpeedUnit,
+    altUnit: com.airchecklists.app.data.model.AltitudeUnit,
+    speedArcs: com.airchecklists.app.data.model.SpeedArcs?,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnClickOutside = true,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        val dialogView = LocalView.current
+        SideEffect {
+            val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
+            if (dialogWindow != null) {
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                dialogWindow.setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+            }
+        }
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.Black).padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                com.airchecklists.app.ui.efis.gauges.InstrumentSlot(
+                    instrument = instrument,
+                    state = state,
+                    speedUnit = speedUnit,
+                    showValues = true,
+                    speedArcs = speedArcs,
+                    altUnit = altUnit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardFullScreenDialog(
+    dashboard: com.airchecklists.app.data.model.Dashboard,
+    state: com.airchecklists.app.data.sensors.EfisState,
+    speedUnit: com.airchecklists.app.data.model.EfisSpeedUnit,
+    altUnit: com.airchecklists.app.data.model.AltitudeUnit,
+    speedArcs: com.airchecklists.app.data.model.SpeedArcs?,
+    prefs: com.airchecklists.app.data.model.AppPreferences,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnClickOutside = true,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        val dialogView = LocalView.current
+        SideEffect {
+            val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
+            if (dialogWindow != null) {
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                dialogWindow.setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                )
+            }
+        }
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.Black).padding(bottom = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                DashboardGrid(
+                    dashboard = dashboard,
+                    state = state,
+                    speedUnit = speedUnit,
+                    showValues = prefs.efisShowValues,
+                    speedArcs = speedArcs,
+                    trail = emptyList(),
+                    mapOrientation = prefs.mapOrientation,
+                    altUnit = altUnit,
+                    focusDurationSec = prefs.focusDurationSec,
+                    onOpenMap = {},
+                )
+            }
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            ) {
+                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardPickerDialog(
+    dashboards: List<com.airchecklists.app.data.model.Dashboard>,
+    onDismiss: () -> Unit,
+    onSelect: (com.airchecklists.app.data.model.Dashboard) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choisir un tableau de bord") },
+        text = {
+            LazyColumn {
+                items(dashboards) { dash ->
+                    TextButton(
+                        onClick = { onSelect(dash) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(dash.name, modifier = Modifier.weight(1f))
+                    }
+                    HorizontalDivider()
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annuler") }
+        },
+    )
 }

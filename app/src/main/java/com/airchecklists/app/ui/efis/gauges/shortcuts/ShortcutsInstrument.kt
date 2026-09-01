@@ -134,16 +134,16 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
             val cx = slotW * i + slotW / 2f
             val label = labels[i]
             val isEmpty = label == "-----"
-            // Small "DB" tag for dashboard shortcuts
             val isDashboard = targets[i] is ShortcutTarget.Dashboard && !isEmpty
-            if (isDashboard) {
-                compactText(tm, "≡", cx - (slotW * 0.28f), bodyCy, sizeSp = 12f, color = CompactStyle.Accent)
-            }
             compactText(
                 tm, label, cx, bodyCy,
                 sizeSp = if (isEmpty) 16f else 14f,
                 bold = !isEmpty,
-                color = if (isEmpty) CompactStyle.Dim else CompactStyle.Mark,
+                color = when {
+                    isEmpty -> CompactStyle.Dim
+                    isDashboard -> Color(0xFF4FC3F7) // bleu clair pour les tableaux de bord
+                    else -> CompactStyle.Mark
+                },
             )
         }
     }
@@ -214,8 +214,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     onDismiss = { configIdx = -1 },
                     onSelect = { chosen ->
                         save(targets, configIdx, ShortcutTarget.Instrument(chosen))
-                        configIdx = if (configIdx < N - 1) configIdx + 1 else -1
-                        if (configIdx >= 0) configStep = ConfigStep.CHOOSE_TYPE
+                        configIdx = -1
                     },
                 )
             }
@@ -225,8 +224,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     onDismiss = { configIdx = -1 },
                     onSelect = { dash ->
                         save(targets, configIdx, ShortcutTarget.Dashboard(dash.id))
-                        configIdx = if (configIdx < N - 1) configIdx + 1 else -1
-                        if (configIdx >= 0) configStep = ConfigStep.CHOOSE_TYPE
+                        configIdx = -1
                     },
                 )
             }

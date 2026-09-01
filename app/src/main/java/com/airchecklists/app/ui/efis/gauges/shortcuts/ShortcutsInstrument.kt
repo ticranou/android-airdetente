@@ -87,7 +87,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
 
         val mainTop = headerH
-        val cellH = (h - mainTop) * 0.66f
+        val cellH = (h - mainTop) * 0.33f
         val cy = mainTop + (h - mainTop) / 2f
         val slotW = w / N
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.platform.LocalContext
@@ -298,27 +300,36 @@ private fun DashboardGrid(
                             if (canFocus) Modifier.pointerInput(focusLongPressSec) {
                                 awaitPointerEventScope {
                                     while (true) {
+                                        // Initial pass: intercept before children so their
+                                        // own long-press (config dialogs at ~600ms) doesn't
+                                        // prevent us from measuring the full 4s duration.
                                         awaitFirstDown(requireUnconsumed = false)
                                         val startTime = System.currentTimeMillis()
                                         val threshold = focusLongPressSec * 1000L
-                                        var cancelled = false
+                                        var lifted = false
                                         while (true) {
-                                            val event = withTimeoutOrNull(threshold - (System.currentTimeMillis() - startTime)) {
-                                                awaitPointerEvent()
+                                            val remaining = threshold - (System.currentTimeMillis() - startTime)
+                                            val event = withTimeoutOrNull(remaining.coerceAtLeast(0L)) {
+                                                awaitPointerEvent(PointerEventPass.Initial)
                                             }
                                             if (event == null) {
-                                                // Timeout reached = long press triggered.
+                                                // Threshold reached: trigger Focus.
                                                 focusCellIdx = i
+                                                // Drain until all fingers up.
+                                                while (true) {
+                                                    val ev = awaitPointerEvent(PointerEventPass.Initial)
+                                                    if (ev.changes.all { !it.pressed }) break
+                                                }
                                                 break
                                             }
-                                            val anyUp = event.changes.any { !it.pressed }
-                                            if (anyUp) { cancelled = true; break }
+                                            if (event.changes.any { !it.pressed }) {
+                                                lifted = true; break
+                                            }
                                         }
-                                        if (cancelled) {
-                                            // Wait for all pointers to lift before next cycle.
-                                            event@ while (true) {
-                                                val ev = awaitPointerEvent()
-                                                if (ev.changes.all { !it.pressed }) break@event
+                                        if (lifted) {
+                                            while (true) {
+                                                val ev = awaitPointerEvent(PointerEventPass.Initial)
+                                                if (ev.changes.all { !it.pressed }) break
                                             }
                                         }
                                     }
@@ -401,6 +412,7 @@ private fun FocusDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.85f)
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.Black)
                 .padding(8.dp),
@@ -418,7 +430,7 @@ private fun FocusDialog(
                 mapOrientation = mapOrientation,
                 accentColor = accentColor,
                 bezelStyleOverride = bezelStyleOverride,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
             )
             Button(
                 onClick = onDismiss,

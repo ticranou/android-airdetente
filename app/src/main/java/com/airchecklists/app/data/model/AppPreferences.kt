@@ -89,7 +89,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR,
+            WATCH_COMPACT, NUMFDR, CMNSCT,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -102,6 +102,7 @@ enum class EfisInstrument {
             HORAMETER_COMPACT -> 120
             TERRAINS_COMPACT -> 110
             NUMFDR -> 96
+            CMNSCT -> 52
             else -> 88
         }
 

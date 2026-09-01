@@ -42,6 +42,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.model.ShortcutTarget
@@ -83,7 +85,9 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
         when (target) {
             is ShortcutTarget.Instrument ->
                 if (target.instrument == EfisInstrument.NONE) "-----"
-                else efisInstrumentLabel(target.instrument).substringAfter(" - ", missingDelimiterValue = target.instrument.name)
+                else efisInstrumentLabel(target.instrument)
+                        .substringAfter(" - ", missingDelimiterValue = target.instrument.name)
+                        .replace(Regex("""\s*\([^)]*\)$"""), "")
             is ShortcutTarget.Dashboard ->
                 allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----"
         }
@@ -239,6 +243,26 @@ private fun save(targets: List<ShortcutTarget>, idx: Int, value: ShortcutTarget)
 
 // ── Sub-dialogs ───────────────────────────────────────────────────────────────
 
+private fun applyImmersiveDialog(dialogView: android.view.View) {
+    val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window ?: return
+    WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+    dialogWindow.setLayout(
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+    )
+    dialogWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK))
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+        dialogWindow.attributes = dialogWindow.attributes.also {
+            it.layoutInDisplayCutoutMode =
+                android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+    }
+    WindowInsetsControllerCompat(dialogWindow, dialogView).apply {
+        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        hide(WindowInsetsCompat.Type.systemBars())
+    }
+}
+
 @Composable
 private fun InstrumentFullScreenDialog(
     instrument: EfisInstrument,
@@ -257,16 +281,7 @@ private fun InstrumentFullScreenDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect {
-            val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
-            if (dialogWindow != null) {
-                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
-                dialogWindow.setLayout(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-            }
-        }
+        SideEffect { applyImmersiveDialog(dialogView) }
         Column(
             modifier = Modifier.fillMaxSize().background(Color.Black).padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -312,16 +327,7 @@ private fun DashboardFullScreenDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect {
-            val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
-            if (dialogWindow != null) {
-                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
-                dialogWindow.setLayout(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-            }
-        }
+        SideEffect { applyImmersiveDialog(dialogView) }
         Column(
             modifier = Modifier.fillMaxSize().background(Color.Black).padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

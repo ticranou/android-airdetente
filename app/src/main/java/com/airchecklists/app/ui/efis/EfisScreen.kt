@@ -43,9 +43,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -285,15 +288,51 @@ internal fun DashboardGrid(
         }
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
             val cellW = maxWidth / cols
-            val cellH = maxHeight / rows
+            val totalH = maxHeight
+            val densityObj = LocalDensity.current
+
+            // Flexible row heights: rows whose master instruments all have a fixed natural
+            // height (isSingleLine) get that height; the remaining space is distributed
+            // equally among the other rows.
+            val rowHeights: FloatArray = run {
+                // For each row, find the tallest master cell that starts on that row.
+                // A row is "short" only when every master cell starting there is isSingleLine.
+                val naturalDp = FloatArray(rows) { 0f }
+                val allShort = BooleanArray(rows) { true }
+                cells.forEachIndexed { i, cell ->
+                    if (cell.covered) return@forEachIndexed
+                    val row = i / cols
+                    if (cell.instrument.isSingleLine) {
+                        val ht = cell.instrument.singleLineHeightDp.toFloat()
+                        if (ht > naturalDp[row]) naturalDp[row] = ht
+                    } else {
+                        allShort[row] = false
+                    }
+                }
+                with(densityObj) {
+                    val shortRows = (0 until rows).filter { allShort[it] && naturalDp[it] > 0f }
+                    val normalRows = (0 until rows).filter { !allShort[it] || naturalDp[it] == 0f }
+                    val usedByShort = shortRows.sumOf { naturalDp[it].dp.toPx().toDouble() }.toFloat()
+                    val normalH = if (normalRows.isEmpty()) totalH.toPx() / rows
+                                  else (totalH.toPx() - usedByShort) / normalRows.size
+                    FloatArray(rows) { r ->
+                        if (allShort[r] && naturalDp[r] > 0f) naturalDp[r].dp.toPx()
+                        else normalH
+                    }
+                }
+            }
+            val rowOffsets = FloatArray(rows) { r -> rowHeights.take(r).sum() }
+
             cells.forEachIndexed { i, cell ->
                 if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed
                 val row = i / cols
                 val col = i % cols
                 val canFocus = cell.instrument != EfisInstrument.NAV_PLANNER
+                val cellH = with(densityObj) { rowHeights[row].toDp() }
+                val offsetY = with(densityObj) { rowOffsets[row].toDp() }
                 Box(
                     modifier = Modifier
-                        .offset(x = cellW * col, y = cellH * row)
+                        .offset(x = cellW * col, y = offsetY)
                         .width(cellW * cell.colSpan)
                         .height(cellH * cell.rowSpan)
                         .then(
@@ -420,6 +459,17 @@ private fun FocusDialog(
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 )
+                dialogWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK))
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    dialogWindow.attributes = dialogWindow.attributes.also {
+                        it.layoutInDisplayCutoutMode =
+                            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                    }
+                }
+                WindowInsetsControllerCompat(dialogWindow, dialogView).apply {
+                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    hide(WindowInsetsCompat.Type.systemBars())
+                }
             }
         }
         Column(

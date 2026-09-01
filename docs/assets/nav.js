@@ -25,6 +25,7 @@
       ["instrument-efis.html", "EFIS"],
       ["instrument-movingmap.html", "Moving Map"],
       ["instrument-approche.html", "Approche finale"],
+      ["instrument-raccourcis.html", "Raccourcis (CMNSCT)"],
     ]},
     { title: "Réglages", items: [
       ["reglages-apparence.html", "Affichage"],

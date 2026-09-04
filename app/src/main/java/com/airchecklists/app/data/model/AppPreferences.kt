@@ -62,6 +62,10 @@ enum class EfisInstrument {
     ANLAPP,              // Aide à l'approche finale analogique (ILS cross-pointer, jauge ronde)
     ANLTRF,              // Trafic Safesky (radar aérien, jauge ronde)
     ANLPRX,              // Proximité sol TAWS (SRTM, jauge ronde)
+    ANLCLT,              // Checklist (jauge ronde — sélection + exécution in-situ)
+    ANLACT,              // Action (jauge ronde — toggle moteur démarrage/arrêt)
+    ANLSCT,              // Raccourci tableau de bord (jauge ronde — double-tap navigue vers le tableau)
+    CMNFGT,              // Session de vol (rectangulaire, 100%-1L)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -72,13 +76,13 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT,
+            NUMAPP, CMNSCT, CMNFGT,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT)
 
     /** True for the numeric "single-line" instruments (label "…-1L"): they render
      *  at a fixed natural height, vertically centred, instead of stretching to fill
@@ -89,7 +93,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, CMNSCT,
+            WATCH_COMPACT, NUMFDR, CMNSCT, CMNFGT,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -103,6 +107,7 @@ enum class EfisInstrument {
             TERRAINS_COMPACT -> 110
             NUMFDR -> 96
             CMNSCT -> 52
+            CMNFGT -> 120
             else -> 88
         }
 
@@ -143,6 +148,36 @@ enum class AltitudeUnit {
     METERS,
 }
 
+/**
+ * GPS altitude correction to convert WGS84 ellipsoidal altitude to orthometric (MSL)
+ * altitude as published on aeronautical charts. Each entry stores the approximate
+ * geoid undulation N for a country/region (orthometric = WGS84 - N).
+ * Values are in metres, representative of the country centroid.
+ */
+@Serializable
+enum class GeoidRegion(val label: String, val correctionM: Float) {
+    NONE          ("Aucune (WGS84 brut)",      0f),
+    FRANCE        ("France",                 -47f),
+    BELGIUM       ("Belgique / Luxembourg",  -43f),
+    SWITZERLAND   ("Suisse",                 -48f),
+    SPAIN         ("Espagne",                -50f),
+    PORTUGAL      ("Portugal",               -51f),
+    ITALY         ("Italie",                 -42f),
+    GERMANY       ("Allemagne",              -36f),
+    AUSTRIA       ("Autriche",               -44f),
+    NETHERLANDS   ("Pays-Bas",               -40f),
+    UK            ("Royaume-Uni",            -52f),
+    IRELAND       ("Irlande",                -56f),
+    DENMARK       ("Danemark",               -37f),
+    SWEDEN        ("Suède",                  -23f),
+    NORWAY        ("Norvège",                -37f),
+    FINLAND       ("Finlande",               -19f),
+    POLAND        ("Pologne",                -32f),
+    CZECH         ("République tchèque",     -44f),
+    GREECE        ("Grèce",                  -50f),
+    CUSTOM        ("Personnalisé",             0f),
+}
+
 /** Altitude / vertical-speed conversions + formatting for the selected unit. */
 object AltitudeFormat {
     private const val FT_PER_M = 3.280839895
@@ -151,8 +186,8 @@ object AltitudeFormat {
     fun altValue(ft: Float, unit: AltitudeUnit): Float =
         if (unit == AltitudeUnit.METERS) (ft / FT_PER_M).toFloat() else ft
 
-    /** Short altitude unit label ("ft" / "m"). */
-    fun altLabel(unit: AltitudeUnit): String = if (unit == AltitudeUnit.METERS) "m" else "ft"
+    /** Short altitude unit label ("ft MSL" / "m"). */
+    fun altLabel(unit: AltitudeUnit): String = if (unit == AltitudeUnit.METERS) "m" else "ft MSL"
 
     /** Convert a vertical speed in ft/min to the display unit (ft/min or m/s). */
     fun vsValue(ftMin: Float, unit: AltitudeUnit): Float =
@@ -333,6 +368,12 @@ sealed class ShortcutTarget {
     data class Instrument(val instrument: EfisInstrument) : ShortcutTarget()
     @Serializable
     data class Dashboard(val dashboardId: String) : ShortcutTarget()
+    /** ANLSCT: navigate directly to this dashboard (pager jump, no focus dialog). */
+    @Serializable
+    data class DashboardNavigate(val dashboardId: String) : ShortcutTarget()
+    /** ANLSCT: open the VAC chart PDF for a terrain. */
+    @Serializable
+    data class TerrainVac(val vacId: String, val icao: String) : ShortcutTarget()
 }
 
 @Serializable
@@ -350,6 +391,24 @@ data class InstrumentPersistState(
     val targetAltitude: Int? = null,
     val shortcutSlots: List<EfisInstrument> = listOf(EfisInstrument.NONE, EfisInstrument.NONE, EfisInstrument.NONE),
     val shortcutTargets: List<ShortcutTarget> = listOf(ShortcutTarget.Instrument(EfisInstrument.NONE), ShortcutTarget.Instrument(EfisInstrument.NONE), ShortcutTarget.Instrument(EfisInstrument.NONE)),
+    /** dashboardId assigned to each ANLSCT cell (keyed by cell index). */
+    val dashboardShortcutSlots: Map<Int, String> = emptyMap(),
+    /** Per-cell ANLSCT target (keyed by cell index). Replaces dashboardShortcutSlots. */
+    val anlsctTargets: Map<Int, ShortcutTarget> = emptyMap(),
+    /** Per-cell shortcut targets: cellIdx → list of 3 ShortcutTarget. Replaces the global shortcutTargets. */
+    val shortcutTargetsByCell: Map<Int, List<ShortcutTarget>> = emptyMap(),
+    /** checklistId assigned to each ANLCLT cell (keyed by cell index in normalizedCells). */
+    val checklistSlots: Map<Int, String> = emptyMap(),
+    /** Per-checklist checked state: checklistId → list of item indices that are checked. */
+    val checklistChecked: Map<String, List<Int>> = emptyMap(),
+    /** actionId assigned to each ANLACT cell (keyed by cell index). */
+    val actionSlots: Map<Int, String> = emptyMap(),
+    /** Which ANLACT cells are currently in DONE state (keyed by cell index). */
+    val actionDone: Map<Int, Boolean> = emptyMap(),
+    /** Epoch ms when the engine was last started (null = engine not running). */
+    val engineStartMs: Long? = null,
+    /** Epoch ms when the engine was last stopped (null = never stopped). */
+    val engineStopMs: Long? = null,
 )
 
 /** A navigation plan: an ordered list of terrain ICAO codes + free-text notes. */
@@ -391,10 +450,16 @@ data class AppPreferences(
     val efisSpeedUnit: EfisSpeedUnit = EfisSpeedUnit.KMH,
     /** Unit for all altitude / vertical-speed readouts (default: feet). */
     val altitudeUnit: AltitudeUnit = AltitudeUnit.FEET,
+    /** GPS → orthometric altitude correction (geoid undulation). */
+    val geoidRegion: GeoidRegion = GeoidRegion.FRANCE,
+    /** Custom correction in metres, used when geoidRegion == CUSTOM. */
+    val geoidCustomM: Float = -47f,
     /** EFIS instrument responsiveness: 0 = very smooth, 1 = very reactive. */
     val efisResponsiveness: Float = 0.35f,
     /** Show a numeric value under altimeter/vario/heading/airspeed. */
     val efisShowValues: Boolean = true,
+    /** Show gesture hint markers (long-press bar, double-tap dots) on instruments. */
+    val showGestureHints: Boolean = true,
     /** Keep the screen on (prevent sleep). */
     val keepScreenOn: Boolean = true,
     /** Saved instrument layouts. Empty => migrate from the legacy efis* fields. */

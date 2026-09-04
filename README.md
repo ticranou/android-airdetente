@@ -15,14 +15,7 @@ mobile** (moving map) hors-ligne.
 
 ## Fonctionnalités
 
-- **Checks** : liste des checklists de l'appareil sélectionné, puis exécution
-  guidée — barre de progression, cochage **dans l'ordre**, élément courant en
-  surbrillance, enchaînement vers la checklist suivante, bannière de fin.
-- **Cockpit / EFIS** : tableaux de bord configurables. La grille est **2 colonnes ×
-  N lignes (1–6)** avec **fusion de cellules** (boutons Large / Haut / Séparer dans
-  l'éditeur) pour dimensionner chaque instrument. Deux familles d'instruments,
-  filtrables dans le sélecteur (Analogique `ANL…` / Numérique `NUM…`, et `CMN`
-  « Vide ») :
+- **Cockpit / EFIS** : (onglet principal, page d'accueil) tableaux de bord configurables. La grille est **2 colonnes × N lignes (1–6)** avec **fusion de cellules** (boutons Large / Haut / Séparer dans l'éditeur) pour dimensionner chaque instrument. Deux familles d'instruments, filtrables dans le sélecteur (Analogique `ANL…` / Numérique `NUM…`, et `CMN` « Vide ») :
   - **Analogiques** (cadrans ronds) : Conservateur, Anémomètre, Altimètre,
     Variomètre, Horizon, Bille, Chronomètre, Compte à rebours, Horamètre, Terrains
     proches, Météo (radar + vent FL20), **Montre**, **Trafic Safesky**, **Proximité sol TAWS**.
@@ -30,15 +23,18 @@ mobile** (moving map) hors-ligne.
     Conservateur, Anémomètre, Altimètre/Variomètre, Bille, Horizon, Chronomètre,
     Compte à rebours, Horamètre, Terrains proches, Radar météo, **Montre**, EFIS
     (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes).
-  - **Commun** : **Raccourcis (CMNSCT)** — 3 slots configurables (instruments ou tableaux de bord) pour accès rapide ; tap ouvre l'instrument/tableau en plein écran, long-press configure le slot.
+  - **Commun** : **Raccourcis (CMNSCT)** — 4 slots configurables pour accès rapide. Chaque slot supporte 4 types de cibles : navigation tableau de bord (>> : double-tap), tableau de bord Focus (tap), instrument Focus (tap), ou VAC chart Terrain (tap). Long-press configure un slot.
   - **Gestes** (indiqués sur chaque instrument par un tiret = appui long, deux
     points = double-tap) : cap et **altitude** à suivre par appui long (curseur/bug
     magenta) ; chrono double-tap = start/stop, appui long = reset ; rebours
     double-tap = start/stop, appui long = saisie ; horamètre appui long = saisie ;
-    terrains double-tap = VAC, appui long = liste ; météo appui long = carte.
+    terrains double-tap = VAC, appui long = liste ; météo appui long = carte ; Raccourcis long-press configure le slot.
   - **Pinch-to-zoom Focus** : deux doigts écartés (scale > 1.3×) sur un instrument pour zoomer en mode Focus (instrument plein écran avec compte à rebours auto-fermeture, durée configurable 10–120 s).
   - Sources de cap (magnétique / route GPS), de vario (GPS / baromètre), unité de
     vitesse (km/h / kt) et réactivité réglables.
+- **Checks** : liste des checklists de l'appareil sélectionné, puis exécution
+  guidée — barre de progression, cochage **dans l'ordre**, élément courant en
+  surbrillance, enchaînement vers la checklist suivante, bannière de fin.
 - **Terrains / VAC** : liste des terrains, fiche détaillée, ouverture de la carte
   VAC (PDF local ou URL SIA selon le cycle AIRAC), et **météo** (METAR/TAF) quand
   la station est disponible.

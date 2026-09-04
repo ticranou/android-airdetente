@@ -81,8 +81,8 @@ fun AirDetenteNavHost() {
     val navController = rememberNavController()
 
     val tabs = listOf(
-        TabItem(Destinations.Checks, R.string.nav_checks, Icons.AutoMirrored.Filled.List) { it?.hasRoute(Destinations.Checks::class) == true },
         TabItem(Destinations.Efis, R.string.nav_efis, Icons.Filled.Dashboard) { it?.hasRoute(Destinations.Efis::class) == true },
+        TabItem(Destinations.Checks, R.string.nav_checks, Icons.AutoMirrored.Filled.List) { it?.hasRoute(Destinations.Checks::class) == true },
         TabItem(Destinations.Vac, R.string.nav_vac, Icons.Filled.Map) { it?.hasRoute(Destinations.Vac::class) == true },
         TabItem(Destinations.Settings, R.string.nav_settings, Icons.Filled.Settings) { it?.hasRoute(Destinations.Settings::class) == true },
     )
@@ -150,7 +150,7 @@ fun AirDetenteNavHost() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Destinations.Checks,
+            startDestination = Destinations.Efis,
         ) {
             composable<Destinations.Checks> {
                 ChecksScreen(

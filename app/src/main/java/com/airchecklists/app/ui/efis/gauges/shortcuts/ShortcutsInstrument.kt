@@ -62,7 +62,7 @@ private const val N = 3
 private enum class ConfigStep { CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD }
 
 @Composable
-fun ShortcutsInstrument(modifier: Modifier = Modifier) {
+fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val prefs = ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
@@ -75,8 +75,9 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
             ?.let { com.airchecklists.app.data.model.SpeedArcs.from(it).takeIf { a -> a.hasAny } }
     }
 
-    val targets = remember(prefs.value.instruments.shortcutTargets) {
-        val raw = prefs.value.instruments.shortcutTargets
+    val targets = remember(cellIdx, prefs.value.instruments.shortcutTargetsByCell) {
+        val raw = prefs.value.instruments.shortcutTargetsByCell[cellIdx]
+            ?: prefs.value.instruments.shortcutTargets // migration: fallback to global list
         List(N) { i -> raw.getOrElse(i) { ShortcutTarget.Instrument(EfisInstrument.NONE) } }
     }
 
@@ -90,6 +91,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                         .replace(Regex("""\s*\([^)]*\)$"""), "")
             is ShortcutTarget.Dashboard ->
                 allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----"
+            else -> "-----"
         }
     }
 
@@ -181,6 +183,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     )
                 }
             }
+            else -> openIdx = -1
         }
     }
 
@@ -217,7 +220,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     current = currentInstr,
                     onDismiss = { configIdx = -1 },
                     onSelect = { chosen ->
-                        save(targets, configIdx, ShortcutTarget.Instrument(chosen))
+                        save(cellIdx, targets, configIdx, ShortcutTarget.Instrument(chosen))
                         configIdx = -1
                     },
                 )
@@ -227,7 +230,7 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
                     dashboards = allDashboards,
                     onDismiss = { configIdx = -1 },
                     onSelect = { dash ->
-                        save(targets, configIdx, ShortcutTarget.Dashboard(dash.id))
+                        save(cellIdx, targets, configIdx, ShortcutTarget.Dashboard(dash.id))
                         configIdx = -1
                     },
                 )
@@ -236,9 +239,11 @@ fun ShortcutsInstrument(modifier: Modifier = Modifier) {
     }
 }
 
-private fun save(targets: List<ShortcutTarget>, idx: Int, value: ShortcutTarget) {
-    val newTargets = targets.toMutableList().also { it[idx] = value }
-    ServiceLocator.updateInstruments { it.copy(shortcutTargets = newTargets) }
+private fun save(cellIdx: Int, targets: List<ShortcutTarget>, slotIdx: Int, value: ShortcutTarget) {
+    val newTargets = targets.toMutableList().also { it[slotIdx] = value }
+    ServiceLocator.updateInstruments {
+        it.copy(shortcutTargetsByCell = it.shortcutTargetsByCell + (cellIdx to newTargets))
+    }
 }
 
 // ── Sub-dialogs ───────────────────────────────────────────────────────────────

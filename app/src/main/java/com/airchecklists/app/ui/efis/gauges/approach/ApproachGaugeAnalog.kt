@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
@@ -36,15 +35,20 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
-import com.airchecklists.app.ui.efis.gauges.gaugeText
 import com.airchecklists.app.ui.efis.gauges.gaugeTitle
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val ON = Color(0xFF35C759)   // green: inside tolerance
-private val OFF = Color(0xFFE8843A)  // orange: outside tolerance
-private val LOW = Color(0xFFFF5252)  // red: below the 3° plane
-private val FLAG = Color(0xFFFF5252) // GS/LOC flag (no data)
+private val ON   = Color(0xFF35C759)   // green: on axis
+private val OFF  = Color(0xFFE8843A)   // orange: off axis
+private val FLAG = Color(0xFFFF5252)   // LOC flag (no data)
+
+// Proximity ring colour (thin, dimmed — ground proximity indicator)
+private val RING_DIM = Color(0x44FFFFFF)
+
+private val ALT_OK   = Color(0xFF32C832)
+private val ALT_WARN = Color(0xFFFFC107)
+private val ALT_LOW  = Color(0xFFE53935)
 
 /**
  * ANLAPP — analog final-approach aid, in the classic ILS "cross-pointer" style.
@@ -95,12 +99,11 @@ fun ApproachGaugeAnalog(
     Canvas(
         modifier = modifier.pointerInput(Unit) {
             detectTapGestures(
-                onDoubleTap = { ServiceLocator.efisProvider.nextDemo() },
                 onLongPress = { showDialog = true },
             )
         },
     ) {
-        drawIls(tm, bezel, target, errors)
+        drawIls(tm, bezel, target, errors, state.gpsAltitudeFt)
     }
 
     if (showDialog) {
@@ -123,112 +126,97 @@ private fun DrawScope.drawIls(
     bezel: GaugeBezel,
     target: ApproachTarget?,
     errors: ApproachGeometry.ApproachErrors,
+    altitudeFt: Float,
 ) {
     val (cx, cy, r) = gaugeFace(bezel)
     val hasTarget = errors.hasTarget
 
-    // The cross-pointer scale is centred a little ABOVE the face centre, so the lower
-    // third of the face is free for the four readout "lobes" (AXE / QFU / ICAO / PLAN).
+    // Cross-pointer scale at face centre.
     val scx = cx
-    val scy = cy - r * 0.14f
+    val scy = cy
 
-    // Deviation scale: 1 dot = tolerance, 2 dots = full-scale (2× tolerance). Bars saturate
-    // at the 2nd dot and never reach the bezel, so the instrument stays legible off-scale.
-    val full = r * 0.44f                       // deflection at full-scale (2× tol)
-    val dot1 = full * 0.5f                     // 1st diamond = ±tolerance
-    val latM = errors.lateralM.toFloat()
-    val aboveFt = errors.aboveFt.toFloat()
-    // Localizer: ship RIGHT of axis (+lat) ⇒ axis is LEFT ⇒ bar deflects LEFT (−x).
-    val locDefl = (-latM / (2f * ApproachGeometry.LAT_TOL_M.toFloat()) * full)
-        .coerceIn(-full, full)
-    // Glideslope: ship ABOVE plane (+above) ⇒ plane is BELOW ⇒ bar deflects DOWN (+y).
-    val gsDefl = (aboveFt / (2f * ApproachGeometry.VERT_TOL_FT.toFloat()) * full)
-        .coerceIn(-full, full)
+    val full  = r * 0.44f
+    val dot1  = full * 0.5f
+    val latM  = errors.lateralM.toFloat()
+    // Localizer: ship RIGHT of axis (+lat) => bar deflects LEFT (-x)
+    val locDefl = (-latM / (2f * ApproachGeometry.LAT_TOL_M.toFloat()) * full).coerceIn(-full, full)
 
-    val latOk = abs(latM) <= ApproachGeometry.LAT_TOL_M
-    val planeOk = abs(aboveFt) <= ApproachGeometry.VERT_TOL_FT
-    val barColor = when {
-        !hasTarget -> GaugeColors.MarkDim
-        aboveFt < -ApproachGeometry.VERT_TOL_FT -> LOW
-        latOk && planeOk -> ON
-        else -> OFF
-    }
+    val latOk    = abs(latM) <= ApproachGeometry.LAT_TOL_M
+    val barColor = if (!hasTarget) GaugeColors.MarkDim else if (latOk) ON else OFF
 
-    // ---- Tolerance scale + deviation bars. ----
-    // Diamond scale markers at ±tol and ±full on both axes.
+    // ── Proximity rings at the edge — cumulative as altitude drops ──
+    // AGL < 900 ft → outer (green) lights up
+    // AGL < 500 ft → middle (orange) lights up
+    // AGL < 300 ft → inner (red) lights up
+    val fieldElevFt = target?.fieldElevFt
+    val aglFt = if (fieldElevFt != null) altitudeFt - fieldElevFt else null
+    val ringStroke = Stroke(width = r * 0.020f)
+    val outerColor = if (aglFt != null && hasTarget && aglFt < 900f) ALT_OK   else RING_DIM
+    val midColor   = if (aglFt != null && hasTarget && aglFt < 500f) ALT_WARN else RING_DIM
+    val innerColor = if (aglFt != null && hasTarget && aglFt < 300f) ALT_LOW  else RING_DIM
+    drawCircle(outerColor, radius = r * 0.940f, center = Offset(cx, cy), style = ringStroke)
+    drawCircle(midColor,   radius = r * 0.880f, center = Offset(cx, cy), style = ringStroke)
+    drawCircle(innerColor, radius = r * 0.820f, center = Offset(cx, cy), style = ringStroke)
+
+    // ── Diamond scale markers (horizontal axis only) ──
     val diaR = r * 0.045f
     for (d in listOf(-full, -dot1, dot1, full)) {
         drawDiamond(Offset(scx + d, scy), diaR, GaugeColors.MarkDim)
-        drawDiamond(Offset(scx, scy + d), diaR, GaugeColors.MarkDim)
     }
 
-    // Deviation pointers (rounded ILS bars, capped at ±full).
-    val barReach = full + r * 0.10f
-    val barW = r * 0.035f
+    // ── Localizer bar (vertical only) ──
+    val barReach = full + r * 0.30f
+    val barW     = r * 0.035f
     if (hasTarget) {
         val vx = scx + locDefl
         drawLine(barColor, Offset(vx, scy - barReach), Offset(vx, scy + barReach),
             strokeWidth = barW, cap = StrokeCap.Round)
-        val hy = scy + gsDefl
-        drawLine(barColor, Offset(scx - barReach, hy), Offset(scx + barReach, hy),
-            strokeWidth = barW, cap = StrokeCap.Round)
     } else {
         drawLine(GaugeColors.MarkDim, Offset(scx, scy - barReach), Offset(scx, scy + barReach),
             strokeWidth = barW, cap = StrokeCap.Round)
-        drawLine(GaugeColors.MarkDim, Offset(scx - barReach, scy), Offset(scx + barReach, scy),
-            strokeWidth = barW, cap = StrokeCap.Round)
-        drawFlag(tm, "LOC", scx - r * 0.28f, scy - r * 0.28f)
-        drawFlag(tm, "GS", scx + r * 0.28f, scy + r * 0.28f)
+        drawFlag(tm, "LOC", scx, scy - r * 0.28f)
     }
 
-    // Centre reference (the aircraft): a crisp white ring drawn on top of the bars.
+    // ── Centre reference ring ──
     drawCircle(GaugeColors.Face, r * 0.075f, Offset(scx, scy))
     drawCircle(GaugeColors.Mark, r * 0.075f, Offset(scx, scy), style = Stroke(width = 2.4f))
 
-    // ---- Numeric readouts — 3 bottom lobes per mockup layout. ----
+    // ── Numeric readouts ──
     val axeVal: String
-    val planVal: String
     if (hasTarget) {
         val side = if (errors.lateralM > 0) "D" else "G"
         val latN = abs(latM).roundToInt().coerceAtMost(999)
         axeVal = if (abs(latM) < 1f) "0" else "${latN}m $side"
-        val sign = if (aboveFt > 0f) "+" else "−"
-        val altN = abs(aboveFt).roundToInt().coerceAtMost(999)
-        planVal = if (abs(aboveFt) < 1f) "0" else "$sign${altN}ft"
     } else {
         axeVal = "—"
-        planVal = "—"
     }
-    val axeColor = if (!hasTarget) GaugeColors.MarkDim else if (latOk) ON else OFF
-    val planColor = when {
-        !hasTarget -> GaugeColors.MarkDim
-        aboveFt < -ApproachGeometry.VERT_TOL_FT -> LOW
-        planeOk -> ON
-        else -> OFF
+    val axeColor  = if (!hasTarget) GaugeColors.MarkDim else if (latOk) ON else OFF
+    val altiTxt   = "${altitudeFt.roundToInt()} ft"
+    val circuitAltFt: Int? = target?.fieldElevFt?.let { it + 1000 }
+    val altiColor = when {
+        circuitAltFt == null || !hasTarget   -> GaugeColors.MarkDim
+        altitudeFt < circuitAltFt - 50       -> ALT_LOW
+        abs(altitudeFt - circuitAltFt) <= 50 -> ALT_OK
+        else                                 -> ALT_WARN
     }
-    val qfuTxt = if (target?.qfuKnown == true) {
-        val tens = ((target.qfuTrueDeg / 10f).roundToInt() % 36).let { if (it <= 0) it + 36 else it }
-        tens.toString().padStart(2, '0')
-    } else "?"
+    val circTxt   = circuitAltFt?.let { "$it ft" } ?: "—"
+    val icaoTxt   = target?.icao ?: "—"
 
-    // Title at the standard position.
     gaugeTitle(tm, "APPROCHE", cx, cy, r)
 
-    // Three bottom lobes: AXE | ICAO+QFU | PLAN
     drawGaugeLobes(
         tm, cx, cy, r,
-        left   = GaugeLobe("AXE",  axeVal,  axeColor),
+        left   = GaugeLobe("AXE", axeVal, axeColor),
         centre = GaugeLobeCentre(
-            primary      = qfuTxt,
-            sub          = target?.icao ?: "—",
-            primaryColor = GaugeColors.Mark,
-            subColor     = if (hasTarget) GaugeColors.Accent else GaugeColors.MarkDim,
+            primary      = icaoTxt,
+            sub          = altiTxt,
+            primaryColor = if (hasTarget) GaugeColors.Accent else GaugeColors.MarkDim,
+            subColor     = altiColor,
         ),
-        right  = GaugeLobe("PLAN", planVal, planColor),
+        right  = GaugeLobe("CIRC", circTxt, GaugeColors.MarkDim),
     )
 
-    // Gesture hints (double-tap = demo, long-press = lock target).
-    drawGestureHints(cx - r * 0.92f, cy - r * 0.92f, hasLongPress = true, hasDoubleTap = true)
+    drawGestureHints(cx - r * 0.92f, cy - r * 0.92f, hasLongPress = true, hasDoubleTap = false)
 }
 
 /** Small filled diamond (ILS scale marker) centred on [c] with half-diagonal [rad]. */
@@ -240,11 +228,15 @@ private fun DrawScope.drawDiamond(c: Offset, rad: Float, color: Color) {
     drawPath(p, color, style = Stroke(width = 1.8f))
 }
 
-/** A small red "warning flag" box (classic ILS off-flag) with a label. */
+/** A small red "warning flag" box with a label, centred on (x, y). */
 private fun DrawScope.drawFlag(tm: TextMeasurer, label: String, x: Float, y: Float) {
     val m = tm.measure(label)
     val w = m.size.width + 10f
     val h = m.size.height + 4f
-    drawRect(FLAG, topLeft = Offset(x - w / 2f, y - h / 2f), size = Size(w, h))
+    drawRoundRect(FLAG,
+        topLeft = Offset(x - w / 2f, y - h / 2f),
+        size = Size(w, h),
+        cornerRadius = CornerRadius(4f),
+    )
     drawText(m, topLeft = Offset(x - m.size.width / 2f, y - m.size.height / 2f))
 }

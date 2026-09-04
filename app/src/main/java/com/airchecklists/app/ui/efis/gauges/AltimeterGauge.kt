@@ -9,7 +9,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
@@ -18,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.AltitudeFormat
 import com.airchecklists.app.data.model.AltitudeUnit
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.components.AltCalibrationDialog
 import com.airchecklists.app.ui.components.AltitudeEntryDialog
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 
@@ -35,11 +38,16 @@ fun AltimeterGauge(
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val targetAlt by ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
+    val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
+    var showCalibDialog by remember { mutableStateOf(false) }
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
-            detectTapGestures(onLongPress = { showDialog = true })
+            detectTapGestures(
+                onLongPress = { showDialog = true },
+                onDoubleTap = { showCalibDialog = true },
+            )
         },
     ) {
         val (cx, cy, r) = gaugeFace(bezel)
@@ -60,6 +68,18 @@ fun AltimeterGauge(
         }
         gaugeText(tm, "ALT", cx, cy - r * 0.32f, sizeSp = 11f, color = GaugeColors.MarkDim)
         gaugeText(tm, AltitudeFormat.altLabel(altUnit), cx, cy + r * 0.34f, sizeSp = 10f, color = GaugeColors.MarkDim)
+
+        // Calibration override indicator: magenta pill behind the numeric value.
+        if (calibAlt != null) {
+            val pillW = r * 1.1f
+            val pillH = r * 0.30f
+            drawRoundRect(
+                color = Color(0xFFAA00CC),
+                topLeft = androidx.compose.ui.geometry.Offset(cx - pillW / 2f, cy - pillH / 2f),
+                size = androidx.compose.ui.geometry.Size(pillW, pillH),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(pillH / 2f),
+            )
+        }
 
         // Drive the dial in the DISPLAY unit so the analog reading matches the
         // numeric value (labels 0–9 mean ×1000 and ×100 of the selected unit).
@@ -93,8 +113,8 @@ fun AltimeterGauge(
             drawRoundedValue(tm, txt, cx, cy, sizeSp = 20f)
         }
 
-        // Gesture hint (long-press) just outside the face, top-left.
-        drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
+        // Gesture hint (long-press + double-tap) just outside the face, top-left.
+        drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
     }
 
     if (showDialog) {
@@ -103,6 +123,15 @@ fun AltimeterGauge(
             onDismiss = { showDialog = false },
             onConfirm = { a -> ServiceLocator.targetAltitude.value = a; showDialog = false },
             onClear = { ServiceLocator.targetAltitude.value = null; showDialog = false },
+        )
+    }
+
+    if (showCalibDialog) {
+        AltCalibrationDialog(
+            initial = calibAlt ?: nearestAirfieldElevationFt(altitudeFt),
+            onDismiss = { showCalibDialog = false },
+            onConfirm = { a -> ServiceLocator.altCalibrationFt.value = a; showCalibDialog = false },
+            onClear = { ServiceLocator.altCalibrationFt.value = null; showCalibDialog = false },
         )
     }
 }

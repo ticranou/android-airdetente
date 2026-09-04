@@ -73,6 +73,14 @@ fun efisInstrumentLabel(instrument: EfisInstrument): String = stringResource(
         EfisInstrument.ANLAPP -> R.string.efis_instr_approach_anl
         EfisInstrument.ANLTRF -> R.string.efis_instr_trf
         EfisInstrument.ANLPRX -> R.string.efis_instr_prx
+        EfisInstrument.ANLCLT -> R.string.efis_instr_clt
+        EfisInstrument.ANLACT -> R.string.efis_instr_act
+        EfisInstrument.ANLSCT -> R.string.efis_instr_sct_dash
+        EfisInstrument.ANLCCT -> R.string.efis_instr_cct
+        EfisInstrument.CMNFGT -> R.string.efis_instr_fgt
+        EfisInstrument.SPACER_S -> R.string.efis_instr_spacer_s
+        EfisInstrument.SPACER_M -> R.string.efis_instr_spacer_m
+        EfisInstrument.SPACER_L -> R.string.efis_instr_spacer_l
     },
 )
 

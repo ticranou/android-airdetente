@@ -1,6 +1,7 @@
 package com.airchecklists.app.ui.efis.gauges.compact
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -69,13 +70,25 @@ fun DrawScope.compactText(
 /** Full-cell modifier for compact instruments. */
 fun Modifier.compactCell(): Modifier = this.fillMaxSize()
 
+/** Controls whether gesture-affordance hints (long-press dash, double-tap dots) are drawn.
+ *  Default true; set to false via CompositionLocalProvider to hide them globally. */
+val LocalShowGestureHints = compositionLocalOf { true }
+
+/** Singleton updated by InstrumentSlot from LocalShowGestureHints before each draw.
+ *  Allows DrawScope extensions to read the preference without CompositionLocal access. */
+internal object GestureHintsState {
+    @Volatile var enabled: Boolean = true
+}
+
 /**
  * Draws gesture-affordance hints anchored at (x,y) (their left edge), laid out
  * horizontally: a dash "–" when [hasLongPress], two dots ".." when [hasDoubleTap].
  * Shared by analog gauges (drawn just outside the face) and numeric instruments
  * (drawn in the title bar).
+ * Pass [enabled] = false (from LocalShowGestureHints.current) to suppress drawing.
  */
-fun DrawScope.drawGestureHints(x: Float, y: Float, hasLongPress: Boolean, hasDoubleTap: Boolean) {
+fun DrawScope.drawGestureHints(x: Float, y: Float, hasLongPress: Boolean, hasDoubleTap: Boolean, enabled: Boolean = true) {
+    if (!enabled || !GestureHintsState.enabled) return
     val color = Color(0xFFCFCFCF)
     var cx = x + 5f     // small inset from the edge
     if (hasLongPress) {

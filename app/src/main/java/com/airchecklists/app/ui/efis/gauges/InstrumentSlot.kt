@@ -22,6 +22,8 @@ import com.airchecklists.app.ui.efis.gauges.compact.AttitudeCompact
 import com.airchecklists.app.ui.efis.gauges.compact.BallCompact
 import com.airchecklists.app.ui.efis.gauges.compact.EfisCompact
 import com.airchecklists.app.ui.efis.gauges.compact.HeadingCompact
+import com.airchecklists.app.ui.efis.gauges.compact.GestureHintsState
+import com.airchecklists.app.ui.efis.gauges.compact.LocalShowGestureHints
 import com.airchecklists.app.ui.efis.gauges.map.MovingMap
 
 /** Renders the gauge for a grid slot, or nothing for NONE. Round gauges are
@@ -40,6 +42,7 @@ fun InstrumentSlot(
     accentColor: Long? = null,
     bezelStyleOverride: com.airchecklists.app.data.model.GaugeBezelStyle? = null,
     onOpenMap: () -> Unit = {},
+    cellIdx: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     // Effective bezel for this cell: per-cell overrides take precedence over the
@@ -49,6 +52,8 @@ fun InstrumentSlot(
         color = accentColor?.let { androidx.compose.ui.graphics.Color(it.toInt()) } ?: global.color,
         style = bezelStyleOverride ?: global.style,
     )
+    val showHints = LocalShowGestureHints.current
+    androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
     androidx.compose.runtime.CompositionLocalProvider(LocalGaugeBezel provides bezel) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         val round = Modifier.gaugeCell()
@@ -71,7 +76,8 @@ fun InstrumentSlot(
         } else when (instrument) {
             EfisInstrument.NONE -> Unit
             EfisInstrument.CMNSCT -> com.airchecklists.app.ui.efis.gauges.shortcuts.ShortcutsInstrument(
-                Modifier.fillMaxWidth().wrapContentHeight().padding(4.dp)
+                cellIdx = cellIdx,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(4.dp),
             )
             EfisInstrument.ALTIMETER -> AltimeterGauge(state.gpsAltitudeFt, showValues, altUnit, round)
             EfisInstrument.VARIOMETER -> VarioGauge(state.verticalSpeedFtMin, showValues, altUnit, round)
@@ -110,6 +116,12 @@ fun InstrumentSlot(
             EfisInstrument.ANLAPP -> com.airchecklists.app.ui.efis.gauges.approach.ApproachGaugeAnalog(state, round)
             EfisInstrument.ANLTRF -> com.airchecklists.app.ui.efis.gauges.traffic.TrafficAnalogInstrument(round)
             EfisInstrument.ANLPRX -> com.airchecklists.app.ui.efis.gauges.proximity.ProximityAnalogInstrument(round)
+            EfisInstrument.ANLCLT -> com.airchecklists.app.ui.efis.gauges.checklist.ChecklistInstrument(cellIdx, round)
+            EfisInstrument.ANLACT -> com.airchecklists.app.ui.efis.gauges.action.ActionInstrument(cellIdx, round)
+            EfisInstrument.ANLSCT -> com.airchecklists.app.ui.efis.gauges.shortcutdash.DashboardShortcutInstrument(cellIdx, round)
+            EfisInstrument.ANLCCT -> com.airchecklists.app.ui.efis.gauges.circuit.CircuitInstrument(state.headingDeg, state.gpsAltitudeFt, showValues, round)
+            EfisInstrument.CMNFGT -> com.airchecklists.app.ui.efis.gauges.compact.FlightSessionDigital(fill)
+            EfisInstrument.SPACER_S, EfisInstrument.SPACER_M, EfisInstrument.SPACER_L -> Unit
         }
     }
     }

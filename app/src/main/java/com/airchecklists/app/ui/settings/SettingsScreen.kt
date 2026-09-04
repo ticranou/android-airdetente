@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -40,6 +41,9 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -289,8 +293,11 @@ fun SettingsScreen(
                     onVarioSource = viewModel::setEfisVarioSource,
                     onEfisSpeedUnit = viewModel::setEfisSpeedUnit,
                     onAltitudeUnit = viewModel::setAltitudeUnit,
+                    onGeoidRegion = viewModel::setGeoidRegion,
+                    onGeoidCustomM = viewModel::setGeoidCustomM,
                     onEfisResponsiveness = viewModel::setEfisResponsiveness,
                     onEfisShowValues = viewModel::setEfisShowValues,
+                    onShowGestureHints = viewModel::setShowGestureHints,
                     onFocusDurationSec = viewModel::setFocusDurationSec,
                     onFdrBufferMinutes = viewModel::setFdrBufferMinutes,
                     onFdrFlushMinutes = viewModel::setFdrFlushMinutes,
@@ -739,8 +746,11 @@ private fun CockpitsSection(
     onVarioSource: (EfisVarioSource) -> Unit,
     onEfisSpeedUnit: (EfisSpeedUnit) -> Unit,
     onAltitudeUnit: (com.airchecklists.app.data.model.AltitudeUnit) -> Unit,
+    onGeoidRegion: (com.airchecklists.app.data.model.GeoidRegion) -> Unit,
+    onGeoidCustomM: (Float) -> Unit,
     onEfisResponsiveness: (Float) -> Unit,
     onEfisShowValues: (Boolean) -> Unit,
+    onShowGestureHints: (Boolean) -> Unit,
     onFocusDurationSec: (Int) -> Unit,
     onFdrBufferMinutes: (Int) -> Unit,
     onFdrFlushMinutes: (Int) -> Unit,
@@ -839,6 +849,41 @@ private fun CockpitsSection(
         ) { Text(stringResource(R.string.settings_alt_unit_m)) }
     }
 
+    // Geoid correction
+    Text(
+        "Correction altitude GPS (géoïde)",
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 12.dp),
+    )
+    Text(
+        "Corrige l'écart entre l'altitude WGS84 du GPS et l'altitude MSL des cartes aéronautiques",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    GeoidRegionDropdown(
+        selected = prefs.geoidRegion,
+        onSelect = onGeoidRegion,
+    )
+    if (prefs.geoidRegion == com.airchecklists.app.data.model.GeoidRegion.CUSTOM) {
+        var customText by remember(prefs.geoidCustomM) {
+            mutableStateOf(prefs.geoidCustomM.toInt().toString())
+        }
+        OutlinedTextField(
+            value = customText,
+            onValueChange = { v ->
+                customText = v
+                v.toFloatOrNull()?.let { onGeoidCustomM(it) }
+            },
+            label = { Text("Correction (mètres, négatif)") },
+            singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+            ),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+    }
+
     // Instrument responsiveness (smoothing).
     Text(
         stringResource(R.string.settings_efis_sensitivity),
@@ -874,6 +919,29 @@ private fun CockpitsSection(
             )
             Text(
                 stringResource(R.string.settings_efis_show_values_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onShowGestureHints(!prefs.showGestureHints) },
+    ) {
+        androidx.compose.material3.Checkbox(
+            checked = prefs.showGestureHints,
+            onCheckedChange = { onShowGestureHints(it) },
+        )
+        Column(modifier = Modifier.padding(start = 4.dp)) {
+            Text(
+                "Indicateurs de gestes",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                "Affiche le trait (appui long) et les points (double tap) sur les instruments",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -1246,4 +1314,56 @@ private fun SafeskyKeyField(value: String, onChanged: (String) -> Unit) {
         },
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun GeoidRegionDropdown(
+    selected: com.airchecklists.app.data.model.GeoidRegion,
+    onSelect: (com.airchecklists.app.data.model.GeoidRegion) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    androidx.compose.material3.ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    ) {
+        OutlinedTextField(
+            value = selected.label,
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+        )
+        if (expanded) {
+            androidx.compose.material3.DropdownMenu(
+                expanded = true,
+                onDismissRequest = { expanded = false }
+            ) {
+                com.airchecklists.app.data.model.GeoidRegion.entries.forEach { region ->
+                    DropdownMenuItem(
+                        text = {
+                            androidx.compose.foundation.layout.Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(region.label)
+                                if (region != com.airchecklists.app.data.model.GeoidRegion.CUSTOM && region != com.airchecklists.app.data.model.GeoidRegion.NONE) {
+                                    Text(
+                                        "${region.correctionM.toInt()} m",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        },
+                        onClick = { onSelect(region); expanded = false },
+                        trailingIcon = if (region == selected) {
+                            { Icon(Icons.Filled.Check, null, tint = MaterialTheme.colorScheme.primary) }
+                        } else null,
+                    )
+                }
+            }
+        }
+    }
 }

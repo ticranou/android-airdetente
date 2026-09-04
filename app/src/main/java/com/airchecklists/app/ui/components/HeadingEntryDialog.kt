@@ -83,9 +83,66 @@ fun HeadingEntryDialog(
 }
 
 /**
- * Big-digit altitude entry (feet) with a numeric keypad. Digits fill from the
- * right; the value is shown with a "ft" suffix. Includes a "clear" action.
+ * Big-digit altitude calibration entry (feet MSL) with a numeric keypad.
+ * Always shows an "Effacer" button (removes the calibration override).
+ * Pre-fills with [initial] when provided.
  */
+@Composable
+fun AltCalibrationDialog(
+    initial: Int?,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit,
+    onClear: () -> Unit,
+) {
+    var buf by remember { mutableStateOf(initial?.toString() ?: "") }
+    val alt = buf.toIntOrNull() ?: 0
+    val valid = buf.isNotEmpty() && alt in 0..60000
+
+    fun push(d: Char) { if (buf.length < 5) buf += d }
+    fun back() { buf = buf.dropLast(1) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Étalonnage") },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "${if (buf.isEmpty()) "0" else buf} ft MSL",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = if (valid || buf.isEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                )
+                Spacer(Modifier.height(12.dp))
+                val rows = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("C", "0", "⌫"))
+                rows.forEach { row ->
+                    Row {
+                        row.forEach { key ->
+                            TextButton(
+                                onClick = {
+                                    when (key) {
+                                        "C" -> buf = ""
+                                        "⌫" -> back()
+                                        else -> push(key[0])
+                                    }
+                                },
+                                modifier = Modifier.width(72.dp).height(56.dp),
+                            ) { Text(key, style = MaterialTheme.typography.headlineSmall) }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(alt) }, enabled = valid) { Text("OK") }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onClear) { Text("Effacer") }
+                Spacer(Modifier.width(4.dp))
+                TextButton(onClick = onDismiss) { Text("Annuler") }
+            }
+        },
+    )
+}
 @Composable
 fun AltitudeEntryDialog(
     initial: Int?,

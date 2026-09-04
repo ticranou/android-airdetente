@@ -69,10 +69,18 @@ class PreferencesRepository(private val store: SettingsStore) {
     suspend fun setAltitudeUnit(unit: com.airchecklists.app.data.model.AltitudeUnit) =
         persist { it.copy(altitudeUnit = unit) }
 
+    suspend fun setGeoidRegion(region: com.airchecklists.app.data.model.GeoidRegion) =
+        persist { it.copy(geoidRegion = region) }
+
+    suspend fun setGeoidCustomM(m: Float) =
+        persist { it.copy(geoidCustomM = m) }
+
     suspend fun setEfisResponsiveness(value: Float) =
         persist { it.copy(efisResponsiveness = value.coerceIn(0.05f, 1f)) }
 
     suspend fun setEfisShowValues(show: Boolean) = persist { it.copy(efisShowValues = show) }
+
+    suspend fun setShowGestureHints(show: Boolean) = persist { it.copy(showGestureHints = show) }
 
     suspend fun setKeepScreenOn(on: Boolean) = persist { it.copy(keepScreenOn = on) }
 

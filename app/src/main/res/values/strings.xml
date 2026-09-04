@@ -180,7 +180,11 @@
     <string name="efis_instr_clt">ANLCLT - Checklist</string>
     <string name="efis_instr_act">ANLACT - Action</string>
     <string name="efis_instr_sct_dash">ANLSCT - Raccourci</string>
+    <string name="efis_instr_cct">ANLCCT - Circuit de piste</string>
     <string name="efis_instr_fgt">CMNFGT - Session de vol</string>
+    <string name="efis_instr_spacer_s">CMN Espaceur - Petit (16 dp)</string>
+    <string name="efis_instr_spacer_m">CMN Espaceur - Moyen (32 dp)</string>
+    <string name="efis_instr_spacer_l">CMN Espaceur - Grand (64 dp)</string>
     <string name="settings_safesky">Trafic Safesky (ANLTRF)</string>
     <string name="settings_safesky_hint">Clé API Safesky pour l\'instrument de trafic ANLTRF. Obtenez votre clé sur safesky.app. La clé est stockée localement et n\'est jamais partagée.</string>
     <string name="settings_safesky_key_label">Clé API Safesky</string>

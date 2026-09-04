@@ -1,7 +1,10 @@
 package com.airchecklists.app.ui.navigation
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -11,11 +14,14 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -121,6 +127,7 @@ fun AirDetenteNavHost() {
                     onCalibrate = { ServiceLocator.efisProvider.calibrate() },
                     onResetCalibration = { ServiceLocator.efisProvider.resetCalibration() },
                     onToggleDemo = { ServiceLocator.efisProvider.toggleDemo() },
+                    onStartDemo = { v -> ServiceLocator.efisProvider.startDemo(v) },
                 )
             }
         },
@@ -298,14 +305,18 @@ private fun AircraftBanner(
     onCalibrate: () -> Unit,
     onResetCalibration: () -> Unit,
     onToggleDemo: () -> Unit,
+    onStartDemo: (Int) -> Unit,
 ) {
     var confirmCalibrate by remember { mutableStateOf(false) }
+    var showDemoMenu by remember { mutableStateOf(false) }
     androidx.compose.material3.TopAppBar(
         title = {
-            // Long-press the aircraft name to toggle the EFIS demo flight.
+            // Long-press the aircraft name: if demo is active → stop it; otherwise show picker.
             Box(
-                modifier = Modifier.pointerInput(Unit) {
-                    detectTapGestures(onLongPress = { onToggleDemo() })
+                modifier = Modifier.pointerInput(demoActive) {
+                    detectTapGestures(onLongPress = {
+                        if (demoActive) onToggleDemo() else showDemoMenu = true
+                    })
                 },
             ) {
                 Text(if (demoActive) "$name • DÉMO" else name)
@@ -360,6 +371,25 @@ private fun AircraftBanner(
                     Text(stringResource(R.string.action_cancel))
                 }
             },
+        )
+    }
+
+    if (showDemoMenu) {
+        AlertDialog(
+            onDismissRequest = { showDemoMenu = false },
+            title = { Text("Choisir la démo") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { onStartDemo(0); showDemoMenu = false },
+                        modifier = Modifier.fillMaxWidth()) { Text("Vol local") }
+                    Button(onClick = { onStartDemo(2); showDemoMenu = false },
+                        modifier = Modifier.fillMaxWidth()) { Text("Tour de piste LFAJ") }
+                    Button(onClick = { onStartDemo(1); showDemoMenu = false },
+                        modifier = Modifier.fillMaxWidth()) { Text("Longue finale LFAJ") }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { showDemoMenu = false }) { Text("Annuler") } },
         )
     }
 }

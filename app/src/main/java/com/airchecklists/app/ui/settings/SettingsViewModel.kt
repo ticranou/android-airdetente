@@ -112,6 +112,14 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setAltitudeUnit(unit) }
     }
 
+    fun setGeoidRegion(region: com.airchecklists.app.data.model.GeoidRegion) {
+        viewModelScope.launch { prefsRepo.setGeoidRegion(region) }
+    }
+
+    fun setGeoidCustomM(m: Float) {
+        viewModelScope.launch { prefsRepo.setGeoidCustomM(m) }
+    }
+
     fun setMapShowZoomButtons(show: Boolean) {
         viewModelScope.launch { prefsRepo.setMapShowZoomButtons(show) }
     }
@@ -122,6 +130,10 @@ class SettingsViewModel(
 
     fun setEfisShowValues(show: Boolean) {
         viewModelScope.launch { prefsRepo.setEfisShowValues(show) }
+    }
+
+    fun setShowGestureHints(show: Boolean) {
+        viewModelScope.launch { prefsRepo.setShowGestureHints(show) }
     }
 
     fun setKeepScreenOn(on: Boolean) {

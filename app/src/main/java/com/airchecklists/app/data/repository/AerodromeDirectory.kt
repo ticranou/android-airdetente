@@ -137,7 +137,7 @@ object AerodromeDirectory {
             type = p.type ?: -1,
             lon = g.coordinates[0],
             lat = g.coordinates[1],
-            elevationFt = p.elevation?.value?.roundToInt(),
+            elevationFt = p.elevation?.value?.let { (it * 3.28084).roundToInt() },
             frequency = freq?.takeIf { it.isNotBlank() },
         )
     }

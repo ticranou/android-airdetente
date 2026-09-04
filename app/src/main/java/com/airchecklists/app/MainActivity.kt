@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.efis.gauges.compact.LocalShowGestureHints
 import com.airchecklists.app.ui.navigation.AirDetenteNavHost
 import com.airchecklists.app.ui.select.AircraftSelectScreen
 import com.airchecklists.app.ui.splash.SplashScreen
@@ -78,7 +79,10 @@ class MainActivity : ComponentActivity() {
             val scope = androidx.compose.runtime.rememberCoroutineScope()
 
             AirDetenteTheme(themeMode = prefs.themeMode) {
-                CompositionLocalProvider(LocalChecklistFontScale provides prefs.fontScale) {
+                CompositionLocalProvider(
+                    LocalChecklistFontScale provides prefs.fontScale,
+                    LocalShowGestureHints provides prefs.showGestureHints,
+                ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background,
@@ -128,6 +132,18 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ServiceLocator.updateInstruments {
+            it.copy(
+                checklistChecked = emptyMap(),
+                actionDone = emptyMap(),
+                engineStartMs = null,
+                engineStopMs = null,
+            )
         }
     }
 

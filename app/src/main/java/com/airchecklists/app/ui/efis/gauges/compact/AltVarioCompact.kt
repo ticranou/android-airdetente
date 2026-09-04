@@ -19,7 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.AltitudeFormat
 import com.airchecklists.app.data.model.AltitudeUnit
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.components.AltCalibrationDialog
 import com.airchecklists.app.ui.components.AltitudeEntryDialog
+import com.airchecklists.app.ui.efis.gauges.nearestAirfieldElevationFt
 import kotlin.math.roundToInt
 
 /** Combined Altitude + Vario (single height, half width): fixed 20dp header with
@@ -37,11 +39,16 @@ fun AltVarioCompact(
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val targetAlt by ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
+    val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
+    var showCalibDialog by remember { mutableStateOf(false) }
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
-            detectTapGestures(onLongPress = { showDialog = true })
+            detectTapGestures(
+                onLongPress = { showDialog = true },
+                onDoubleTap = { showCalibDialog = true },
+            )
         },
     ) {
         val w = size.width
@@ -52,8 +59,8 @@ fun AltVarioCompact(
         drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         compactText(tm, "ALTITUDE (${AltitudeFormat.altLabel(altUnit)})", w * 0.27f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
         compactText(tm, "VARIO (${AltitudeFormat.vsLabel(altUnit)})", w * 0.73f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
-        // Gesture hint (long-press) in the title bar, top-left.
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        // Gesture hint (long-press + double-tap) in the title bar, top-left.
+        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 
         val mainTop = headerH
         val mainBottom = h
@@ -87,6 +94,11 @@ fun AltVarioCompact(
             compactText(tm, "▲ $tTxt", w * 0.27f, cy - cellH / 2 - mainTop * 0.20f - 6f, sizeSp = 11f, bold = true, color = Color(0xFFD24DEA))
         }
 
+        // Calibration indicator: magenta dot to the right of the altitude title.
+        if (calibAlt != null) {
+            drawCircle(Color(0xFFAA00CC), radius = 5f, center = androidx.compose.ui.geometry.Offset(w * 0.46f, headerH / 2f))
+        }
+
         // Single centred trend arrow between the two cells.
         val arrowHalf = cellH * 0.34f
         trendArrow(w * 0.5f, cy, arrowHalf, verticalSpeedFtMin)
@@ -98,6 +110,15 @@ fun AltVarioCompact(
             onDismiss = { showDialog = false },
             onConfirm = { a -> ServiceLocator.targetAltitude.value = a; showDialog = false },
             onClear = { ServiceLocator.targetAltitude.value = null; showDialog = false },
+        )
+    }
+
+    if (showCalibDialog) {
+        AltCalibrationDialog(
+            initial = calibAlt ?: nearestAirfieldElevationFt(altitudeFt),
+            onDismiss = { showCalibDialog = false },
+            onConfirm = { a -> ServiceLocator.altCalibrationFt.value = a; showCalibDialog = false },
+            onClear = { ServiceLocator.altCalibrationFt.value = null; showCalibDialog = false },
         )
     }
 }

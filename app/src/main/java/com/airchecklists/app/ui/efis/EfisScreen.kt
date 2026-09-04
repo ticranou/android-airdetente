@@ -133,6 +133,15 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
         }
 
         val pagerState = rememberPagerState(pageCount = { cockpitDashboards.size })
+
+        // Navigate to a dashboard requested by ANLSCT (shortcut instrument).
+        val requestedId by ServiceLocator.requestedDashboardId.collectAsStateWithLifecycle()
+        LaunchedEffect(requestedId) {
+            val id = requestedId ?: return@LaunchedEffect
+            val idx = cockpitDashboards.indexOfFirst { it.id == id }
+            if (idx >= 0) pagerState.animateScrollToPage(idx)
+            ServiceLocator.requestedDashboardId.value = null
+        }
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
             DashboardGrid(
                 dashboard = cockpitDashboards[page],
@@ -283,7 +292,7 @@ internal fun DashboardGrid(
                     .fillMaxWidth()
                     .background(Color(0xFF0A0A0A))
                     // Leave room on the right for the full-screen button + page markers.
-                    .padding(start = 12.dp, end = 96.dp, top = 5.dp, bottom = 5.dp),
+                    .padding(start = 64.dp, end = 96.dp, top = 5.dp, bottom = 5.dp),
             )
         }
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -386,6 +395,7 @@ internal fun DashboardGrid(
                         accentColor = cell.accentColor,
                         bezelStyleOverride = cell.bezelStyle,
                         onOpenMap = onOpenMap,
+                        cellIdx = i,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }

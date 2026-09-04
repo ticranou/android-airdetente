@@ -235,3 +235,23 @@ fun DrawScope.drawRoundedValue(
     drawText(m, topLeft = Offset(x - m.size.width / 2f, y - m.size.height / 2f))
 }
 
+/** Returns the elevation (ft) of the nearest VAC terrain that has known coordinates
+ *  and a parsable altitude string (e.g. "581ft"). Falls back to [gpsFallbackFt]. */
+fun nearestAirfieldElevationFt(gpsFallbackFt: Float = 0f): Int {
+    val gpsState = com.airchecklists.app.di.ServiceLocator.efisProvider.state.value
+    val fallback = if (gpsFallbackFt != 0f) gpsFallbackFt.toInt() else gpsState.gpsAltitudeFt.toInt()
+    if (!gpsState.hasPosition) return fallback
+    val myLat = gpsState.latitude
+    val myLon = gpsState.longitude
+    val nearest = com.airchecklists.app.di.ServiceLocator.vacRepository.charts.value
+        .filter { it.latitude != null && it.longitude != null && it.altitude.isNotBlank() }
+        .minByOrNull { chart ->
+            val dlat = chart.latitude!! - myLat
+            val dlon = chart.longitude!! - myLon
+            dlat * dlat + dlon * dlon
+        } ?: return fallback
+    return Regex("""(\d+)\s*ft""", RegexOption.IGNORE_CASE)
+        .find(nearest.altitude)?.groupValues?.get(1)?.toIntOrNull() ?: fallback
+}
+
+

@@ -69,6 +69,10 @@ object ServiceLocator {
     /** Target altitude to follow (ft), session only. null = none set. */
     val targetAltitude = MutableStateFlow<Int?>(null)
 
+    /** Altitude calibration override (ft MSL), session only.
+     *  When set, replaces the GPS altitude on all instruments. null = use GPS. */
+    val altCalibrationFt = MutableStateFlow<Int?>(null)
+
     /** Saved navigation plan (ordered terrain ICAOs + notes); mirrors prefs. */
     val navPlan = MutableStateFlow(com.airchecklists.app.data.model.NavPlan())
 
@@ -137,6 +141,9 @@ object ServiceLocator {
     /** Whether the cockpit is in full-screen mode (header + tab bar + system bars
      *  hidden). Session only; reset when leaving the cockpit. */
     val cockpitFullscreen = MutableStateFlow(false)
+
+    /** Request to navigate to a specific dashboard by id. Consumed by EfisScreen. */
+    val requestedDashboardId = MutableStateFlow<String?>(null)
 
     fun currentAircraft(): Aircraft? =
         currentAircraftId.value?.let { repository.getById(it) }

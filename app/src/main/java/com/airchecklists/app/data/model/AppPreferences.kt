@@ -65,7 +65,11 @@ enum class EfisInstrument {
     ANLCLT,              // Checklist (jauge ronde — sélection + exécution in-situ)
     ANLACT,              // Action (jauge ronde — toggle moteur démarrage/arrêt)
     ANLSCT,              // Raccourci tableau de bord (jauge ronde — double-tap navigue vers le tableau)
+    ANLCCT,              // Circuit de piste (jauge ronde — conservateur de cap + alti circuit)
     CMNFGT,              // Session de vol (rectangulaire, 100%-1L)
+    SPACER_S,            // Espaceur S (16 dp)
+    SPACER_M,            // Espaceur M (32 dp)
+    SPACER_L,            // Espaceur L (64 dp)
     ;
 
     /** True for the rectangular "compact" variants (fill the whole cell). */
@@ -76,13 +80,13 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT, CMNFGT,
+            NUMAPP, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT, ANLCCT)
 
     /** True for the numeric "single-line" instruments (label "…-1L"): they render
      *  at a fixed natural height, vertically centred, instead of stretching to fill
@@ -93,7 +97,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, CMNSCT, CMNFGT,
+            WATCH_COMPACT, NUMFDR, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -108,6 +112,9 @@ enum class EfisInstrument {
             NUMFDR -> 96
             CMNSCT -> 52
             CMNFGT -> 120
+            SPACER_S -> 16
+            SPACER_M -> 32
+            SPACER_L -> 64
             else -> 88
         }
 
@@ -504,7 +511,7 @@ data class AppPreferences(
         const val FONT_STEP = 0.15f
         const val MAX_SPLASH_SECONDS = 3
         const val EFIS_MAX_COLS = 2
-        const val EFIS_MAX_ROWS = 6
+        const val EFIS_MAX_ROWS = 8
         const val LEGACY_DASHBOARD_ID = "legacy-default"
         const val FDR_MIN_BUFFER_MIN = 5
         const val FDR_MAX_BUFFER_MIN = 60

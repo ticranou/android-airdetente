@@ -100,7 +100,6 @@ fun ApproachInstrument(
     Canvas(
         modifier = modifier.pointerInput(Unit) {
             detectTapGestures(
-                onDoubleTap = { ServiceLocator.efisProvider.nextDemo() },
                 onLongPress = { showDialog = true },
             )
         },

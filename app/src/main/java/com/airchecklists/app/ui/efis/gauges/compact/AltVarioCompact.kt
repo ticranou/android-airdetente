@@ -117,8 +117,8 @@ fun AltVarioCompact(
         AltCalibrationDialog(
             initial = calibAlt ?: nearestAirfieldElevationFt(altitudeFt),
             onDismiss = { showCalibDialog = false },
-            onConfirm = { a -> ServiceLocator.altCalibrationFt.value = a; showCalibDialog = false },
-            onClear = { ServiceLocator.altCalibrationFt.value = null; showCalibDialog = false },
+            onConfirm = { a -> ServiceLocator.setAltCalibration(a, altitudeFt); showCalibDialog = false },
+            onClear = { ServiceLocator.clearAltCalibration(); showCalibDialog = false },
         )
     }
 }

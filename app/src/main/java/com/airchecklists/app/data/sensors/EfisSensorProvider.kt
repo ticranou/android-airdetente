@@ -228,8 +228,7 @@ class EfisSensorProvider(
         val corrM = if (prefs.geoidRegion == com.airchecklists.app.data.model.GeoidRegion.CUSTOM)
             prefs.geoidCustomM else prefs.geoidRegion.correctionM
         val gpsAltFt = ((location.altitude + corrM) * 3.28084).toFloat()
-        val calibFt = com.airchecklists.app.di.ServiceLocator.altCalibrationFt.value
-        val altFt = calibFt?.toFloat() ?: gpsAltFt
+        val altFt = gpsAltFt + com.airchecklists.app.di.ServiceLocator.altCalibOffsetFt
         if (location.hasBearing() && location.speed > 0.5f) {
             gpsTrack = location.bearing
         }
@@ -414,17 +413,16 @@ class EfisSensorProvider(
      */
     private suspend fun runApproachDemo() {
         val frameMs = 40L
-        // Anchor on LFRK (Caen-Carpiquet)'s REAL ARP + a real runway heading, so the NUMAPP
-        // AUTO resolver (which picks the nearest aerodrome and a QFU from its circuit text
-        // "12/30 - QFU 124/304") locks onto the SAME field and axis this demo flies. If the
-        // two disagree the instrument's cross-track blows up (e.g. thousands of metres) and
-        // the runway never appears to approach — so they must match.
-        val thrLat = 49.1733
-        val thrLon = -0.4500
-        val fieldElevFt = 243f          // LFRK elevation
-        val qfuDeg = 304.0              // land toward 304 (approach from the SE)
+        // Anchor on LFAJ (Argentan) RWY 22 — same field as the circuit demo.
+        // ARP: 48.7094N 0.0028E, elevation 581 ft. Threshold 22 is ~300 m NE of ARP along 041°.
         val mPerDegLat = 111_320.0
-        val mPerDegLon = 111_320.0 * kotlin.math.cos(Math.toRadians(thrLat))
+        val arpLat = 48.709444; val arpLon = 0.002778
+        val thrLat = arpLat + (300.0 * kotlin.math.cos(Math.toRadians(41.0))) / mPerDegLat
+        val thrLon = arpLon + (300.0 * kotlin.math.sin(Math.toRadians(41.0))) /
+                (mPerDegLat * kotlin.math.cos(Math.toRadians(arpLat)))
+        val fieldElevFt = 581f
+        val qfuDeg = 221.0              // atterrissage cap 221 (RWY 22)
+        val mPerDegLon = mPerDegLat * kotlin.math.cos(Math.toRadians(thrLat))
         // Unit vectors: fwd points along the landing direction (toward threshold heading),
         // right is 90° clockwise of fwd. Ship sits "behind" the threshold on final.
         val hdg = Math.toRadians(qfuDeg)
@@ -564,77 +562,102 @@ class EfisSensorProvider(
 
     /**
      * Demo 3 — VFR circuit at LFAJ (Argentan, elevation 581 ft).
-     * RWY 03/21, QFU 030°. Left-hand circuit: 030->300->210->120->030.
-     * ARP: 48.7094N 0.0028E. Threshold 03 approx 300 m SW of ARP.
+     * RWY 04/22, QFU 041/221. Left-hand circuit: 041->311->221->131->041.
+     * ARP: 48.7094N 0.0028E. Threshold 04 approx 300 m SW of ARP along 221°.
+     * Circuit geometry (waypoint-based, all distances in metres):
+     *   Thr04 → [041°, ~1500m] → WP_A (fin décollage/vent traversier)
+     *   WP_A  → [311°, ~1800m] → WP_B (début vent arrière)
+     *   WP_B  → [221°, ~3000m] → WP_C (dépasse seuil d'1nm)
+     *   WP_C  → [131°, ~1800m] → WP_D (début finale)
+     *   WP_D  → [041°, ~3000m] → Thr04 (remise de gaz)
      */
     private suspend fun runCircuitDemo() {
         val frameMs = 40L
         val dt = frameMs / 1000f
         val elevFt = 581f
-        val qfu = 30f               // runway 03 heading (degrees)
+        val qfuF = 41f                  // cap décollage (Float pour headingDeg)
         val mPerDegLat = 111_320.0
-        // Threshold 03: ARP shifted ~300 m along the 210° axis (opposite of landing direction)
-        val arpLat = 48.709444
-        val arpLon = 0.002778
-        val thrLat = arpLat + (300.0 * kotlin.math.cos(Math.toRadians(210.0))) / mPerDegLat
-        val thrLon = arpLon + (300.0 * kotlin.math.sin(Math.toRadians(210.0))) /
-                (mPerDegLat * kotlin.math.cos(Math.toRadians(arpLat)))
+        val arpLat = 48.709444; val arpLon = 0.002778
+
+        // ── Seuil 04 ──────────────────────────────────────────────────────────────
+        val cosArp = kotlin.math.cos(Math.toRadians(arpLat))
+        val thrLat = arpLat + 300.0 * kotlin.math.cos(Math.toRadians(221.0)) / mPerDegLat
+        val thrLon = arpLon + 300.0 * kotlin.math.sin(Math.toRadians(221.0)) / (mPerDegLat * cosArp)
+
+        // ── Waypoints du circuit (précalculés, ne dépendent pas de la trajectoire) ──
+        // Le circuit est un rectangle aligné cap 041°/221°.
+        // Vecteurs unitaires géographiques (composantes Nord/Est) :
+        //   cap 041° → fwdN = cos(41°), fwdE = sin(41°)
+        //   cap 311° (perpendiculaire gauche) → lftN = cos(311°), lftE = sin(311°)
+        val fwdN = kotlin.math.cos(Math.toRadians(41.0)); val fwdE = kotlin.math.sin(Math.toRadians(41.0))
+        val lftN = kotlin.math.cos(Math.toRadians(311.0)); val lftE = kotlin.math.sin(Math.toRadians(311.0))
+
+        // Dimensions du circuit : 1400 m sur l'axe piste, 800 m de largeur
+        val fwdM  = 1400.0   // distance sur l'axe décollage avant le virage vent traversier
+        val widM  = 800.0    // largeur du circuit (distance latérale)
+        val extM  = 600.0    // extension vent arrière au-delà du seuil
+
+        // Rayon de virage estimé à 115 km/h / 15° de banque (avec rampe d'entrée/sortie ~30%)
+        val turnRadiusM = 400.0
+
+        fun mkWp(fM: Double, lM: Double): Pair<Double, Double> {
+            val cosThr = kotlin.math.cos(Math.toRadians(thrLat))
+            return thrLat + (fM * fwdN + lM * lftN) / mPerDegLat to
+                   thrLon + (fM * fwdE + lM * lftE) / (mPerDegLat * cosThr)
+        }
+        val (wpALat, wpALon) = mkWp(fwdM, 0.0)          // coin NE — début vent traversier
+        val (wpBLat, wpBLon) = mkWp(fwdM, widM)          // coin NW — début vent arrière
+        val (wpCLat, wpCLon) = mkWp(-extM, widM)         // coin SW — début base
+        val (wpDLat, wpDLon) = mkWp(-extM, 0.0)          // coin SE — axe finale
+        // Point d'initiation du virage base→finale : cap base = 131° = -lft direction,
+        // donc anticiper de turnRadiusM dans la direction lft (= décaler wpD de +turnRadiusM vers le vent arrière).
+        val (wpDTurnLat, wpDTurnLon) = mkWp(-extM, turnRadiusM)
 
         clearTrail()
 
-        var lat = thrLat
-        var lon = thrLon
-        var alt = elevFt
-        var heading = qfu
-        var speed = 0f
+        var lat = thrLat; var lon = thrLon; var alt = elevFt.toDouble()
+        var heading = qfuF; var speed = 0f
 
         fun set(build: EfisState.() -> EfisState) { _state.value = _state.value.build() }
-
-        _state.value = _state.value.copy(
-            hasFix = true, hasPosition = true,
-            latitude = lat, longitude = lon,
-            gpsAltitudeFt = alt, gpsSpeedKmh = speed,
-            headingDeg = heading, gpsTrackDeg = heading,
-            pitchDeg = 0f, rollDeg = 0f, slip = 0f, verticalSpeedFtMin = 0f,
-        )
 
         fun advance() {
             val distM = speed / 3.6f * dt
             val hdgRad = Math.toRadians(heading.toDouble())
-            lat += (distM * kotlin.math.cos(hdgRad)) / mPerDegLat
-            lon += (distM * kotlin.math.sin(hdgRad)) /
-                    (mPerDegLat * kotlin.math.cos(Math.toRadians(lat)))
-            _state.value = _state.value.copy(latitude = lat, longitude = lon,
-                headingDeg = heading, gpsTrackDeg = heading)
+            lat += distM * kotlin.math.cos(hdgRad) / mPerDegLat
+            lon += distM * kotlin.math.sin(hdgRad) / (mPerDegLat * kotlin.math.cos(Math.toRadians(lat)))
+            _state.value = _state.value.copy(latitude = lat, longitude = lon, gpsTrackDeg = heading)
             pushTrail(lat, lon)
         }
 
-        suspend fun hold(durationMs: Long) {
-            var elapsed = 0L
-            while (elapsed < durationMs && _demoActive.value) {
-                advance(); delay(frameMs); elapsed += frameMs
+        // Vole vers un waypoint (cap + avance jusqu'à dépasser la perpendiculaire au WP).
+        // Le cap est celui de la branche courante (déjà fixé avant l'appel).
+        suspend fun flyTo(wpLat: Double, wpLon: Double, setFn: () -> Unit) {
+            // Vecteur de la branche courante (direction de vol)
+            val brHdgRad = Math.toRadians(heading.toDouble())
+            val brN = kotlin.math.cos(brHdgRad); val brE = kotlin.math.sin(brHdgRad)
+            while (_demoActive.value) {
+                val dLatM = (wpLat - lat) * mPerDegLat
+                val dLonM = (wpLon - lon) * mPerDegLat * kotlin.math.cos(Math.toRadians(lat))
+                // Projection du vecteur avion→WP sur la direction de vol :
+                // quand elle devient ≤ 0, on a dépassé (ou atteint) le WP.
+                val proj = dLatM * brN + dLonM * brE
+                if (proj <= 0.0) break
+                setFn(); advance(); delay(frameMs)
             }
         }
 
-        // Turn left by [degrees] at [bankDeg] bank — constant-rate turn.
-        // Rate ≈ (g * tan(bank)) / speed_ms, capped to keep it realistic.
         suspend fun turnLeft(degrees: Float, bankDeg: Float = 15f) {
-            val totalTurned = degrees
-            var turned = 0f
-            val startHdg = heading
-            while (turned < totalTurned && _demoActive.value) {
+            var turned = 0f; val startHdg = heading
+            while (turned < degrees && _demoActive.value) {
                 val spdMs = (speed / 3.6f).coerceAtLeast(20f)
-                val rateDegS = Math.toDegrees(9.81 * kotlin.math.tan(Math.toRadians(bankDeg.toDouble())) / spdMs).toFloat()
-                val step = rateDegS * dt
-                heading = (heading - step + 360f) % 360f
-                turned += step
-                // Roll in/hold/roll out (trapezoidal)
-                val rollFrac = when {
-                    turned < totalTurned * 0.15f -> turned / (totalTurned * 0.15f)
-                    turned > totalTurned * 0.85f -> (totalTurned - turned) / (totalTurned * 0.15f)
+                val step = Math.toDegrees(9.81 * kotlin.math.tan(Math.toRadians(bankDeg.toDouble())) / spdMs).toFloat() * dt
+                heading = (heading - step + 360f) % 360f; turned += step
+                val rf = when {
+                    turned < degrees * 0.15f -> turned / (degrees * 0.15f)
+                    turned > degrees * 0.85f -> (degrees - turned) / (degrees * 0.15f)
                     else -> 1f
                 }.coerceIn(0f, 1f)
-                set { copy(rollDeg = -bankDeg * rollFrac, headingDeg = heading) }
+                set { copy(rollDeg = -bankDeg * rf, headingDeg = heading) }
                 advance(); delay(frameMs)
             }
             heading = (startHdg - degrees + 360f) % 360f
@@ -642,117 +665,111 @@ class EfisSensorProvider(
         }
 
         while (_demoActive.value) {
-            // Reset position to threshold each loop
-            lat = thrLat; lon = thrLon; alt = elevFt; heading = qfu; speed = 0f
+            lat = thrLat; lon = thrLon; alt = elevFt.toDouble(); heading = qfuF; speed = 0f
             _state.value = _state.value.copy(
-                hasFix = true, hasPosition = true,
-                latitude = lat, longitude = lon,
-                gpsAltitudeFt = alt, gpsSpeedKmh = speed,
+                hasFix = true, hasPosition = true, latitude = lat, longitude = lon,
+                gpsAltitudeFt = alt.toFloat(), gpsSpeedKmh = speed,
                 headingDeg = heading, gpsTrackDeg = heading,
                 pitchDeg = 0f, rollDeg = 0f, slip = 0f, verticalSpeedFtMin = 0f,
             )
 
-            // ── Roulage et décollage ──
-            var elapsed = 0L
+            // ── Roulage + décollage ──
             while (speed < 80f && _demoActive.value) {
-                speed = (speed + 20f * dt).coerceAtMost(80f)
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, pitchDeg = 2f) }
-                advance(); delay(frameMs); elapsed += frameMs
+                speed = (speed + 22f * dt).coerceAtMost(80f)
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), pitchDeg = 2f, verticalSpeedFtMin = 0f, headingDeg = heading) }
+                advance(); delay(frameMs)
             }
 
-            // ── Rotation + montée vers 880 ft (300 ft sol) à 130 km/h ──
-            elapsed = 0
-            while (alt < elevFt + 300f && _demoActive.value) {
+            // ── Montée 130 km/h +800 ft/min → 300 ft AGL ──
+            while (alt < elevFt + 300.0 && _demoActive.value) {
                 speed = (speed + 15f * dt).coerceAtMost(130f)
-                alt += 500f / 60f * dt
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, pitchDeg = 8f, verticalSpeedFtMin = 500f) }
+                alt += 800.0 / 60 * dt
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), pitchDeg = 9f, verticalSpeedFtMin = 800f, headingDeg = heading) }
                 advance(); delay(frameMs)
             }
-            alt = elevFt + 300f; speed = 130f
-            set { copy(pitchDeg = 0f, verticalSpeedFtMin = 0f, gpsAltitudeFt = alt) }
+            speed = 130f
 
-            // ── Montée vers 1080 ft (500 ft sol) ──
-            while (alt < elevFt + 500f && _demoActive.value) {
-                speed = (speed + 3f * dt).coerceAtMost(140f)
-                alt += 400f / 60f * dt
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, pitchDeg = 7f, verticalSpeedFtMin = 400f) }
-                advance(); delay(frameMs)
+            // ── Montée 140 km/h +700 ft/min → WP_A (500 ft AGL + atteinte du WP_A) ──
+            // On monte jusqu'à 500 ft AGL ET on vole jusqu'à WP_A.
+            var reached500 = false
+            flyTo(wpALat, wpALon) {
+                speed = (speed + 5f * dt).coerceAtMost(140f)
+                if (alt < elevFt + 500.0) {
+                    alt += 700.0 / 60 * dt
+                } else { reached500 = true }
+                val vs = if (alt < elevFt + 500.0) 700f else 0f
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), pitchDeg = if (vs > 0) 7f else 0f, verticalSpeedFtMin = vs, headingDeg = heading) }
             }
-            alt = elevFt + 500f; speed = 140f
+            if (!_demoActive.value) return
+            speed = 140f; alt = maxOf(alt, elevFt + 500.0)
 
-            // ── Montée vers 1580 ft (1000 ft sol) ──
-            while (alt < elevFt + 1000f && _demoActive.value) {
-                alt += 300f / 60f * dt
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, pitchDeg = 5f, verticalSpeedFtMin = 300f) }
-                advance(); delay(frameMs)
+            // ── Virage vent traversier → cap 311° ──
+            turnLeft(90f); if (!_demoActive.value) return
+            heading = 311f
+
+            // ── Vent traversier : montée vers 1000 ft AGL jusqu'à WP_B ──
+            flyTo(wpBLat, wpBLon) {
+                if (alt < elevFt + 1000.0) {
+                    alt += 600.0 / 60 * dt
+                    set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = 600f, pitchDeg = 5f, headingDeg = heading) }
+                } else {
+                    set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = 0f, pitchDeg = 0f, headingDeg = heading) }
+                }
             }
-            alt = elevFt + 1000f
-            set { copy(pitchDeg = 0f, verticalSpeedFtMin = 0f, gpsAltitudeFt = alt) }
+            if (!_demoActive.value) return
+            alt = maxOf(alt, elevFt + 1000.0)
+            set { copy(gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = 0f, pitchDeg = 0f) }
 
-            // ── 15 s en palier avant virage vent traversier ──
-            hold(15_000)
+            // ── Virage vent arrière → cap 221° ──
+            turnLeft(90f); if (!_demoActive.value) return
+            heading = 221f; speed = 130f
+            set { copy(gpsSpeedKmh = speed, pitchDeg = 0f, verticalSpeedFtMin = 0f, gpsAltitudeFt = alt.toFloat()) }
+
+            // ── Vent arrière en palier jusqu'à WP_C ──
+            flyTo(wpCLat, wpCLon) {
+                set { copy(gpsSpeedKmh = speed, pitchDeg = 0f, verticalSpeedFtMin = 0f, gpsAltitudeFt = alt.toFloat(), headingDeg = heading) }
+            }
             if (!_demoActive.value) return
 
-            // ── Virage gauche 90° cap 310° (vent traversier) ──
-            turnLeft(90f)
-            if (!_demoActive.value) return
-
-            // ── 15 s en palier avant virage vent arrière ──
-            hold(15_000)
-            if (!_demoActive.value) return
-
-            // ── Virage gauche 90° cap 220° (vent arrière) + réduction vitesse ──
-            speed = 120f
+            // ── Virage étape de base → cap 131° ──
+            turnLeft(90f); if (!_demoActive.value) return
+            heading = 131f; speed = 115f
             set { copy(gpsSpeedKmh = speed) }
-            turnLeft(90f)
-            if (!_demoActive.value) return
 
-            // ── Vent arrière : 60 s en palier ──
-            hold(60_000)
-            if (!_demoActive.value) return
-
-            // ── 15 s après dépassement de la piste ──
-            hold(15_000)
-            if (!_demoActive.value) return
-
-            // ── Virage gauche 90° cap 130° (étape de base) ──
-            speed = 115f
-            set { copy(gpsSpeedKmh = speed) }
-            turnLeft(90f)
-            if (!_demoActive.value) return
-
-            // ── Base : descente 300 ft/min pendant 15 s ──
-            elapsed = 0
-            while (elapsed < 15_000 && _demoActive.value) {
-                alt -= 300f / 60f * dt
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, verticalSpeedFtMin = -300f, pitchDeg = -3f) }
-                advance(); delay(frameMs); elapsed += frameMs
+            // ── Base : descente 300 ft/min — vire anticipé avant WP_D ──
+            flyTo(wpDTurnLat, wpDTurnLon) {
+                alt -= 300.0 / 60 * dt
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = -300f, pitchDeg = -3f, headingDeg = heading) }
             }
-
-            // ── Virage gauche 90° cap 040° (finale) ──
-            turnLeft(90f)
             if (!_demoActive.value) return
-            set { copy(pitchDeg = -3f, verticalSpeedFtMin = -300f) }
 
-            // ── Finale : descente avec louvoiement ±10° jusqu'à 100 ft sol ──
+            // ── Virage finale → cap 041° ──
+            turnLeft(90f); if (!_demoActive.value) return
+            heading = qfuF
+            set { copy(pitchDeg = -5f, verticalSpeedFtMin = -500f, headingDeg = heading) }
+
+            // ── Finale : descente 500 ft/min avec louvoiement jusqu'au passage du seuil ──
             var finalMs = 0L
-            while (alt > elevFt + 100f && _demoActive.value) {
-                alt -= 300f / 60f * dt
-                val wobble = 10f * kotlin.math.sin(finalMs / 2500.0 * Math.PI).toFloat()
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, verticalSpeedFtMin = -300f,
-                    pitchDeg = -3f, rollDeg = wobble * 0.3f, headingDeg = qfu + wobble) }
-                advance(); delay(frameMs); finalMs += frameMs
+            flyTo(thrLat, thrLon) {
+                alt -= 500.0 / 60 * dt
+                val wobble = (5.0 * kotlin.math.sin(finalMs / 4000.0 * 2.0 * Math.PI)).toFloat()
+                val hdg = (qfuF + wobble + 360f) % 360f
+                heading = hdg
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = -500f,
+                    pitchDeg = -5f, rollDeg = wobble * 0.3f, headingDeg = hdg, gpsTrackDeg = hdg) }
+                finalMs += frameMs
             }
+            if (!_demoActive.value) return
 
-            // ── Remise de gaz ──
-            alt = elevFt + 100f; heading = qfu
-            elapsed = 0
-            while (elapsed < 3_000 && _demoActive.value) {
-                val t = elapsed / 3000f
-                speed = 115f + 25f * t
-                alt += 200f / 60f * dt
-                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt, verticalSpeedFtMin = 200f * t,
-                    pitchDeg = 5f * t, rollDeg = 0f, headingDeg = qfu) }
+            // ── Remise de gaz au passage du seuil ──
+            heading = qfuF
+            set { copy(gpsAltitudeFt = alt.toFloat(), headingDeg = heading, gpsTrackDeg = heading, rollDeg = 0f, pitchDeg = 0f, verticalSpeedFtMin = 0f) }
+            var elapsed = 0L
+            while (elapsed < 5_000 && _demoActive.value) {
+                val t = elapsed / 5000f
+                speed = (115f + 30f * t).coerceAtMost(145f)
+                alt += 800.0 * t / 60 * dt
+                set { copy(gpsSpeedKmh = speed, gpsAltitudeFt = alt.toFloat(), verticalSpeedFtMin = 800f * t, pitchDeg = 8f * t, rollDeg = 0f, headingDeg = qfuF, gpsTrackDeg = qfuF) }
                 advance(); delay(frameMs); elapsed += frameMs
             }
         }

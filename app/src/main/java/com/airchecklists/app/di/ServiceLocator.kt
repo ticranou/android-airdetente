@@ -69,9 +69,25 @@ object ServiceLocator {
     /** Target altitude to follow (ft), session only. null = none set. */
     val targetAltitude = MutableStateFlow<Int?>(null)
 
-    /** Altitude calibration override (ft MSL), session only.
-     *  When set, replaces the GPS altitude on all instruments. null = use GPS. */
+    /** Altitude calibration value (ft MSL) shown on UI (magenta indicator). null = none set. */
     val altCalibrationFt = MutableStateFlow<Int?>(null)
+
+    /** Offset applied to every GPS altitude reading (ft). Computed at calibration time as
+     *  (userEnteredElevationFt - rawGpsAltFt). Zero = no correction. */
+    var altCalibOffsetFt: Float = 0f
+
+    /** Set a new altitude calibration. [calibFt] is the known field elevation; [currentGpsAltFt]
+     *  is the raw GPS altitude at this moment. Computes the persistent offset. */
+    fun setAltCalibration(calibFt: Int, currentGpsAltFt: Float) {
+        altCalibOffsetFt = calibFt - currentGpsAltFt
+        altCalibrationFt.value = calibFt
+    }
+
+    /** Clear altitude calibration — GPS altitude used as-is. */
+    fun clearAltCalibration() {
+        altCalibOffsetFt = 0f
+        altCalibrationFt.value = null
+    }
 
     /** Saved navigation plan (ordered terrain ICAOs + notes); mirrors prefs. */
     val navPlan = MutableStateFlow(com.airchecklists.app.data.model.NavPlan())

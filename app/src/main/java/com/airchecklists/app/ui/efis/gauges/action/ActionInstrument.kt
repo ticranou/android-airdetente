@@ -159,8 +159,8 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     if (showCalibDialog) {
         AltCalibrationDialog(
             initial = ServiceLocator.altCalibrationFt.value ?: nearestAirfieldElevationFt(),            onDismiss = { showCalibDialog = false },
-            onConfirm = { a -> ServiceLocator.altCalibrationFt.value = a; showCalibDialog = false },
-            onClear = { ServiceLocator.altCalibrationFt.value = null; showCalibDialog = false },
+            onConfirm = { a -> ServiceLocator.setAltCalibration(a, ServiceLocator.efisProvider.state.value.gpsAltitudeFt); showCalibDialog = false },
+            onClear = { ServiceLocator.clearAltCalibration(); showCalibDialog = false },
         )
     }
 }

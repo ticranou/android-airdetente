@@ -169,18 +169,22 @@ private fun executeAction(action: ActionId, s: InstrumentPersistState): Instrume
     ActionId.ENGINE_START -> {
         ServiceLocator.flightRecorder.start()
         ServiceLocator.efisProvider.calibrate()
-        s.copy(engineStartMs = System.currentTimeMillis(), engineStopMs = null)
+        s.copy(
+            engineStartMs = System.currentTimeMillis(),
+            engineStopMs = null,
+            fuelTrackingStartMs = System.currentTimeMillis(),
+        )
     }
     ActionId.ENGINE_STOP -> {
         ServiceLocator.flightRecorder.stop()
-        s.copy(engineStopMs = System.currentTimeMillis())
+        s.copy(engineStopMs = System.currentTimeMillis(), fuelTrackingStartMs = null)
     }
 }
 
 private fun cancelAction(action: ActionId, s: InstrumentPersistState): InstrumentPersistState = when (action) {
     ActionId.ENGINE_START -> {
         ServiceLocator.flightRecorder.stop()
-        s.copy(engineStartMs = null)
+        s.copy(engineStartMs = null, fuelTrackingStartMs = null)
     }
     ActionId.ENGINE_STOP -> s.copy(engineStopMs = null)
 }

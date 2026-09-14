@@ -292,11 +292,17 @@ internal fun WeatherMapDialog(
             }
             // Tapped-feature detail panel (METAR/TAF or SIGMET).
             selected?.let { sel ->
-                WxDetailPanel(
-                    selection = sel,
-                    onDismiss = { selected = null },
-                    modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(12.dp),
-                )
+                when (sel) {
+                    is WxSelection.Metar -> WxTerrainDetailDialog(
+                        icao = sel.point.icao,
+                        onDismiss = { selected = null },
+                    )
+                    is WxSelection.Sigmet -> WxDetailPanel(
+                        selection = sel,
+                        onDismiss = { selected = null },
+                        modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(12.dp),
+                    )
+                }
             }
             if (selected == null) {
                 TextButton(
@@ -360,6 +366,59 @@ private fun WxDetailPanel(selection: WxSelection, onDismiss: () -> Unit, modifie
                 }
             }
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text("Fermer") }
+        }
+    }
+}
+
+/** Full-screen weather detail dialog for a METAR tap — shows the graphical WeatherContent. */
+@Composable
+private fun WxTerrainDetailDialog(icao: String, onDismiss: () -> Unit) {
+    val wx by produceState<com.airchecklists.app.data.model.WeatherResult?>(null, icao) {
+        value = runCatching {
+            withContext(Dispatchers.IO) { ServiceLocator.weatherClient.fetch(icao) }
+        }.getOrNull()
+    }
+    val chart = remember(icao) {
+        ServiceLocator.vacRepository.charts.value.firstOrNull { it.icao.equals(icao, ignoreCase = true) }
+    }
+    val runwayHeading = remember(chart) {
+        chart?.circuit?.let { com.airchecklists.app.ui.terrain.QfuParser.primaryHeading(it) }
+    }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        androidx.compose.material3.Surface(
+            modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+            color = androidx.compose.material3.MaterialTheme.colorScheme.background,
+        ) {
+            Column(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+                androidx.compose.material3.Text(
+                    text = icao,
+                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+                    modifier = androidx.compose.ui.Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                )
+                if (wx == null) {
+                    Box(modifier = androidx.compose.ui.Modifier.weight(1f).fillMaxWidth(),
+                        contentAlignment = Alignment.Center) {
+                        androidx.compose.material3.CircularProgressIndicator()
+                    }
+                } else {
+                    Box(modifier = androidx.compose.ui.Modifier.weight(1f)) {
+                        com.airchecklists.app.ui.terrain.weather.WeatherContent(
+                            metar = wx!!.metar,
+                            taf = wx!!.taf,
+                            runwayHeading = runwayHeading,
+                        )
+                    }
+                }
+                androidx.compose.material3.TextButton(
+                    onClick = onDismiss,
+                    modifier = androidx.compose.ui.Modifier
+                        .align(Alignment.End)
+                        .padding(8.dp),
+                ) { Text("Fermer") }
+            }
         }
     }
 }

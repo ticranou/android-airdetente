@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -336,7 +337,8 @@ internal fun DashboardGrid(
                 if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed
                 val row = i / cols
                 val col = i % cols
-                val canFocus = cell.instrument != EfisInstrument.NAV_PLANNER
+                val canFocus = cell.instrument != EfisInstrument.NAV_PLANNER &&
+                              cell.instrument != EfisInstrument.MOVING_MAP
                 val cellH = with(densityObj) { rowHeights[row].toDp() }
                 val offsetY = with(densityObj) { rowOffsets[row].toDp() }
                 Box(
@@ -461,9 +463,13 @@ private fun FocusDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect {
+        DisposableEffect(dialogView) {
             val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window
             if (dialogWindow != null) {
+                dialogWindow.addFlags(
+                    android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+                )
                 WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
                 dialogWindow.setLayout(
                     android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -481,39 +487,81 @@ private fun FocusDialog(
                     hide(WindowInsetsCompat.Type.systemBars())
                 }
             }
+            onDispose {}
         }
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .background(Color.Black),
         ) {
-            InstrumentSlot(
-                instrument = instrument,
-                state = state,
-                speedUnit = speedUnit,
-                showValues = showValues,
-                speedArcs = speedArcs,
-                altUnit = altUnit,
-                trail = trail,
-                mapOrientation = mapOrientation,
-                accentColor = accentColor,
-                bezelStyleOverride = bezelStyleOverride,
-                modifier = Modifier.fillMaxWidth().weight(1f),
-            )
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_focus_close, remaining),
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+            if (instrument.isCompact) {
+                // Instruments compacts (rectangulaires) : remplissent toute la hauteur disponible
+                Column(modifier = Modifier.fillMaxSize()) {
+                    InstrumentSlot(
+                        instrument = instrument,
+                        state = state,
+                        speedUnit = speedUnit,
+                        showValues = showValues,
+                        speedArcs = speedArcs,
+                        altUnit = altUnit,
+                        trail = trail,
+                        mapOrientation = mapOrientation,
+                        accentColor = accentColor,
+                        bezelStyleOverride = bezelStyleOverride,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                    )
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_focus_close, remaining),
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            } else {
+                // Instruments ronds (analog) : carré centré
+                InstrumentSlot(
+                    instrument = instrument,
+                    state = state,
+                    speedUnit = speedUnit,
+                    showValues = showValues,
+                    speedArcs = speedArcs,
+                    altUnit = altUnit,
+                    trail = trail,
+                    mapOrientation = mapOrientation,
+                    accentColor = accentColor,
+                    bezelStyleOverride = bezelStyleOverride,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(8.dp)
+                        .align(Alignment.TopCenter),
                 )
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_focus_close, remaining),
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
         }
     }

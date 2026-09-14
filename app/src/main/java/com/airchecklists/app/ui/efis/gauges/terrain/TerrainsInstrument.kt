@@ -144,7 +144,7 @@ private fun rowIndexAtImpl(y: Float, w: Float, h: Float): Int? {
 private fun DrawScope.drawFace(tm: TextMeasurer, nearest: List<NearTerrain>, hasPosition: Boolean) {
     // Round black face + bezel, like the other analog gauges.
     val (cx, cy, r) = gaugeFace()
-    compactText(tm, "TERRAINS", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
+    compactText(tm, "Terrains (VAC)", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
 
     if (nearest.isEmpty()) {

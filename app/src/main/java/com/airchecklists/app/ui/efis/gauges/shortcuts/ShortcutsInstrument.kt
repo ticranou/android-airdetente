@@ -7,9 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,9 +39,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -47,6 +55,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.model.ShortcutTarget
+import com.airchecklists.app.data.model.VacChart
+import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.InstrumentPickerDialog
 import com.airchecklists.app.ui.components.efisInstrumentLabel
@@ -59,17 +69,21 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 
 private const val N = 3
 
-private enum class ConfigStep { CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD }
+private enum class ConfigStep {
+    CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD_FOCUS, PICK_DASHBOARD_NAV, PICK_TERRAIN
+}
 
 @Composable
 fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val context = LocalContext.current
     val prefs = ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val speedUnit = prefs.value.efisSpeedUnit
     val altUnit = prefs.value.altitudeUnit
     val allDashboards = prefs.value.effectiveDashboards
+    val allCharts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     val speedArcs = remember(ServiceLocator.currentAircraft()) {
         ServiceLocator.currentAircraft()
             ?.let { com.airchecklists.app.data.model.SpeedArcs.from(it).takeIf { a -> a.hasAny } }
@@ -81,23 +95,36 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         List(N) { i -> raw.getOrElse(i) { ShortcutTarget.Instrument(EfisInstrument.NONE) } }
     }
 
-    // Label for each slot.
-    val labels = targets.map { target ->
+    // Label and colour for each slot.
+    data class SlotDisplay(val label: String, val color: Color)
+    val slots = targets.map { target ->
         when (target) {
             is ShortcutTarget.Instrument ->
-                if (target.instrument == EfisInstrument.NONE) "-----"
-                else efisInstrumentLabel(target.instrument)
+                if (target.instrument == EfisInstrument.NONE) SlotDisplay("-----", CompactStyle.Dim)
+                else SlotDisplay(
+                    efisInstrumentLabel(target.instrument)
                         .substringAfter(" - ", missingDelimiterValue = target.instrument.name)
-                        .replace(Regex("""\s*\([^)]*\)$"""), "")
+                        .replace(Regex("""\s*\([^)]*\)$"""), ""),
+                    CompactStyle.Mark,
+                )
             is ShortcutTarget.Dashboard ->
-                allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----"
-            else -> "-----"
+                SlotDisplay(
+                    allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----",
+                    Color(0xFF4FC3F7),
+                )
+            is ShortcutTarget.DashboardNavigate ->
+                SlotDisplay(
+                    allDashboards.firstOrNull { it.id == target.dashboardId }?.name ?: "-----",
+                    Color(0xFF4FC3F7),
+                )
+            is ShortcutTarget.TerrainVac ->
+                SlotDisplay(target.icao, Color(0xFFFFCC44))
         }
     }
 
     // Which slot is open for viewing (-1 = none).
     var openIdx by remember { mutableIntStateOf(-1) }
-    // Which slot is being configured (-1 = none) + which step of the config flow.
+    // Which slot is being configured (-1 = none) + step.
     var configIdx by remember { mutableIntStateOf(-1) }
     var configStep by remember { mutableStateOf(ConfigStep.CHOOSE_TYPE) }
 
@@ -138,23 +165,17 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
         for (i in 0 until N) {
             val cx = slotW * i + slotW / 2f
-            val label = labels[i]
-            val isEmpty = label == "-----"
-            val isDashboard = targets[i] is ShortcutTarget.Dashboard && !isEmpty
+            val (label, color) = slots[i]
             compactText(
                 tm, label, cx, bodyCy,
-                sizeSp = if (isEmpty) 16f else 14f,
-                bold = !isEmpty,
-                color = when {
-                    isEmpty -> CompactStyle.Dim
-                    isDashboard -> Color(0xFF4FC3F7) // bleu clair pour les tableaux de bord
-                    else -> CompactStyle.Mark
-                },
+                sizeSp = if (label == "-----") 16f else 14f,
+                bold = label != "-----",
+                color = color,
             )
         }
     }
 
-    // ── Open dialog ──────────────────────────────────────────────────────────
+    // ── Open / tap action ─────────────────────────────────────────────────────
 
     if (openIdx in 0 until N) {
         val target = targets[openIdx]
@@ -181,9 +202,25 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                         prefs = prefs.value,
                         onDismiss = { openIdx = -1 },
                     )
+                } else {
+                    openIdx = -1
                 }
             }
-            else -> openIdx = -1
+            is ShortcutTarget.DashboardNavigate -> {
+                ServiceLocator.requestedDashboardId.value = target.dashboardId
+                openIdx = -1
+            }
+            is ShortcutTarget.TerrainVac -> {
+                val chart = allCharts.firstOrNull { it.id == target.vacId }
+                    ?: VacChart(id = target.vacId, icao = target.icao, airfieldName = target.icao)
+                val cycle = prefs.value.vacAiracCycle
+                PdfOpener.open(
+                    context = context,
+                    localFile = ServiceLocator.vacRepository.localPdf(chart),
+                    remoteUrl = ServiceLocator.vacRepository.remoteUrl(cycle, chart.icao),
+                )
+                openIdx = -1
+            }
         }
     }
 
@@ -198,13 +235,21 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
+                                onClick = { configStep = ConfigStep.PICK_DASHBOARD_NAV },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Tableau de bord (??)") }
+                            Button(
+                                onClick = { configStep = ConfigStep.PICK_DASHBOARD_FOCUS },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Tableau de bord (Focus)") }
+                            Button(
                                 onClick = { configStep = ConfigStep.PICK_INSTRUMENT },
                                 modifier = Modifier.fillMaxWidth(),
-                            ) { Text("Instruments") }
+                            ) { Text("Instrument (Focus)") }
                             Button(
-                                onClick = { configStep = ConfigStep.PICK_DASHBOARD },
+                                onClick = { configStep = ConfigStep.PICK_TERRAIN },
                                 modifier = Modifier.fillMaxWidth(),
-                            ) { Text("Tableaux de bord") }
+                            ) { Text("Terrain (Carte VAC)") }
                         }
                     },
                     confirmButton = {},
@@ -225,12 +270,32 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     },
                 )
             }
-            ConfigStep.PICK_DASHBOARD -> {
+            ConfigStep.PICK_DASHBOARD_FOCUS -> {
                 DashboardPickerDialog(
                     dashboards = allDashboards,
                     onDismiss = { configIdx = -1 },
                     onSelect = { dash ->
                         save(cellIdx, targets, configIdx, ShortcutTarget.Dashboard(dash.id))
+                        configIdx = -1
+                    },
+                )
+            }
+            ConfigStep.PICK_DASHBOARD_NAV -> {
+                DashboardPickerDialog(
+                    dashboards = allDashboards,
+                    onDismiss = { configIdx = -1 },
+                    onSelect = { dash ->
+                        save(cellIdx, targets, configIdx, ShortcutTarget.DashboardNavigate(dash.id))
+                        configIdx = -1
+                    },
+                )
+            }
+            ConfigStep.PICK_TERRAIN -> {
+                TerrainPickerDialog(
+                    charts = allCharts,
+                    onDismiss = { configIdx = -1 },
+                    onSelect = { chart ->
+                        save(cellIdx, targets, configIdx, ShortcutTarget.TerrainVac(chart.id, chart.icao))
                         configIdx = -1
                     },
                 )
@@ -250,6 +315,10 @@ private fun save(cellIdx: Int, targets: List<ShortcutTarget>, slotIdx: Int, valu
 
 private fun applyImmersiveDialog(dialogView: android.view.View) {
     val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window ?: return
+    dialogWindow.addFlags(
+        android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+        android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+    )
     WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
     dialogWindow.setLayout(
         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -286,26 +355,28 @@ private fun InstrumentFullScreenDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect { applyImmersiveDialog(dialogView) }
-        Column(
-            modifier = Modifier.fillMaxSize().background(Color.Black).padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                com.airchecklists.app.ui.efis.gauges.InstrumentSlot(
-                    instrument = instrument,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = true,
-                    speedArcs = speedArcs,
-                    altUnit = altUnit,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+        DisposableEffect(dialogView) { applyImmersiveDialog(dialogView); onDispose {} }
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            com.airchecklists.app.ui.efis.gauges.InstrumentSlot(
+                instrument = instrument,
+                state = state,
+                speedUnit = speedUnit,
+                showValues = true,
+                speedArcs = speedArcs,
+                altUnit = altUnit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .padding(8.dp)
+                    .align(Alignment.TopCenter),
+            )
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
                 Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
@@ -332,12 +403,9 @@ private fun DashboardFullScreenDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect { applyImmersiveDialog(dialogView) }
-        Column(
-            modifier = Modifier.fillMaxSize().background(Color.Black).padding(bottom = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        DisposableEffect(dialogView) { applyImmersiveDialog(dialogView); onDispose {} }
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            Box(modifier = Modifier.fillMaxSize().padding(bottom = 64.dp)) {
                 DashboardGrid(
                     dashboard = dashboard,
                     state = state,
@@ -354,7 +422,10 @@ private fun DashboardFullScreenDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
                 Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
@@ -378,7 +449,8 @@ private fun DashboardPickerDialog(
                         onClick = { onSelect(dash) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(dash.name, modifier = Modifier.weight(1f))
+                        Text(dash.name, modifier = Modifier.weight(1f),
+                            overflow = TextOverflow.Ellipsis, maxLines = 2)
                     }
                     HorizontalDivider()
                 }
@@ -388,5 +460,35 @@ private fun DashboardPickerDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Annuler") }
         },
+    )
+}
+
+@Composable
+private fun TerrainPickerDialog(
+    charts: List<VacChart>,
+    onDismiss: () -> Unit,
+    onSelect: (VacChart) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choisir un terrain") },
+        text = {
+            if (charts.isEmpty()) {
+                Text("Aucun terrain disponible. Ajoutez des terrains dans l'onglet Terrains.")
+            } else {
+                LazyColumn {
+                    items(charts) { chart ->
+                        TextButton(onClick = { onSelect(chart) }, modifier = Modifier.fillMaxWidth()) {
+                            Text("${chart.icao} — ${chart.airfieldName}",
+                                modifier = Modifier.weight(1f),
+                                overflow = TextOverflow.Ellipsis, maxLines = 1)
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
     )
 }

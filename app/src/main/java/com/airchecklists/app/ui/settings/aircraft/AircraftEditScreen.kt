@@ -167,6 +167,21 @@ fun AircraftEditScreen(
                 singleLine = true, keyboardOptions = kbd, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(state.vpl, viewModel::onVpl, label = { Text(stringResource(R.string.aircraft_field_vpl)) },
                 singleLine = true, keyboardOptions = kbd, modifier = Modifier.fillMaxWidth())
+
+            Text(
+                stringResource(R.string.aircraft_fuel_header),
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+            )
+            OutlinedTextField(state.fuelCapacityL, viewModel::onFuelCapacityL,
+                label = { Text(stringResource(R.string.aircraft_field_fuel_capacity)) },
+                singleLine = true, keyboardOptions = kbd, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(state.fuelConsumptionLh, viewModel::onFuelConsumptionLh,
+                label = { Text(stringResource(R.string.aircraft_field_fuel_consumption)) },
+                singleLine = true, keyboardOptions = kbd, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(state.fuelReserveMin, viewModel::onFuelReserveMin,
+                label = { Text(stringResource(R.string.aircraft_field_fuel_reserve)) },
+                singleLine = true, keyboardOptions = kbd, modifier = Modifier.fillMaxWidth())
         }
     }
 }

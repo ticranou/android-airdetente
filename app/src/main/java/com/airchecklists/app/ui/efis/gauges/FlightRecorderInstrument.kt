@@ -130,7 +130,7 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
             Row("Inclinaison", status.hasGyro),
             Row("Baromètre", status.hasBaro),
         )
-        val labelSp = (r * 0.095f).coerceIn(8f, 12f)
+        val labelSp = (r * 0.075f).coerceAtLeast(7f)
         val labelStyle = TextStyle(color = GaugeColors.Mark, fontSize = labelSp.sp)
         val dotR = r * 0.045f
         val gap = r * 0.09f
@@ -151,7 +151,7 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
         val recording = status.recording
         val badgeColor = if (recording) FDR_GREEN else FDR_ORANGE
         val badgeText = if (recording) "Recording" else "Paused"
-        val badgeSp = (r * 0.145f).coerceIn(13f, 20f)
+        val badgeSp = (r * 0.095f).coerceAtLeast(10f)
         val badgeMeasured = tm.measure(badgeText, TextStyle(color = badgeColor, fontSize = badgeSp.sp, fontWeight = FontWeight.Bold))
         val padH = r * 0.08f; val padV = r * 0.05f
         val cW = 1.6f * r

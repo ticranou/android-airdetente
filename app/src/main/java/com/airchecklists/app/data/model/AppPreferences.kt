@@ -66,7 +66,11 @@ enum class EfisInstrument {
     ANLACT,              // Action (jauge ronde — toggle moteur démarrage/arrêt)
     ANLSCT,              // Raccourci tableau de bord (jauge ronde — double-tap navigue vers le tableau)
     ANLCCT,              // Circuit de piste (jauge ronde — conservateur de cap + alti circuit)
+    ANLTCH,              // Toucher de piste (jauge ronde — approche latérale)
+    ANLCRB,              // Carburant (jauge ronde — niveau + autonomie + range)
+    NUMCRB,              // Carburant numérique (rectangulaire, 100%-1L)
     CMNFGT,              // Session de vol (rectangulaire, 100%-1L)
+    CMNWHB,              // Tableau blanc / notes (dessin libre, 100%-5L)
     SPACER_S,            // Espaceur S (16 dp)
     SPACER_M,            // Espaceur M (32 dp)
     SPACER_L,            // Espaceur L (64 dp)
@@ -80,13 +84,13 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT, ANLCCT)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTCH, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT, ANLCCT, ANLCRB)
 
     /** True for the numeric "single-line" instruments (label "…-1L"): they render
      *  at a fixed natural height, vertically centred, instead of stretching to fill
@@ -97,7 +101,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            WATCH_COMPACT, NUMFDR, NUMCRB, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -110,6 +114,7 @@ enum class EfisInstrument {
             HORAMETER_COMPACT -> 120
             TERRAINS_COMPACT -> 110
             NUMFDR -> 96
+            NUMCRB -> 120
             CMNSCT -> 52
             CMNFGT -> 120
             SPACER_S -> 16
@@ -416,6 +421,12 @@ data class InstrumentPersistState(
     val engineStartMs: Long? = null,
     /** Epoch ms when the engine was last stopped (null = never stopped). */
     val engineStopMs: Long? = null,
+    /** Fuel volume in litres at the start of this fuel session (null = not set). */
+    val fuelStartL: Float? = null,
+    /** Epoch ms when fuel tracking was started (null = not started). */
+    val fuelTrackingStartMs: Long? = null,
+    /** True when the low-fuel alert has already been shown this session (avoid repeat). */
+    val fuelAlertShown: Boolean = false,
 )
 
 /** A navigation plan: an ordered list of terrain ICAO codes + free-text notes. */

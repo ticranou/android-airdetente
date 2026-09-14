@@ -26,6 +26,7 @@
       ["instrument-movingmap.html", "Moving Map"],
       ["instrument-approche.html", "Approche finale"],
       ["instrument-raccourcis.html", "Raccourcis (CMNSCT)"],
+      ["instrument-tableau-blanc.html", "Tableau blanc (CMNWHB)"],
     ]},
     { title: "Réglages", items: [
       ["reglages-apparence.html", "Affichage"],

@@ -28,3 +28,10 @@ local.properties
 
 # Local device screenshots (test captures)
 /.shots/
+
+# Build logs and local scripts
+/*.log
+/build_*.log
+/build_*.txt
+/build_apk.ps1
+/cmnfgt*.png

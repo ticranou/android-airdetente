@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,23 +58,21 @@ import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
-import com.airchecklists.app.ui.components.InstrumentPickerDialog
 import com.airchecklists.app.ui.components.efisInstrumentLabel
 import com.airchecklists.app.ui.efis.DashboardGrid
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
-import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
-private enum class AanlsctStep { CHOOSE_TYPE, PICK_DASHBOARD_NAV, PICK_DASHBOARD_FOCUS, PICK_INSTRUMENT, PICK_TERRAIN }
+private enum class AanlsctStep { CHOOSE_TYPE, PICK_DASHBOARD_NAV, PICK_DASHBOARD_FOCUS, PICK_TERRAIN }
 
 /**
  * ANLSCT — Raccourci (round gauge).
  * Long-press: pick shortcut type and target.
- * Tap: trigger focus shortcuts (Dashboard Focus, Instrument Focus, TerrainVac).
+ * Tap: trigger focus shortcuts (Dashboard Focus, TerrainVac).
  * Double-tap: trigger DashboardNavigate (jump to dashboard in pager).
  */
 @Composable
@@ -102,7 +103,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
     var showPicker by remember { mutableStateOf(false) }
     var step by remember { mutableStateOf(AanlsctStep.CHOOSE_TYPE) }
-    var showFocusInstrument by remember { mutableStateOf(false) }
     var showFocusDashboard by remember { mutableStateOf(false) }
 
     Canvas(
@@ -117,7 +117,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 onTap = {
                     when (target) {
                         is ShortcutTarget.Dashboard  -> showFocusDashboard = true
-                        is ShortcutTarget.Instrument -> showFocusInstrument = true
                         is ShortcutTarget.TerrainVac -> {
                             val chart = allCharts.firstOrNull { it.id == target.vacId }
                                 ?: VacChart(id = target.vacId, icao = target.icao, airfieldName = target.icao)
@@ -204,17 +203,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         }
     }
 
-    if (showFocusInstrument && target is ShortcutTarget.Instrument) {
-        AnlsctInstrumentFocusDialog(
-            instrument = target.instrument,
-            state = state,
-            speedUnit = prefs.efisSpeedUnit,
-            altUnit = prefs.altitudeUnit,
-            speedArcs = speedArcs,
-            onDismiss = { showFocusInstrument = false },
-        )
-    }
-
     // ── Picker flow ───────────────────────────────────────────────────────────
 
     if (showPicker) {
@@ -226,11 +214,9 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     text = {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = { step = AanlsctStep.PICK_DASHBOARD_NAV },
-                                modifier = Modifier.fillMaxWidth()) { Text("Tableau de bord (>>)") }
+                                modifier = Modifier.fillMaxWidth()) { Text("Tableau de bord (Lien)") }
                             Button(onClick = { step = AanlsctStep.PICK_DASHBOARD_FOCUS },
                                 modifier = Modifier.fillMaxWidth()) { Text("Tableau de bord (Focus)") }
-                            Button(onClick = { step = AanlsctStep.PICK_INSTRUMENT },
-                                modifier = Modifier.fillMaxWidth()) { Text("Instrument (Focus)") }
                             Button(onClick = { step = AanlsctStep.PICK_TERRAIN },
                                 modifier = Modifier.fillMaxWidth()) { Text("Terrain (Carte VAC)") }
                         }
@@ -258,19 +244,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     onSelect = { dash ->
                         ServiceLocator.updateInstruments {
                             it.copy(anlsctTargets = it.anlsctTargets + (cellIdx to ShortcutTarget.Dashboard(dash.id)))
-                        }
-                        showPicker = false
-                    },
-                )
-            }
-            AanlsctStep.PICK_INSTRUMENT -> {
-                val currentInstr = (target as? ShortcutTarget.Instrument)?.instrument ?: EfisInstrument.NONE
-                InstrumentPickerDialog(
-                    current = currentInstr,
-                    onDismiss = { showPicker = false },
-                    onSelect = { chosen ->
-                        ServiceLocator.updateInstruments {
-                            it.copy(anlsctTargets = it.anlsctTargets + (cellIdx to ShortcutTarget.Instrument(chosen)))
                         }
                         showPicker = false
                     },
@@ -351,6 +324,10 @@ private fun TerrainListDialog(
 
 private fun applyImmersiveDialog(dialogView: android.view.View) {
     val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window ?: return
+    dialogWindow.addFlags(
+        android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+        android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+    )
     WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
     dialogWindow.setLayout(
         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
@@ -367,51 +344,6 @@ private fun applyImmersiveDialog(dialogView: android.view.View) {
     WindowInsetsControllerCompat(dialogWindow, dialogView).apply {
         systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         hide(WindowInsetsCompat.Type.systemBars())
-    }
-}
-
-@Composable
-private fun AnlsctInstrumentFocusDialog(
-    instrument: EfisInstrument,
-    state: EfisState,
-    speedUnit: EfisSpeedUnit,
-    altUnit: AltitudeUnit,
-    speedArcs: SpeedArcs?,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnClickOutside = true,
-            decorFitsSystemWindows = false,
-        ),
-    ) {
-        val dialogView = LocalView.current
-        SideEffect { applyImmersiveDialog(dialogView) }
-        Column(
-            modifier = Modifier.fillMaxSize().background(Color.Black).padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                InstrumentSlot(
-                    instrument = instrument,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = true,
-                    speedArcs = speedArcs,
-                    altUnit = altUnit,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            ) {
-                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 
@@ -434,12 +366,9 @@ private fun AnlsctDashboardFocusDialog(
         ),
     ) {
         val dialogView = LocalView.current
-        SideEffect { applyImmersiveDialog(dialogView) }
-        Column(
-            modifier = Modifier.fillMaxSize().background(Color.Black).padding(bottom = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        DisposableEffect(dialogView) { applyImmersiveDialog(dialogView); onDispose {} }
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            Box(modifier = Modifier.fillMaxSize().padding(bottom = 64.dp)) {
                 DashboardGrid(
                     dashboard = dashboard,
                     state = state,
@@ -456,7 +385,10 @@ private fun AnlsctDashboardFocusDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
                 Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }

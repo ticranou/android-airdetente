@@ -55,7 +55,8 @@ fun InstrumentSlot(
     val showHints = LocalShowGestureHints.current
     androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
     androidx.compose.runtime.CompositionLocalProvider(LocalGaugeBezel provides bezel) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    val boxModifier = if (instrument.isCompact) modifier.fillMaxSize() else modifier
+    Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
         val round = Modifier.gaugeCell()
         val fill = Modifier.fillMaxSize().padding(4.dp)
         // Single-line numeric instruments render at a fixed natural height, vertically
@@ -114,13 +115,17 @@ fun InstrumentSlot(
             EfisInstrument.NUMFDR -> com.airchecklists.app.ui.efis.gauges.compact.FlightRecorderDigital(slotFill)
             EfisInstrument.NUMAPP -> com.airchecklists.app.ui.efis.gauges.approach.ApproachInstrument(state, speedUnit, altUnit, fill)
             EfisInstrument.ANLAPP -> com.airchecklists.app.ui.efis.gauges.approach.ApproachGaugeAnalog(state, round)
+            EfisInstrument.ANLTCH -> com.airchecklists.app.ui.efis.gauges.approach.TouchdownAnalogInstrument(state, round)
             EfisInstrument.ANLTRF -> com.airchecklists.app.ui.efis.gauges.traffic.TrafficAnalogInstrument(round)
             EfisInstrument.ANLPRX -> com.airchecklists.app.ui.efis.gauges.proximity.ProximityAnalogInstrument(round)
             EfisInstrument.ANLCLT -> com.airchecklists.app.ui.efis.gauges.checklist.ChecklistInstrument(cellIdx, round)
             EfisInstrument.ANLACT -> com.airchecklists.app.ui.efis.gauges.action.ActionInstrument(cellIdx, round)
             EfisInstrument.ANLSCT -> com.airchecklists.app.ui.efis.gauges.shortcutdash.DashboardShortcutInstrument(cellIdx, round)
             EfisInstrument.ANLCCT -> com.airchecklists.app.ui.efis.gauges.circuit.CircuitInstrument(state.headingDeg, state.gpsAltitudeFt, showValues, round)
+            EfisInstrument.ANLCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelAnalogInstrument(round)
+            EfisInstrument.NUMCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelDigital(slotFill)
             EfisInstrument.CMNFGT -> com.airchecklists.app.ui.efis.gauges.compact.FlightSessionDigital(fill)
+            EfisInstrument.CMNWHB -> com.airchecklists.app.ui.efis.gauges.whiteboard.WhiteboardInstrument(fill)
             EfisInstrument.SPACER_S, EfisInstrument.SPACER_M, EfisInstrument.SPACER_L -> Unit
         }
     }

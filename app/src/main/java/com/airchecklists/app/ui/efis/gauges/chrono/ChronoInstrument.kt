@@ -104,9 +104,9 @@ private fun DrawScope.drawChrono(
     fun cell(cyc: Float, text: String, color: Color) {
         compactText(tm, text, cx, cyc, sizeSp = 30f, bold = true, mono = true, color = color)
     }
-    // Top chrono blue, bottom chrono orange.
-    cell(cy - r * 0.22f, fmt(topMs), Color(0xFF2E9BE6))
-    cell(cy + r * 0.30f, fmt(botMs), Color(0xFFE8843A))
+    // Top chrono orange, bottom chrono blue (same convention as ANLCWN).
+    cell(cy - r * 0.22f, fmt(topMs), Color(0xFFE8843A))
+    cell(cy + r * 0.30f, fmt(botMs), Color(0xFF2E9BE6))
 }
 
 /** Format millis as H:MM:SS (or MM:SS under an hour). */

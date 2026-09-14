@@ -91,8 +91,8 @@ private fun DrawScope.drawProximity(
 ) {
     val (cx, cy, r) = gaugeFace()
 
-    // ── TAWS label ──────────────────────────────────────────────────────────
-    compactText(tm, "TAWS", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
+    // ── PROXIMITY label ─────────────────────────────────────────────────────
+    compactText(tm, "Proximité", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
 
     // ── Arc segments: terrain proximity arcs ────────────────────────────────
     drawTawsArcs(cx, cy, r, level)
@@ -131,17 +131,17 @@ private fun DrawScope.drawTawsArcs(cx: Float, cy: Float, r: Float, level: TawsLe
     // outer arc (advisory = yellow), mid (caution = orange), inner (pull-up = red)
     // We use partial drawArc to fill the left/right half-rings
 
-    val stroke = r * 0.055f
+    val stroke = r * 0.020f
     val style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
     val clearColor = Color(0x44FFFFFF)
     val advisoryColor  = Color(0xFFFFCC00)
     val cautionColor   = Color(0xFFFF9500)
     val pullUpColor    = Color(0xFFFF3B30)
 
-    // Three rings at 90%, 75%, 60% of r — thin dimmed arcs for clear
-    val rPullUp   = r * 0.60f
-    val rCaution  = r * 0.75f
-    val rAdvisory = r * 0.90f
+    // Three rings at 94%, 88%, 82% of r — style identique à ANLAPP
+    val rPullUp   = r * 0.820f
+    val rCaution  = r * 0.880f
+    val rAdvisory = r * 0.940f
 
     fun arcColor(ring: TawsLevel): Color = when {
         level.ordinal >= ring.ordinal -> when (ring) {

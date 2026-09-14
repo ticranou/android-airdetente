@@ -44,4 +44,10 @@ data class Aircraft(
     val vno: Int = 0,        // max structural cruising → marker on green row
     val vne: Int = 0,        // never exceed            → marker on green row
     val vpl: Int = 0,        // best glide speed        → magenta cursor on white row
+    /** Fuel tank capacity in litres (0 = not configured). */
+    val fuelCapacityL: Int = 0,
+    /** Fuel consumption in litres per hour (0 = not configured). */
+    val fuelConsumptionLh: Int = 0,
+    /** Safety reserve in minutes of autonomy (default 30 min). */
+    val fuelReserveMin: Int = 30,
 )

@@ -139,7 +139,7 @@ private fun HourReadingDialog(
     onClear: () -> Unit,
 ) {
     // Up to 5 digits (NNNNN), filled from the right; last two are the decimals.
-    var buf by remember { mutableStateOf(initial?.toString()?.takeIf { it.isNotEmpty() } ?: "") }
+    var buf by remember { mutableStateOf("") }
 
     val value = buf.toIntOrNull()
     val valid = value != null && value > 0
@@ -155,10 +155,23 @@ private fun HourReadingDialog(
         title = { Text("Horamètre") },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (initial != null) {
+                    val iPad = initial.toString().padStart(3, '0')
+                    val iInt = iPad.dropLast(2).ifEmpty { "0" }
+                    val iDec = iPad.takeLast(2)
+                    Text("Valeur actuelle : $iInt.$iDec h",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(4.dp))
+                }
                 Text(
-                    "$displayInt.$displayDec",
+                    if (buf.isEmpty()) "0.00" else "$displayInt.$displayDec",
                     style = MaterialTheme.typography.displayMedium,
-                    color = if (valid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    color = when {
+                        buf.isEmpty() -> MaterialTheme.colorScheme.onSurfaceVariant
+                        valid -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.error
+                    },
                 )
                 Spacer(Modifier.height(12.dp))
                 val rows = listOf(

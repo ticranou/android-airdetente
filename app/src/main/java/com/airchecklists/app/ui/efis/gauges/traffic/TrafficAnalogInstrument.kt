@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -148,6 +149,11 @@ private fun DrawScope.drawTraffic(
         centre = GaugeLobeCentre(dangerPrimary, dangerSub, dangerColor, GaugeColors.MarkDim),
         right  = GaugeLobe("NIVEAU", dangerLabel, dangerColor),
     )
+
+    // Watermark — instrument en cours de développement
+    rotate(degrees = -30f, pivot = Offset(cx, cy)) {
+        compactText(tm, "EN DÉVELOPPEMENT", cx, cy, sizeSp = 14f, bold = true, color = Color(0x55FFFFFF))
+    }
 }
 
 private fun DrawScope.drawRadarContent(

@@ -140,7 +140,7 @@ private fun ErrorView(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun WeatherContent(metar: MetarData?, taf: TafData?, runwayHeading: Int?) {
+internal fun WeatherContent(metar: MetarData?, taf: TafData?, runwayHeading: Int?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -191,7 +191,7 @@ private fun WeatherContent(metar: MetarData?, taf: TafData?, runwayHeading: Int?
 }
 
 @Composable
-private fun CategoryHeader(metar: MetarData) {
+internal fun CategoryHeader(metar: MetarData) {
     val color = flightCategoryColor(metar.flightCategory)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -218,7 +218,7 @@ private fun CategoryHeader(metar: MetarData) {
 }
 
 @Composable
-private fun DecodedBlock(m: MetarData) {
+internal fun DecodedBlock(m: MetarData) {
     SectionCard(title = null) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val wind = when {
@@ -247,7 +247,7 @@ private fun DecodedBlock(m: MetarData) {
 }
 
 @Composable
-private fun InfoRow(label: String, value: String) {
+internal fun InfoRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
@@ -255,7 +255,7 @@ private fun InfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun SectionCard(title: String?, content: @Composable () -> Unit) {
+internal fun SectionCard(title: String?, content: @Composable () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (title != null) {
@@ -267,11 +267,11 @@ private fun SectionCard(title: String?, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun MonoText(text: String) {
+internal fun MonoText(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
 }
 
-private fun flightCategoryColor(cat: String): Color = when (cat.uppercase()) {
+internal fun flightCategoryColor(cat: String): Color = when (cat.uppercase()) {
     "VFR" -> FlightCatVfr
     "MVFR" -> FlightCatMvfr
     "IFR" -> FlightCatIfr

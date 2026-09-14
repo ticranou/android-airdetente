@@ -28,6 +28,9 @@ data class AircraftEditState(
     val vno: String = "",
     val vne: String = "",
     val vpl: String = "",
+    val fuelCapacityL: String = "",
+    val fuelConsumptionLh: String = "",
+    val fuelReserveMin: String = "30",
     val isEditing: Boolean = false,
 ) {
     val canSave: Boolean get() = name.isNotBlank()
@@ -51,6 +54,9 @@ class AircraftEditViewModel(
                 it.greenMin.orEmpty(), it.greenMax.orEmpty(),
                 it.whiteMin.orEmpty(), it.whiteMid.orEmpty(), it.whiteMax.orEmpty(),
                 it.vno.orEmpty(), it.vne.orEmpty(), it.vpl.orEmpty(),
+                fuelCapacityL = it.fuelCapacityL.orEmpty(),
+                fuelConsumptionLh = it.fuelConsumptionLh.orEmpty(),
+                fuelReserveMin = if (it.fuelReserveMin > 0) it.fuelReserveMin.toString() else "30",
                 isEditing = true,
             )
         } ?: AircraftEditState(),
@@ -71,6 +77,9 @@ class AircraftEditViewModel(
     fun onVno(v: String) = _state.update { it.copy(vno = digits(v)) }
     fun onVne(v: String) = _state.update { it.copy(vne = digits(v)) }
     fun onVpl(v: String) = _state.update { it.copy(vpl = digits(v)) }
+    fun onFuelCapacityL(v: String) = _state.update { it.copy(fuelCapacityL = digits(v)) }
+    fun onFuelConsumptionLh(v: String) = _state.update { it.copy(fuelConsumptionLh = digits(v)) }
+    fun onFuelReserveMin(v: String) = _state.update { it.copy(fuelReserveMin = digits(v)) }
 
     // ---- Characteristics ----
 
@@ -121,6 +130,9 @@ class AircraftEditViewModel(
             vno = s.vno.toIntOrNull() ?: 0,
             vne = s.vne.toIntOrNull() ?: 0,
             vpl = s.vpl.toIntOrNull() ?: 0,
+            fuelCapacityL = s.fuelCapacityL.toIntOrNull() ?: 0,
+            fuelConsumptionLh = s.fuelConsumptionLh.toIntOrNull() ?: 0,
+            fuelReserveMin = s.fuelReserveMin.toIntOrNull()?.coerceAtLeast(1) ?: 30,
         )
         viewModelScope.launch {
             repository.upsertAircraft(toSave)

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Tableau blanc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">📝</div>
+      <div>
+        <h1>Tableau blanc</h1>
+        <p class="subtitle">CMNWHB — Notes et dessin libre avec historique</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">CMNWHB · commun · 100%-5L</span>
+      <span class="chip num">Doigt · Stylet</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="shot portrait">Capture CMNWHB<br>(à venir)</div>
+      </div>
+
+      <div class="card">
+      <h2>Possibilités</h2>
+      <ul class="feat">
+        <li>Surface de <b>dessin libre</b> au doigt ou au stylet pour notes, croquis, calculs.</li>
+        <li>Fond configurable : <b>blanc</b> (encre noire) ou <b>noir</b> (encre blanche, défaut).</li>
+        <li>Trois épaisseurs de trait : <b>Moyen</b> (2.5 dp), <b>Épais</b> (4.0 dp, défaut), <b>Très épais</b> (6.5 dp).</li>
+        <li>Toolbar bas (hauteur 7.5%) avec boutons :
+          <ul style="margin-top:4px">
+            <li><b>🧹 Effacer</b> (rouge, 42–68 % largeur) : long-press ajoute la note à l'historique et efface la surface.</li>
+            <li><b>🕔</b> (bleu si historique non vide, 71–97 % largeur) : affiche la liste des notes enregistrées avec horodatage.</li>
+          </ul>
+        </li>
+        <li>Bouton <b>⚙ réglages</b> (38 dp, circulaire) en haut à droite : configurer fond et épaisseur.</li>
+        <li><b>Mode lecture seule</b> : après restauration d'une note de l'historique, surface verrouillée en lecture seule (pas de dessin nouveau, Effacer long-press inactif). Indicateur « — Lecture seule — » (22 sp, orange) au-dessus de la toolbar et « [lecture seule] » dans la barre de titre. Persiste lors de changements de focus.</li>
+        <li>Historique : <b>max 10 entrées</b>. Restaurer une note ne la supprime pas. Ajouter une nouvelle note déplace les anciennes.</li>
+      </ul>
+      <h3>Réglages (Réglages ▸ Cockpits)</h3>
+      <ul class="feat">
+        <li><b>Fond</b> : Blanc / encre noire OR Noir / encre blanche (défaut).</li>
+        <li><b>Épaisseur du trait</b> : Moyen (2.5 dp) / Épais (4.0 dp, défaut) / Très épais (6.5 dp).</li>
+      </ul>
+      <h3>Gestes</h3>
+      <div class="gesture"><span class="g">–</span> Long-press sur Effacer : sauvegarder la note → historique et effacer la surface</div>
+      <div class="gesture"><span class="g">↗</span> Tap sur Historique : afficher la liste des notes (à venir : min/max dates, aperçu)</div>
+      <div class="gesture"><span class="g">⚙</span> Tap sur Réglages : fond et épaisseur du trait</div>
+      <h3>Note</h3>
+      <ul class="feat">
+        <li>Les entrées historiques sont stockées en mémoire (ServiceLocator.instrumentState) et <b>non persistantes</b> à la fermeture de l'app.</li>
+        <li>Mode lecture seule utile pour vérifier une note antérieure sans risque de l'écraser accidentellement.</li>
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer">
+      Repères en bas : tiret « – » = long-press Effacer (ajoute à l'historique).
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

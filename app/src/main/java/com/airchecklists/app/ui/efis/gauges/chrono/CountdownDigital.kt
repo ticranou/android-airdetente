@@ -5,6 +5,8 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,7 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -82,6 +87,7 @@ fun CountdownDigital(modifier: Modifier = Modifier) {
     val cd = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("countdown.num") { Countdown1().seed(com.airchecklists.app.di.ServiceLocator.instrumentPersist.countdownNum) } }
     var showDialog by remember { mutableStateOf(false) }
     var nowTick by remember { mutableLongStateOf(0L) }
+    val iconPainter = rememberVectorPainter(Icons.Outlined.Timer)
 
     LaunchedEffect(cd.run) {
         while (cd.run == Cd2.RUNNING) {
@@ -105,7 +111,6 @@ fun CountdownDigital(modifier: Modifier = Modifier) {
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
         drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-        // Title only (consigne moved above the value cell, like NUMCHR/ANLCWN).
         compactText(tm, "REBOURS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 
@@ -114,21 +119,18 @@ fun CountdownDigital(modifier: Modifier = Modifier) {
         val mainH = h - headerH
         val cy = mainTop + mainH * 0.50f
         val unset = cd.setMs <= 0L
-        // Rebours icon to the left of the value (open clock body + crown + down hand).
-        val iconR = mainH * 0.20f
-        val iconCx = w * 0.20f
-        drawArc(CompactStyle.Dim, startAngle = -150f, sweepAngle = 300f, useCenter = false,
-            topLeft = Offset(iconCx - iconR, cy - iconR), size = Size(iconR * 2f, iconR * 2f),
-            style = Stroke(width = 2f))
-        drawLine(CompactStyle.Dim, Offset(iconCx - iconR * 0.25f, cy - iconR),
-            Offset(iconCx + iconR * 0.25f, cy - iconR), strokeWidth = 3f)
-        drawLine(CompactStyle.Dim, Offset(iconCx, cy), Offset(iconCx, cy + iconR * 0.75f), strokeWidth = 1.5f)
-        // Consigne (configured duration) placed ABOVE the remaining value.
+
+        val iconSize = mainH * 0.42f
+        val iconLeft = w * 0.20f - iconSize / 2f
+        val iconTop  = cy - iconSize / 2f
+        translate(left = iconLeft, top = iconTop) {
+            with(iconPainter) { draw(Size(iconSize, iconSize), colorFilter = ColorFilter.tint(CompactStyle.Dim)) }
+        }
+
         if (!unset) compactText(tm, fmtMs(cd.setMs), w * 0.58f, cy - mainH * 0.33f, sizeSp = 12f, bold = true, color = Color(0xFF2E9BE6))
         val col = if (!unset && rem <= 0L) Color(0xFFFF4136) else CompactStyle.Mark
         compactText(tm, if (unset) "--:--" else fmtMs(rem), w * 0.58f, cy, sizeSp = 26f, bold = true, mono = true, color = col)
 
-        // Progress bar directly under the value.
         val frac = if (cd.setMs > 0) (1f - rem.toFloat() / cd.setMs).coerceIn(0f, 1f) else 0f
         val barW = w * 0.72f
         val barLeft = w * 0.58f - barW / 2f

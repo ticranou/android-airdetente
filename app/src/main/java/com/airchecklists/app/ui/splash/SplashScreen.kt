@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,11 +16,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.airchecklists.app.R
 import kotlinx.coroutines.delay
+
+/** Background matching the splash artwork so the image blends into the screen edges. */
+private val SplashBackground = Color(0xFF282828)
 
 @Composable
 fun SplashScreen(durationSeconds: Int, onFinished: () -> Unit) {
@@ -41,7 +44,7 @@ fun SplashScreen(durationSeconds: Int, onFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(SplashBackground),
         contentAlignment = Alignment.Center,
     ) {
         Image(

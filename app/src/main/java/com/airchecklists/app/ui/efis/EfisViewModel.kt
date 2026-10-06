@@ -36,6 +36,8 @@ class EfisViewModel(context: Context) : ViewModel() {
     fun calibrateHorizon() = provider.calibrate()
     fun resetHorizon() = provider.resetCalibration()
 
+    fun updateDisplayRotation(rotation: Int) = provider.updateDisplayRotation(rotation)
+
     /** Speed arcs from the current aircraft (null if none/unset). */
     val speedArcs: com.airchecklists.app.data.model.SpeedArcs?
         get() {

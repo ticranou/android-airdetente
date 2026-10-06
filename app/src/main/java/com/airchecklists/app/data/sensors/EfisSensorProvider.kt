@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
+import android.view.Surface
 import android.location.LocationManager
 import com.airchecklists.app.data.model.EfisHeadingSource
 import com.airchecklists.app.data.model.EfisVarioSource
@@ -97,6 +98,11 @@ class EfisSensorProvider(
     private var magneticHeading = 0f
     private var gpsTrack = 0f
 
+    /** Current screen rotation (Surface.ROTATION_*). Updated from the UI. */
+    @Volatile private var displayRotation: Int = Surface.ROTATION_0
+
+    fun updateDisplayRotation(rotation: Int) { displayRotation = rotation }
+
     // Attitude calibration: reference captured at the mount's neutral position.
     private var pitchOffset = 0f
     private var rollOffset = 0f
@@ -155,7 +161,20 @@ class EfisSensorProvider(
             when (event.sensor.type) {
                 Sensor.TYPE_ROTATION_VECTOR -> {
                     SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                    SensorManager.getOrientation(rotationMatrix, orientation)
+                    // Remap axes so that azimuth always reflects the direction the TOP
+                    // of the screen faces, regardless of whether the device is in
+                    // portrait or landscape.
+                    val remapped = FloatArray(9)
+                    when (displayRotation) {
+                        Surface.ROTATION_90 ->
+                            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, remapped)
+                        Surface.ROTATION_270 ->
+                            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_X, remapped)
+                        Surface.ROTATION_180 ->
+                            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y, remapped)
+                        else -> remapped.also { rotationMatrix.copyInto(it) }
+                    }
+                    SensorManager.getOrientation(remapped, orientation)
                     // orientation: [azimuth, pitch, roll] in radians.
                     val azimuth = ((Math.toDegrees(orientation[0].toDouble()) + 360.0) % 360.0).toFloat()
                     // Raw attitude (portrait mounting: negate pitch so nose-up = sky up).

@@ -81,6 +81,17 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val trail by viewModel.trail.collectAsStateWithLifecycle()
 
+    // Keep the sensor provider aware of the current screen rotation so it can
+    // remap the rotation matrix axes and return a correct magnetic heading.
+    val windowManager = context.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager
+    @Suppress("DEPRECATION")
+    val currentRotation = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        context.display?.rotation ?: android.view.Surface.ROTATION_0
+    } else {
+        windowManager.defaultDisplay.rotation
+    }
+    LaunchedEffect(currentRotation) { viewModel.updateDisplayRotation(currentRotation) }
+
     val permLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted -> if (granted) viewModel.onLocationPermissionGranted() }

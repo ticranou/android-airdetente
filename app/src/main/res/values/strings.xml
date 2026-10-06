@@ -79,7 +79,7 @@
     <string name="help_title">Aide</string>
     <string name="settings_section_aircraft">ULMs</string>
     <string name="settings_section_checklists">Checks</string>
-    <string name="settings_section_data">Données</string>
+    <string name="settings_section_data">Sauvegarde</string>
     <string name="settings_section_appearance">Affichage</string>
     <string name="settings_section_cockpits">Cockpits</string>
     <string name="settings_efis">Instruments</string>
@@ -347,10 +347,9 @@
     <string name="disclaimer_body">AirDetente est une aide destinée à faciliter la préparation et le suivi des vols. Son utilisation relève de la seule responsabilité de l\'utilisateur final.\n\nLe développeur ne saurait être tenu pour responsable de tout dommage, incident ou préjudice résultant de l\'utilisation de l\'application.\n\nLes informations affichées (instruments, position, altitude, cap, vitesse, cartes, terrains, etc.) ne sont pas garanties : elles proviennent des capteurs de l\'appareil utilisé (téléphone ou tablette) et dépendent de leur présence, de leur précision et de leur bon fonctionnement. Elles peuvent être erronées, imprécises ou indisponibles.\n\nCette application ne remplace en aucun cas les instruments de bord certifiés, la documentation officielle, ni le jugement du pilote. Elle ne doit pas être utilisée comme unique moyen de navigation ou de pilotage.\n\nEn continuant, vous reconnaissez avoir lu et accepté ces conditions.</string>
     <string name="disclaimer_dont_show_again">J\'ai compris, ne plus afficher</string>
     <string name="disclaimer_accept">Continuer</string>
-    <string name="settings_data_hint">Fonctionnalité de maintenance : exporter ou importer l\'intégralité des données de l\'application (appareils, terrains, réglages). L\'import REMPLACE les données existantes.</string>
-    <string name="settings_data_export">Exporter le jeu de données</string>
-    <string name="settings_data_import">Importer un jeu de données</string>
-    <string name="settings_data_unlocked">Onglet Data activé.</string>
+    <string name="settings_data_hint">Sauvegardez l\'intégralité de vos données (appareils, cockpits, terrains, réglages) dans un fichier, puis restaurez-les à tout moment ou sur un autre appareil. Pensez à sauvegarder régulièrement : une désinstallation efface toutes les données de l\'application. L\'import REMPLACE les données existantes.</string>
+    <string name="settings_data_export">Sauvegarder mes données</string>
+    <string name="settings_data_import">Restaurer une sauvegarde</string>
     <string name="instrument_nummap_title">Carte de navigation</string>
     <string name="instrument_unavailable">Instrument indisponible</string>
     <string name="instrument_unavailable_gyro">(gyroscope absent)</string>

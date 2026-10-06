@@ -2,21 +2,24 @@
 REM ============================================================
 REM  AirDetente - compilation de l'APK (sans Android Studio)
 REM  Double-cliquez ce fichier, ou lancez-le depuis un terminal.
-REM  Il utilise le JDK 17, le SDK Android et Gradle installes
-REM  (en .zip) dans %USERPROFILE%\tools.
-REM
+REM  Utilise le JDK de IntelliJ IDEA (jbr), le SDK Android et Gradle 8.12.
+REM  Le SDK Android doit etre installe dans %USERPROFILE%\tools.
 REM  Ce projet cible compileSdk 35 : si la platform android-35
 REM  et les build-tools 35 sont absents, le script les installe
 REM  automatiquement via sdkmanager (necessite une connexion).
+REM
+REM  Note : un java agent (gradle/java-version-fix.jar) est necessaire
+REM  pour contourner un bug de parsing de version Java dans Kotlin DSL
+REM  (versions Java avec 4 segments comme 25.0.4.1 de SapMachine LTS).
 REM ============================================================
 
 setlocal
 
-REM --- Emplacements de la toolchain locale ---
-set "JAVA_HOME=%USERPROFILE%\tools\sapmachine-jdk-17.0.13"
+REM --- Emplacements de la toolchain ---
+set "JAVA_HOME=C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.2\jbr"
 set "ANDROID_HOME=%USERPROFILE%\tools\android-sdk"
 set "ANDROID_SDK_ROOT=%ANDROID_HOME%"
-set "GRADLE=%USERPROFILE%\tools\gradle-8.7\bin\gradle.bat"
+set "GRADLE=%USERPROFILE%\.gradle\wrapper\dists\gradle-8.12\gradle-8.12\bin\gradle.bat"
 set "SDKMANAGER=%USERPROFILE%\tools\cmdline-tools\bin\sdkmanager.bat"
 
 REM --- Se placer dans le dossier du projet (dossier de ce script) ---
@@ -25,13 +28,14 @@ cd /d "%~dp0"
 echo.
 echo === Verification de la toolchain ===
 if not exist "%JAVA_HOME%\bin\java.exe" (
-  echo [ERREUR] JDK 17 introuvable dans "%JAVA_HOME%".
-  echo Verifiez que le dossier existe.
+  echo [ERREUR] Java introuvable dans "%JAVA_HOME%".
+  echo Verifiez que SapMachine JDK/JRE 25 est installe.
   pause
   exit /b 1
 )
 if not exist "%GRADLE%" (
   echo [ERREUR] Gradle introuvable dans "%GRADLE%".
+  echo Le cache Gradle est peut-etre absent. Lancez gradlew.bat --version une premiere fois.
   pause
   exit /b 1
 )

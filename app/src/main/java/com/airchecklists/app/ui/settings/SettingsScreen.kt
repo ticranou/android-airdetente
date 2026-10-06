@@ -67,7 +67,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -137,10 +136,6 @@ fun SettingsScreen(
     // Aircraft awaiting import-overwrite confirmation (has existing content).
     var importConfirmFor by remember { mutableStateOf<Aircraft?>(null) }
 
-    // Hidden "Data" maintenance tab: unlocked by 5 taps on the Disclaimer title.
-    // Deliberately NOT rememberSaveable → it vanishes when the app process dies.
-    var dataUnlocked by remember { mutableStateOf(false) }
-    var disclaimerTaps by remember { mutableIntStateOf(0) }
     // Mode of the SAF launchers when used for the whole-dataset export/import.
     var datasetExport by remember { mutableStateOf(false) }
     var datasetImport by remember { mutableStateOf(false) }
@@ -176,10 +171,6 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
     }
-    val dataUnlockedMsg = stringResource(R.string.settings_data_unlocked)
-    LaunchedEffect(dataUnlocked) {
-        if (dataUnlocked) snackbarHostState.showSnackbar(dataUnlockedMsg)
-    }
 
     Scaffold(
         topBar = {
@@ -193,7 +184,7 @@ fun SettingsScreen(
                     add(SettingsSection.APPEARANCE); add(SettingsSection.COCKPITS)
                     add(SettingsSection.AIRCRAFT); add(SettingsSection.CHECKLISTS); add(SettingsSection.VAC)
                     add(SettingsSection.HELP); add(SettingsSection.DISCLAIMER)
-                    if (dataUnlocked) add(SettingsSection.DATA)
+                    add(SettingsSection.DATA)
                 }
                 val selectedIndex = (order.indexOf(section) + 1).coerceAtLeast(0)
                 androidx.compose.material3.ScrollableTabRow(
@@ -249,14 +240,12 @@ fun SettingsScreen(
                         text = { Text(stringResource(R.string.disclaimer_title), maxLines = 1) },
                         icon = { Icon(Icons.Filled.WarningAmber, contentDescription = null) },
                     )
-                    if (dataUnlocked) {
-                        androidx.compose.material3.Tab(
-                            selected = section == SettingsSection.DATA,
-                            onClick = { section = SettingsSection.DATA },
-                            text = { Text(stringResource(R.string.settings_section_data), maxLines = 1) },
-                            icon = { Icon(Icons.Filled.Storage, contentDescription = null) },
-                        )
-                    }
+                    androidx.compose.material3.Tab(
+                        selected = section == SettingsSection.DATA,
+                        onClick = { section = SettingsSection.DATA },
+                        text = { Text(stringResource(R.string.settings_section_data), maxLines = 1) },
+                        icon = { Icon(Icons.Filled.Storage, contentDescription = null) },
+                    )
                 }
             }
         },
@@ -374,19 +363,7 @@ fun SettingsScreen(
                     // 5 taps anywhere on the disclaimer content reveal the hidden Data tab
                     // for the lifetime of the app process.
                     com.airchecklists.app.ui.disclaimer.DisclaimerContent(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                            ) {
-                                if (!dataUnlocked) {
-                                    disclaimerTaps++
-                                    if (disclaimerTaps >= 5) {
-                                        dataUnlocked = true
-                                    }
-                                }
-                            },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 SettingsSection.DATA -> DataSection(

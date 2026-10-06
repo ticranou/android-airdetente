@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -31,11 +32,23 @@ class FlightService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(NOTIF_ID, buildNotification())
+        startForegroundCompat(buildNotification())
         // The recorder runs for the whole flight (service lifetime), not just while the
         // cockpit screen is visible, so it keeps capturing when the user switches apps.
         com.airchecklists.app.di.ServiceLocator.flightRecorder.start()
         return START_STICKY
+    }
+
+    private fun startForegroundCompat(notification: Notification) {
+        // dataSync FGS type: this service is a keep-alive wrapper around the flight
+        // data recorder. It must not use the "location" type — on Android 14+ that
+        // requires the app to be in an eligible state at start time, which isn't
+        // guaranteed in Activity.onCreate and crashed the app on launch.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIF_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(NOTIF_ID, notification)
+        }
     }
 
     private fun buildNotification(): Notification {

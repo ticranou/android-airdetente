@@ -332,7 +332,7 @@ internal sealed interface WxSelection {
 
 /** Bottom detail panel for a tapped METAR (raw + TAF fetched on demand) or SIGMET. */
 @Composable
-private fun WxDetailPanel(selection: WxSelection, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+internal fun WxDetailPanel(selection: WxSelection, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = Color(0xFF14171C),
@@ -425,7 +425,7 @@ internal fun WxTerrainDetailDialog(icao: String, onDismiss: () -> Unit) {
 
 /** Checkbox dialog for the weather overlay layers. */
 @Composable
-private fun WxLayerDialog(
+internal fun WxLayerDialog(
     current: com.airchecklists.app.data.model.WxLayerPrefs,
     onDismiss: () -> Unit,
     onApply: (com.airchecklists.app.data.model.WxLayerPrefs) -> Unit,
@@ -458,7 +458,7 @@ private fun WxLayerRow(label: String, checked: Boolean, onCheckedChange: (Boolea
 }
 
 @Composable
-private fun WxZoomButton(label: String, enabled: Boolean, onClick: () -> Unit) {
+internal fun WxZoomButton(label: String, enabled: Boolean, onClick: () -> Unit) {
     Surface(
         color = Color(0xCC14171C),
         shape = androidx.compose.foundation.shape.CircleShape,
@@ -476,8 +476,8 @@ private fun WxZoomButton(label: String, enabled: Boolean, onClick: () -> Unit) {
  *  sources on the left and the FL20 wind (direction/speed + arrow → FL20) on the
  *  right. Sits below the system status bar. */
 @Composable
-private fun WeatherDialogHeader(winds: WindsAloft?, onLayers: () -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.background(Color(0xFF0C0C0C)).androidStatusBarPadding()) {
+internal fun WeatherDialogHeader(winds: WindsAloft?, onLayers: () -> Unit, modifier: Modifier = Modifier, applyStatusBarPadding: Boolean = true) {
+    Column(modifier = modifier.background(Color(0xFF0C0C0C)).let { if (applyStatusBarPadding) it.androidStatusBarPadding() else it }) {
         // Row 1 — centred title + a layers button on the right.
         androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp)) {
             Text(
@@ -840,7 +840,7 @@ private fun worldY(lat: Double, zoom: Int): Double {
 }
 
 /** Screen offset for (lat,lon) given the ship anchor at (shipX,shipY) and [zoom]. */
-private fun wxProject(lat: Double, lon: Double, shipLat: Double, shipLon: Double, shipX: Float, shipY: Float, zoom: Int): Offset {
+internal fun wxProject(lat: Double, lon: Double, shipLat: Double, shipLon: Double, shipX: Float, shipY: Float, zoom: Int): Offset {
     val px = shipX + (worldX(lon, zoom) - worldX(shipLon, zoom)).toFloat()
     val py = shipY + (worldY(lat, zoom) - worldY(shipLat, zoom)).toFloat()
     return Offset(px, py)

@@ -104,6 +104,7 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     var showPicker by remember { mutableStateOf(false) }
     var step by remember { mutableStateOf(AanlsctStep.CHOOSE_TYPE) }
     var showFocusDashboard by remember { mutableStateOf(false) }
+    var showWxDialog by remember { mutableStateOf(false) }
 
     Canvas(
         modifier = modifier.pointerInput(target) {
@@ -127,6 +128,7 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                                 remoteUrl = ServiceLocator.vacRepository.remoteUrl(cycle, chart.icao),
                             )
                         }
+                        is ShortcutTarget.WeatherStation -> showWxDialog = true
                         else -> Unit
                     }
                 },
@@ -157,6 +159,11 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     "Focus", GaugeColors.MarkDim
                 )
                 is ShortcutTarget.TerrainVac -> Triple(target.icao, "VAC", Color(0xFFFFCC44))
+                is ShortcutTarget.WeatherStation -> Triple(
+                    allCharts.firstOrNull { it.icao.equals(target.icao, ignoreCase = true) }
+                        ?.airfieldName ?: target.icao,
+                    "METEO", Color(0xFF4CAF50)
+                )
             }
 
             // Name: word-wrap on up to 2 lines
@@ -201,6 +208,13 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 onDismiss = { showFocusDashboard = false },
             )
         }
+    }
+
+    if (showWxDialog && target is ShortcutTarget.WeatherStation) {
+        com.airchecklists.app.ui.efis.gauges.weather.WxTerrainDetailDialog(
+            icao = target.icao,
+            onDismiss = { showWxDialog = false },
+        )
     }
 
     // ── Picker flow ───────────────────────────────────────────────────────────

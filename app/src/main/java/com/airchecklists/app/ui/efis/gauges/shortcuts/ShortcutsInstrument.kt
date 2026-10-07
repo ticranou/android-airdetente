@@ -71,7 +71,7 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 private const val N = 3
 
 private enum class ConfigStep {
-    CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD_FOCUS, PICK_DASHBOARD_NAV, PICK_TERRAIN
+    CHOOSE_TYPE, PICK_INSTRUMENT, PICK_DASHBOARD_FOCUS, PICK_DASHBOARD_NAV, PICK_TERRAIN, PICK_WEATHER_STATION
 }
 
 @Composable
@@ -121,6 +121,11 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 )
             is ShortcutTarget.TerrainVac ->
                 SlotDisplay(target.icao, Color(0xFFFFCC44))
+            is ShortcutTarget.WeatherStation -> {
+                val name = allCharts.firstOrNull { it.icao.equals(target.icao, ignoreCase = true) }
+                    ?.airfieldName ?: target.icao
+                SlotDisplay(name, Color(0xFF4CAF50))
+            }
         }
     }
 
@@ -223,7 +228,19 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 )
                 openIdx = -1
             }
+            is ShortcutTarget.WeatherStation -> {
+                // dialog handled below via state — keep openIdx set
+            }
         }
+    }
+
+    // Weather station dialog — shown when openIdx points to a WeatherStation target.
+    val wxTarget = (targets.getOrNull(openIdx) as? ShortcutTarget.WeatherStation)
+    if (wxTarget != null) {
+        com.airchecklists.app.ui.efis.gauges.weather.WxTerrainDetailDialog(
+            icao = wxTarget.icao,
+            onDismiss = { openIdx = -1 },
+        )
     }
 
     // ── Config flow ──────────────────────────────────────────────────────────
@@ -239,7 +256,7 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                             Button(
                                 onClick = { configStep = ConfigStep.PICK_DASHBOARD_NAV },
                                 modifier = Modifier.fillMaxWidth(),
-                            ) { Text("Tableau de bord (??)") }
+                            ) { Text("Tableau de bord (>>)") }
                             Button(
                                 onClick = { configStep = ConfigStep.PICK_DASHBOARD_FOCUS },
                                 modifier = Modifier.fillMaxWidth(),
@@ -252,6 +269,10 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                                 onClick = { configStep = ConfigStep.PICK_TERRAIN },
                                 modifier = Modifier.fillMaxWidth(),
                             ) { Text("Terrain (Carte VAC)") }
+                            Button(
+                                onClick = { configStep = ConfigStep.PICK_WEATHER_STATION },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Terrain (Station Météo)") }
                         }
                     },
                     confirmButton = {},
@@ -304,6 +325,15 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                     onDismiss = { configIdx = -1 },
                     onSelect = { chart ->
                         save(cellIdx, targets, configIdx, ShortcutTarget.TerrainVac(chart.id, chart.icao))
+                        configIdx = -1
+                    },
+                )
+            }
+            ConfigStep.PICK_WEATHER_STATION -> {
+                WeatherStationPickerDialog(
+                    onDismiss = { configIdx = -1 },
+                    onSelect = { icao ->
+                        save(cellIdx, targets, configIdx, ShortcutTarget.WeatherStation(icao))
                         configIdx = -1
                     },
                 )
@@ -487,6 +517,37 @@ private fun TerrainPickerDialog(
                 LazyColumn {
                     items(charts) { chart ->
                         TextButton(onClick = { onSelect(chart) }, modifier = Modifier.fillMaxWidth()) {
+                            Text("${chart.icao} — ${chart.airfieldName}",
+                                modifier = Modifier.weight(1f),
+                                overflow = TextOverflow.Ellipsis, maxLines = 1)
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
+    )
+}
+
+@Composable
+private fun WeatherStationPickerDialog(
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit,
+) {
+    val allCharts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
+    val stations = allCharts.filter { it.hasWeather }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choisir une station météo") },
+        text = {
+            if (stations.isEmpty()) {
+                Text("Aucun terrain avec station météo. Activez l'option \"Station météo\" dans les réglages d'un terrain.")
+            } else {
+                LazyColumn {
+                    items(stations) { chart ->
+                        TextButton(onClick = { onSelect(chart.icao) }, modifier = Modifier.fillMaxWidth()) {
                             Text("${chart.icao} — ${chart.airfieldName}",
                                 modifier = Modifier.weight(1f),
                                 overflow = TextOverflow.Ellipsis, maxLines = 1)

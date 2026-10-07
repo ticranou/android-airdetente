@@ -372,7 +372,7 @@ private fun WxDetailPanel(selection: WxSelection, onDismiss: () -> Unit, modifie
 
 /** Full-screen weather detail dialog for a METAR tap — shows the graphical WeatherContent. */
 @Composable
-private fun WxTerrainDetailDialog(icao: String, onDismiss: () -> Unit) {
+internal fun WxTerrainDetailDialog(icao: String, onDismiss: () -> Unit) {
     val wx by produceState<com.airchecklists.app.data.model.WeatherResult?>(null, icao) {
         value = runCatching {
             withContext(Dispatchers.IO) { ServiceLocator.weatherClient.fetch(icao) }

@@ -395,6 +395,9 @@ sealed class ShortcutTarget {
     /** ANLSCT: open the VAC chart PDF for a terrain. */
     @Serializable
     data class TerrainVac(val vacId: String, val icao: String) : ShortcutTarget()
+    /** ANLSCT: open the METAR/TAF weather dialog for a station. */
+    @Serializable
+    data class WeatherStation(val icao: String) : ShortcutTarget()
 }
 
 @Serializable

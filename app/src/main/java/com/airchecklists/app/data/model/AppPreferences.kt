@@ -24,6 +24,13 @@ enum class EfisVarioSource {
     BAROMETER,
 }
 
+/** When to watch for magnetic heading drift vs GPS track. */
+@Serializable
+enum class EfisCalibrationWatch {
+    MAGNETIC_ONLY,  // alert only when heading source is MAGNETIC (default)
+    ALWAYS,         // always compare, even when GPS_TRACK is selected
+}
+
 /** An instrument that can be placed in an EFIS grid slot. Declaration order is
  *  the order shown in the settings picker. */
 @Serializable
@@ -454,6 +461,8 @@ data class AppPreferences(
     val splashSeconds: Int = 2,
     /** EFIS heading tape source. */
     val efisHeadingSource: EfisHeadingSource = EfisHeadingSource.MAGNETIC,
+    /** When to alert for magnetic compass calibration. */
+    val efisCalibrationWatch: EfisCalibrationWatch = EfisCalibrationWatch.MAGNETIC_ONLY,
     /** EFIS variometer source. */
     val efisVarioSource: EfisVarioSource = EfisVarioSource.GPS,
     /** EFIS grid dimensions (cols 1..3, rows 1..2). */

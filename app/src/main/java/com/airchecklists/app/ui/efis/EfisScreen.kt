@@ -70,6 +70,7 @@ import com.airchecklists.app.data.model.Dashboard
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.components.CompassCalibrationDialog
 import com.airchecklists.app.ui.efis.gauges.InstrumentSlot
 import com.airchecklists.app.ui.simpleViewModelFactory
 
@@ -80,6 +81,8 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val trail by viewModel.trail.collectAsStateWithLifecycle()
+    val calibrationNeeded by viewModel.calibrationNeeded.collectAsStateWithLifecycle()
+    val headingDrift by viewModel.headingDriftDeg.collectAsStateWithLifecycle()
 
     // Keep the sensor provider aware of the current screen rotation so it can
     // remap the rotation matrix axes and return a correct magnetic heading.
@@ -207,6 +210,16 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
                 imageVector = if (fullscreen) Icons.Filled.FullscreenExit else Icons.Filled.Fullscreen,
                 contentDescription = if (fullscreen) "Quitter le plein écran" else "Plein écran",
                 tint = Color(0xCCFFFFFF),
+            )
+        }
+
+        if (calibrationNeeded) {
+            CompassCalibrationDialog(
+                driftDeg = headingDrift,
+                driftSignedDeg = state.headingDriftSignedDeg,
+                onDismiss = { viewModel.dismissCalibrationAlert() },
+                onCalibrated = { viewModel.dismissCalibrationAlert() },
+                onCompensate = { viewModel.applyHeadingOffset(it) },
             )
         }
     }

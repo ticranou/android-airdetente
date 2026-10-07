@@ -1,5 +1,6 @@
 package com.airchecklists.app.ui.efis.gauges.map
 
+import com.airchecklists.app.ui.efis.gauges.HeadingSourceBadge
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -263,15 +265,24 @@ private fun EfisHeaderBand(
     // Fixed-height band at the top of the cell so the banking aircraft is fully
     // visible and the long-press on the heading tape is reliably received.
     val bandHeight = 150.dp
-    Canvas(
-        modifier = Modifier.fillMaxWidth().height(bandHeight).pointerInput(Unit) {
-            detectTapGestures(onLongPress = { pos ->
-                // Top band (heading tape) → set the heading bug.
-                if (pos.y <= size.height * 0.40f) showHeadingDialog = true
-            })
-        },
-    ) {
-        drawEfisHeader(tm, state, unit, arcs, size.height, Color(0xF01A1C1E), altUnit, targetHeading)
+    // The heading tape occupies the top ~36% of the band. Badge sits at ~18% (mid of tape).
+    val badgeOffsetDp = bandHeight * 0.18f
+    Box(modifier = Modifier.fillMaxWidth().height(bandHeight)) {
+        Canvas(
+            modifier = Modifier.fillMaxWidth().height(bandHeight).pointerInput(Unit) {
+                detectTapGestures(onLongPress = { pos ->
+                    // Top band (heading tape) → set the heading bug.
+                    if (pos.y <= size.height * 0.40f) showHeadingDialog = true
+                })
+            },
+        ) {
+            drawEfisHeader(tm, state, unit, arcs, size.height, Color(0xF01A1C1E), altUnit, targetHeading)
+        }
+        HeadingSourceBadge(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = badgeOffsetDp),
+        )
     }
     if (showHeadingDialog) {
         com.airchecklists.app.ui.components.HeadingEntryDialog(

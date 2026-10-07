@@ -92,6 +92,10 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setEfisHeadingSource(source) }
     }
 
+    fun setEfisCalibrationWatch(mode: com.airchecklists.app.data.model.EfisCalibrationWatch) {
+        viewModelScope.launch { prefsRepo.setEfisCalibrationWatch(mode) }
+    }
+
     fun setEfisVarioSource(source: com.airchecklists.app.data.model.EfisVarioSource) {
         viewModelScope.launch { prefsRepo.setEfisVarioSource(source) }
     }

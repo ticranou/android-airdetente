@@ -1,11 +1,15 @@
 package com.airchecklists.app.ui.efis.gauges.circuit
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -20,6 +24,7 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.GaugeLobe
 import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
+import com.airchecklists.app.ui.efis.gauges.HeadingSourceBadge
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.gaugeText
@@ -109,7 +114,10 @@ fun CircuitInstrument(
 
     val circuitAltFt: Int? = target?.elevationFt?.let { it + 1000 }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val badgeOffsetDp = if (showValue) (maxHeight * 0.15f) else 0.dp
+
+        Canvas(modifier = Modifier.fillMaxSize()) {
         val (cx, cy, r) = gaugeFace(bezel)
 
         // ── Compass card (rotates so current heading sits under top index) ──
@@ -194,6 +202,13 @@ fun CircuitInstrument(
             right = GaugeLobe("CIRC", circAltiTxt, GaugeColors.MarkDim),
         )
     }
+
+        HeadingSourceBadge(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = badgeOffsetDp),
+        )
+    } // BoxWithConstraints
 }
 
 /** Pick the primary QFU using bearing from ship to ARP when no circuit text available. */

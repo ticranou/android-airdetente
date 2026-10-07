@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.filled.Upload
@@ -68,13 +70,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -83,6 +90,8 @@ import com.airchecklists.app.R
 import com.airchecklists.app.data.model.Aircraft
 import com.airchecklists.app.data.model.AppPreferences
 import com.airchecklists.app.data.model.EfisHeadingSource
+import com.airchecklists.app.data.model.EfisCalibrationWatch
+import com.airchecklists.app.ui.components.CompassCalibrationDialog
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.model.EfisSpeedUnit
 import com.airchecklists.app.data.model.EfisVarioSource
@@ -97,7 +106,7 @@ import com.airchecklists.app.ui.repoViewModelFactory
 import com.airchecklists.app.ui.settings.vac.ReorderableVacList
 import com.airchecklists.app.ui.theme.scaledByPrefs
 
-private enum class SettingsSection { APPEARANCE, COCKPITS, AIRCRAFT, CHECKLISTS, VAC, HELP, DISCLAIMER, DATA }
+internal enum class SettingsSection { SEARCH, APPEARANCE, COCKPITS, AIRCRAFT, CHECKLISTS, VAC, HELP, DISCLAIMER, DATA }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,7 +134,12 @@ fun SettingsScreen(
 
     // rememberSaveable so returning from an edit screen (dashboard / aircraft / vac /
     // checklist) restores the tab the user was on, instead of resetting to Affichage.
-    var section by rememberSaveable { mutableStateOf(SettingsSection.APPEARANCE) }
+    var section by rememberSaveable { mutableStateOf(SettingsSection.SEARCH) }
+    var pendingAnchor by remember { mutableStateOf<SettingsAnchor?>(null) }
+    val scrollState = rememberScrollState()
+    val anchorOffsets = remember { androidx.compose.runtime.mutableStateMapOf<SettingsAnchor, Int>() }
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
     var aircraftToDelete by remember { mutableStateOf<Aircraft?>(null) }
     var checklistToDelete by remember { mutableStateOf<ChecklistRow?>(null) }
     var vacToDelete by remember { mutableStateOf<VacChart?>(null) }
@@ -172,6 +186,19 @@ fun SettingsScreen(
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
     }
 
+    LaunchedEffect(pendingAnchor) {
+        val anchor = pendingAnchor ?: return@LaunchedEffect
+        val topBarPx = with(density) { 130.dp.toPx() }.toInt()
+        var attempts = 0
+        while (anchorOffsets[anchor] == null && attempts < 30) {
+            kotlinx.coroutines.delay(16); attempts++
+        }
+        anchorOffsets[anchor]?.let { y ->
+            scrollState.animateScrollTo((y - topBarPx).coerceAtLeast(0))
+        }
+        pendingAnchor = null
+    }
+
     Scaffold(
         topBar = {
             Column {
@@ -181,6 +208,7 @@ fun SettingsScreen(
                 // Scrollable section tabs, directly under the title bar (Material
                 // standard placement; avoids overlapping the Android nav buttons).
                 val order = buildList {
+                    add(SettingsSection.SEARCH)
                     add(SettingsSection.APPEARANCE); add(SettingsSection.COCKPITS)
                     add(SettingsSection.AIRCRAFT); add(SettingsSection.CHECKLISTS); add(SettingsSection.VAC)
                     add(SettingsSection.HELP); add(SettingsSection.DISCLAIMER)
@@ -197,6 +225,12 @@ fun SettingsScreen(
                         onClick = onHome,
                         text = { Text(stringResource(R.string.action_back), maxLines = 1) },
                         icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) },
+                    )
+                    androidx.compose.material3.Tab(
+                        selected = section == SettingsSection.SEARCH,
+                        onClick = { section = SettingsSection.SEARCH },
+                        text = { Text("Recherche", maxLines = 1) },
+                        icon = { Icon(Icons.Default.Search, contentDescription = null) },
                     )
                     androidx.compose.material3.Tab(
                         selected = section == SettingsSection.APPEARANCE,
@@ -254,7 +288,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(
                     top = inner.calculateTopPadding() + 16.dp,
                     bottom = inner.calculateBottomPadding() + 16.dp,
@@ -264,7 +298,12 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             when (section) {
+                SettingsSection.SEARCH -> SettingsSearchTab(onNavigateTo = { sec, anchor ->
+                    section = sec
+                    pendingAnchor = anchor
+                })
                 SettingsSection.APPEARANCE -> AppearanceSection(
+                    anchorOffsets = anchorOffsets,
                     prefs = prefs,
                     onThemeMode = viewModel::setThemeMode,
                     onFontScale = viewModel::setFontScale,
@@ -276,9 +315,11 @@ fun SettingsScreen(
                     onGaugeBezelColor = viewModel::setGaugeBezelColor,
                 )
                 SettingsSection.COCKPITS -> CockpitsSection(
+                    anchorOffsets = anchorOffsets,
                     prefs = prefs,
                     hasBarometer = viewModel.hasBarometer,
                     onHeadingSource = viewModel::setEfisHeadingSource,
+                    onCalibrationWatch = viewModel::setEfisCalibrationWatch,
                     onVarioSource = viewModel::setEfisVarioSource,
                     onEfisSpeedUnit = viewModel::setEfisSpeedUnit,
                     onAltitudeUnit = viewModel::setAltitudeUnit,
@@ -484,6 +525,7 @@ private fun DataSection(onExport: () -> Unit, onImport: () -> Unit) {
 
 @Composable
 private fun AppearanceSection(
+    anchorOffsets: androidx.compose.runtime.snapshots.SnapshotStateMap<SettingsAnchor, Int>,
     prefs: AppPreferences,
     onThemeMode: (ThemeMode) -> Unit,
     onFontScale: (Float) -> Unit,
@@ -494,6 +536,7 @@ private fun AppearanceSection(
     onGaugeBezelStyle: (com.airchecklists.app.data.model.GaugeBezelStyle) -> Unit,
     onGaugeBezelColor: (Long) -> Unit,
 ) {
+    AnchorBox(SettingsAnchor.APPEARANCE_THEME, anchorOffsets) {
     SectionHeader(stringResource(R.string.settings_section_appearance))
     Text(
         stringResource(R.string.settings_theme),
@@ -512,7 +555,9 @@ private fun AppearanceSection(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         ) { Text(stringResource(R.string.settings_theme_auto)) }
     }
+    } // AnchorBox APPEARANCE_THEME
 
+    AnchorBox(SettingsAnchor.APPEARANCE_FONT, anchorOffsets) {
     // Font size: everything on one line (label preview kept short).
     SectionHeader(stringResource(R.string.settings_font_size))
     Row(
@@ -539,7 +584,9 @@ private fun AppearanceSection(
             modifier = Modifier.padding(start = 12.dp),
         )
     }
+    } // AnchorBox APPEARANCE_FONT
 
+    AnchorBox(SettingsAnchor.APPEARANCE_SPLASH, anchorOffsets) {
     // Splash screen duration (0 = disabled).
     SectionHeader(stringResource(R.string.settings_splash))
     Row(
@@ -564,7 +611,9 @@ private fun AppearanceSection(
             Icon(Icons.Filled.Add, stringResource(R.string.settings_splash_increase))
         }
     }
+    } // AnchorBox APPEARANCE_SPLASH
 
+    AnchorBox(SettingsAnchor.APPEARANCE_KEEP_SCREEN, anchorOffsets) {
     // Keep screen on toggle (general display setting → stays in Affichage).
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -582,7 +631,9 @@ private fun AppearanceSection(
             modifier = Modifier.padding(start = 4.dp),
         )
     }
+    } // AnchorBox APPEARANCE_KEEP_SCREEN
 
+    AnchorBox(SettingsAnchor.APPEARANCE_PAGER, anchorOffsets) {
     // --- Cockpit page marker (style + position) ---
     SectionHeader(stringResource(R.string.settings_pager_style))
     Text(
@@ -626,7 +677,9 @@ private fun AppearanceSection(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         ) { Text(stringResource(R.string.settings_pager_position_bottom)) }
     }
+    } // AnchorBox APPEARANCE_PAGER
 
+    AnchorBox(SettingsAnchor.APPEARANCE_BEZEL, anchorOffsets) {
     // --- Analog gauge bezel (contour) style + colour ---
     SectionHeader(stringResource(R.string.settings_bezel))
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -682,7 +735,9 @@ private fun AppearanceSection(
             }
         }
     }
+    } // AnchorBox APPEARANCE_BEZEL
 
+    AnchorBox(SettingsAnchor.APPEARANCE_QUIT, anchorOffsets) {
     // --- Quitter l'application (arrête le service et ferme proprement) ---
     SectionHeader(stringResource(R.string.settings_quit_section))
     val quitCtx = androidx.compose.ui.platform.LocalContext.current
@@ -712,14 +767,17 @@ private fun AppearanceSection(
             },
         )
     }
+    } // AnchorBox APPEARANCE_QUIT
 }
 
 /** Cockpit-related settings: EFIS sources/units/behaviour, saved dashboards, map. */
 @Composable
 private fun CockpitsSection(
+    anchorOffsets: androidx.compose.runtime.snapshots.SnapshotStateMap<SettingsAnchor, Int>,
     prefs: AppPreferences,
     hasBarometer: Boolean,
     onHeadingSource: (EfisHeadingSource) -> Unit,
+    onCalibrationWatch: (EfisCalibrationWatch) -> Unit,
     onVarioSource: (EfisVarioSource) -> Unit,
     onEfisSpeedUnit: (EfisSpeedUnit) -> Unit,
     onAltitudeUnit: (com.airchecklists.app.data.model.AltitudeUnit) -> Unit,
@@ -745,6 +803,7 @@ private fun CockpitsSection(
     onDownloadMaps: () -> Unit,
     onCheckMapUpdate: () -> Unit,
 ) {
+    AnchorBox(SettingsAnchor.COCKPITS_HEADING, anchorOffsets) {
     // EFIS options.
     SectionHeader(stringResource(R.string.settings_efis))
     Text(
@@ -764,6 +823,43 @@ private fun CockpitsSection(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         ) { Text(stringResource(R.string.settings_efis_heading_gps)) }
     }
+    var showCalibrationDialog by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(R.string.settings_efis_calibration_watch),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(onClick = { showCalibrationDialog = true }) {
+            Text(stringResource(R.string.settings_efis_calibration_launch))
+        }
+    }
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        SegmentedButton(
+            selected = prefs.efisCalibrationWatch == EfisCalibrationWatch.MAGNETIC_ONLY,
+            onClick = { onCalibrationWatch(EfisCalibrationWatch.MAGNETIC_ONLY) },
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+        ) { Text(stringResource(R.string.settings_efis_calibration_magnetic_only)) }
+        SegmentedButton(
+            selected = prefs.efisCalibrationWatch == EfisCalibrationWatch.ALWAYS,
+            onClick = { onCalibrationWatch(EfisCalibrationWatch.ALWAYS) },
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+        ) { Text(stringResource(R.string.settings_efis_calibration_always)) }
+    }
+    if (showCalibrationDialog) {
+        CompassCalibrationDialog(
+            driftDeg = 0f,
+            onDismiss = { showCalibrationDialog = false },
+            onCalibrated = { showCalibrationDialog = false },
+        )
+    }
+    } // AnchorBox COCKPITS_HEADING
+
+    AnchorBox(SettingsAnchor.COCKPITS_VARIO, anchorOffsets) {
     Text(
         stringResource(R.string.settings_efis_vario),
         style = MaterialTheme.typography.titleSmall,
@@ -789,7 +885,9 @@ private fun CockpitsSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+    } // AnchorBox COCKPITS_VARIO
 
+    AnchorBox(SettingsAnchor.COCKPITS_SPEED, anchorOffsets) {
     // Airspeed unit.
     Text(
         stringResource(R.string.settings_efis_speed_unit),
@@ -808,6 +906,9 @@ private fun CockpitsSection(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         ) { Text(stringResource(R.string.settings_efis_speed_knots)) }
     }
+    } // AnchorBox COCKPITS_SPEED
+
+    AnchorBox(SettingsAnchor.COCKPITS_ALTITUDE, anchorOffsets) {
     Text(
         stringResource(R.string.settings_alt_unit),
         style = MaterialTheme.typography.titleSmall,
@@ -825,7 +926,9 @@ private fun CockpitsSection(
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
         ) { Text(stringResource(R.string.settings_alt_unit_m)) }
     }
+    } // AnchorBox COCKPITS_ALTITUDE
 
+    AnchorBox(SettingsAnchor.COCKPITS_GEOID, anchorOffsets) {
     // Geoid correction
     Text(
         "Correction altitude GPS (géoïde)",
@@ -860,7 +963,9 @@ private fun CockpitsSection(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
     }
+    } // AnchorBox COCKPITS_GEOID
 
+    AnchorBox(SettingsAnchor.COCKPITS_RESPONSIVENESS, anchorOffsets) {
     // Instrument responsiveness (smoothing).
     Text(
         stringResource(R.string.settings_efis_sensitivity),
@@ -877,7 +982,9 @@ private fun CockpitsSection(
         )
         Text(stringResource(R.string.settings_efis_sensitivity_reactive), style = MaterialTheme.typography.labelSmall)
     }
+    } // AnchorBox COCKPITS_RESPONSIVENESS
 
+    AnchorBox(SettingsAnchor.COCKPITS_SHOW_VALUES, anchorOffsets) {
     // Show numeric values toggle.
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -901,7 +1008,9 @@ private fun CockpitsSection(
             )
         }
     }
+    } // AnchorBox COCKPITS_SHOW_VALUES
 
+    AnchorBox(SettingsAnchor.COCKPITS_GESTURE_HINTS, anchorOffsets) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -924,7 +1033,9 @@ private fun CockpitsSection(
             )
         }
     }
+    } // AnchorBox COCKPITS_GESTURE_HINTS
 
+    AnchorBox(SettingsAnchor.COCKPITS_FOCUS, anchorOffsets) {
     // Focus mode settings.
     SectionHeader(stringResource(R.string.settings_focus_section))
     Text(
@@ -948,7 +1059,9 @@ private fun CockpitsSection(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+    } // AnchorBox COCKPITS_FOCUS
 
+    AnchorBox(SettingsAnchor.COCKPITS_FDR, anchorOffsets) {
     // Flight recorder (ANLFDR): rolling buffer length + disk-flush period.
     SectionHeader(stringResource(R.string.settings_fdr))
     Text(
@@ -970,7 +1083,9 @@ private fun CockpitsSection(
         max = AppPreferences.FDR_MAX_FLUSH_MIN,
         onChange = onFdrFlushMinutes,
     )
+    } // AnchorBox COCKPITS_FDR
 
+    AnchorBox(SettingsAnchor.COCKPITS_SAFESKY, anchorOffsets) {
     // Safesky API key (ANLTRF traffic radar).
     SectionHeader(stringResource(R.string.settings_safesky))
     Text(
@@ -979,7 +1094,9 @@ private fun CockpitsSection(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     SafeskyKeyField(value = prefs.safeskyApiKey ?: "", onChanged = { onSafeskyApiKey(it.ifBlank { null }) })
+    } // AnchorBox COCKPITS_SAFESKY
 
+    AnchorBox(SettingsAnchor.COCKPITS_DASHBOARDS, anchorOffsets) {
     // Dashboards (saved instrument layouts).
     SectionHeader(stringResource(R.string.settings_dashboards))
     Text(
@@ -1011,7 +1128,9 @@ private fun CockpitsSection(
         androidx.compose.material3.Icon(Icons.Filled.Add, contentDescription = null)
         Text(stringResource(R.string.settings_dashboard_add), modifier = Modifier.padding(start = 8.dp))
     }
+    } // AnchorBox COCKPITS_DASHBOARDS
 
+    AnchorBox(SettingsAnchor.COCKPITS_MAP, anchorOffsets) {
     // Maps: download/update the offline VFR map + orientation.
     SectionHeader(stringResource(R.string.settings_map))
     Text(
@@ -1086,6 +1205,7 @@ private fun CockpitsSection(
         androidx.compose.material3.Icon(Icons.Filled.Refresh, contentDescription = null)
         Text(stringResource(R.string.settings_map_check_update), modifier = Modifier.padding(start = 8.dp))
     }
+    } // AnchorBox COCKPITS_MAP
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1260,8 +1380,18 @@ private fun VacSection(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
+private fun AnchorBox(
+    anchor: SettingsAnchor,
+    offsets: androidx.compose.runtime.snapshots.SnapshotStateMap<SettingsAnchor, Int>,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.onGloballyPositioned { coords ->
+        offsets[anchor] = coords.positionInRoot().y.toInt()
+    }, content = content)
+}
+
+@Composable
+private fun SectionHeader(text: String) {    Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.EfisSpeedUnit
 import com.airchecklists.app.data.model.SpeedArcs
@@ -33,10 +34,8 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * Full EFIS panel (3 rows tall) matching the reference mockup:
- *  - Top grey band: "EFIS" title + horizontal heading tape (yellow centre cell).
- *  - Black main: ALTI/ball/VARIO titles row, then vertical ALT scale | horizon | VARIO scale.
- *  - Bottom grey band: horizontal speed tape with coloured arcs + magenta Vpl cursor.
+ * EFIS panel: ALTI/ball/VARIO titles row + vertical ALT scale | horizon | VARIO scale.
+ * Heading tape and speed tape are removed — use NUMCAP and NUMSPD instruments instead.
  */
 @Composable
 fun EfisCompact(
@@ -49,71 +48,46 @@ fun EfisCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
-    val targetHeading by com.airchecklists.app.di.ServiceLocator.targetHeading.collectAsStateWithLifecycle()
     val targetAltitude by com.airchecklists.app.di.ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
-    var showHeadingDialog by remember { mutableStateOf(false) }
     var showAltitudeDialog by remember { mutableStateOf(false) }
+
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(
                 onLongPress = { pos ->
-                    when {
-                        // Top heading-tape band → set the heading bug.
-                        pos.y <= size.height * 0.13f -> showHeadingDialog = true
-                        // Left ALT column (below the header) → set the target altitude.
-                        pos.x <= size.width * 0.23f -> showAltitudeDialog = true
-                    }
+                    // Left ALT column → set the target altitude.
+                    if (pos.x <= size.width * 0.23f) showAltitudeDialog = true
                 },
             )
         },
     ) {
         val w = size.width
         val h = size.height
-        val headerH = h * 0.13f
-        val footerH = h * 0.14f
+        val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
 
-        // Backgrounds.
         drawRect(CompactStyle.Bg, size = size)
-        // Accent/texture only on the thin EFIS title strip — NOT on the heading tape
-        // band nor the speed tape band (those keep their own rendering).
-        drawNumTitleBar(bezel, w, headerH * 0.28f)
+        drawNumTitleBar(bezel, w, headerH)
         drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
-        val toUnit = if (unit == EfisSpeedUnit.KNOTS) 1f / 1.852f else 1f
-        val speed = state.gpsSpeedKmh * toUnit
-        val speedUnitLabel = if (unit == EfisSpeedUnit.KNOTS) "kt" else "km/h"
-        val arcsInUnit = arcs?.scaled(toUnit)
-        val heading = (state.headingDeg.roundToInt() % 360 + 360) % 360
+        compactText(tm, "EFIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
 
-        // --- Header: EFIS title + heading tape ---
-        compactText(tm, "EFIS", w / 2f, headerH * 0.14f, sizeSp = 12f, color = CompactStyle.Dim)
-        val headTape = Rect(0f, headerH * 0.28f, w, headerH)
-        efisHeadingTape(tm, headTape, heading.toFloat(), showValue, targetHeading)
-
-        // --- Footer: speed tape + arcs ---
-        val footTape = Rect(0f, h - footerH, w, h)
-        efisSpeedTape(tm, footTape, speed, speedUnitLabel, arcsInUnit, showValue)
-
-        // --- Main area (leave a gap above the footer speed tape) ---
-        val main = Rect(6f, headerH + 4f, w - 6f, h - footerH - h * 0.03f)
+        // --- Main area: full height below the title strip ---
+        val main = Rect(6f, headerH + 4f, w - 6f, h - 6f)
         val colW = main.width * 0.23f
-        val titleRowH = main.height * 0.22f
+        val titleRowH = main.height * 0.18f
         val altiTitleRect = Rect(main.left, main.top, main.left + colW, main.top + titleRowH)
         val varioTitleRect = Rect(main.right - colW, main.top, main.right, main.top + titleRowH)
         val ballRect = Rect(altiTitleRect.right, main.top, varioTitleRect.left, main.top + titleRowH)
 
-        // Titles (two clearly separated lines) — grey label + grey unit.
         compactText(tm, "ALTI", altiTitleRect.center.x, altiTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Dim)
         compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.altLabel(altUnit)})", altiTitleRect.center.x, altiTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Dim)
         compactText(tm, "VARIO", varioTitleRect.center.x, varioTitleRect.center.y - 22f, sizeSp = 16f, bold = true, color = CompactStyle.Dim)
         compactText(tm, "(${com.airchecklists.app.data.model.AltitudeFormat.vsLabel(altUnit)})", varioTitleRect.center.x, varioTitleRect.center.y + 22f, sizeSp = 12f, bold = true, color = CompactStyle.Dim)
 
-        // Slip ball (centre of titles row); its pill matches the horizon width.
         val horizonLeft = main.left + colW + 12f
         val horizonRight = main.right - colW - 12f
         slipBall(tm, ballRect, state.slip, state.rollDeg, horizonLeft, horizonRight)
 
-        // Bottom row: vertical scales + horizon.
         val scalesTop = main.top + titleRowH
         val altScale = Rect(main.left, scalesTop, main.left + colW, main.bottom)
         val varioScale = Rect(main.right - colW, scalesTop, main.right, main.bottom)
@@ -130,8 +104,7 @@ fun EfisCompact(
             valueColor = trendColor, showValue = showValue, tickOnRight = true, targetValue = altTarget)
         verticalScale(tm, varioScale, varVal, labelStep = if (meters) 1 else 100,
             valueColor = trendColor, showValue = showValue, tickOnRight = false)
-        // Gesture hints in the EFIS title bar (long-press: heading + altitude bands).
-        drawGestureHints(6f, headerH * 0.5f, hasLongPress = true, hasDoubleTap = false)
+        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
     }
 
     if (showAltitudeDialog) {
@@ -140,15 +113,6 @@ fun EfisCompact(
             onDismiss = { showAltitudeDialog = false },
             onConfirm = { a -> com.airchecklists.app.di.ServiceLocator.targetAltitude.value = a; showAltitudeDialog = false },
             onClear = { com.airchecklists.app.di.ServiceLocator.targetAltitude.value = null; showAltitudeDialog = false },
-        )
-    }
-
-    if (showHeadingDialog) {
-        com.airchecklists.app.ui.components.HeadingEntryDialog(
-            initial = targetHeading,
-            onDismiss = { showHeadingDialog = false },
-            onConfirm = { hdg -> com.airchecklists.app.di.ServiceLocator.targetHeading.value = hdg; showHeadingDialog = false },
-            onClear = { com.airchecklists.app.di.ServiceLocator.targetHeading.value = null; showHeadingDialog = false },
         )
     }
 }
@@ -276,7 +240,7 @@ private fun DrawScope.pitchLadderBox(tm: TextMeasurer, cx: Float, cy: Float, pxP
  *  (matched to the horizon width); only the ball inside moves with slip. */
 private fun DrawScope.slipBall(tm: TextMeasurer, r: Rect, slip: Float, roll: Float, pillLeft: Float, pillRight: Float) {
     val pillW = pillRight - pillLeft
-    val pillH = r.height * 0.24f
+    val pillH = r.height * 0.40f
     val pcx = (pillLeft + pillRight) / 2f
     val pcy = r.top + r.height * 0.30f
     drawRoundRect(Color(0xFF2A2A2A), topLeft = Offset(pillLeft, pcy - pillH / 2), size = Size(pillW, pillH),

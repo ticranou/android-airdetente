@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -226,32 +227,35 @@ fun DrawScope.scrollingTape(
 }
 
 /**
- * EFIS-style horizontal heading tape inside [r]: labels every 10° with fine white
- * ticks under them, a highlighted centre cell holding the current heading in big
- * orange, and a magenta triangle cursor under the tape for the target heading.
- * Shared by the full EFIS panel and the compact heading instrument.
+ * EFIS-style horizontal heading tape inside [r]. The upper part mirrors the heading
+ * tape (labels + fine ticks + orange centre cell), shifted up by the height of the
+ * TWO arc rows that sit at the bottom (green Vne row + white flap row). Stall
+ * (Vs0/Vs1, red) and best-glide (Vpl, magenta) cursors span the full arc-rows
+ * height. [arcs] must already be in the display unit.
+ *
+ * [sourceLabel] — "GPS", "MAG", or "MAG+" — drawn vertically in a narrow left margin
+ * so the heading source is always visible without overlapping the value cell.
+ * Pass null or empty string to omit the label (for instruments where showValue=false
+ * and the side margin would be wasted space).
  */
-fun DrawScope.efisHeadingTape(tm: TextMeasurer, r: Rect, heading: Float, showValue: Boolean, targetHeading: Int? = null) {
+fun DrawScope.efisHeadingTape(tm: TextMeasurer, r: Rect, heading: Float, showValue: Boolean, targetHeading: Int? = null, sourceLabel: String = "") {
+    // Tape is always centred on the full rect — no margin shift.
     val cx = r.center.x
     val pxPerDeg = r.width / 130f
     val labelStep = 10
     val cellW = r.width * 0.20f
-    // Reserve the SAME bottom band as the speed tape's two arc rows so the graduation
-    // part lines up 1:1 with NUMSPD. Heading has no arcs → the band stays empty (the
-    // magenta target cursor sits in it).
+
     val arcRowH = r.height * 0.13f
     val gradBottom = r.bottom - 2f * arcRowH
     val gradH = gradBottom - r.top
     val labelY = r.top + gradH * 0.34f
     val tickTop = r.top + gradH * 0.56f
     val tickBottom = gradBottom
-    // Value cell: from the title-bar bottom (r.top) down to the bottom of the graduations.
     val cell = Rect(cx - cellW / 2f, r.top + 2f, cx + cellW / 2f, gradBottom)
     val base = (heading / labelStep).let { kotlin.math.round(it) }.toInt() * labelStep
     val margin = cellW / 2f + 6f
 
-    // Thin baseline at the bottom of the graduations (the "top of the arc band"),
-    // mirroring where NUMSPD's arcs begin, so the two tapes line up.
+    // Thin baseline at the bottom of the graduations.
     drawLine(Color(0xFF555555), Offset(r.left + 4f, gradBottom), Offset(r.right - 4f, gradBottom), strokeWidth = 1f)
 
     for (k in -9..9) {
@@ -265,17 +269,14 @@ fun DrawScope.efisHeadingTape(tm: TextMeasurer, r: Rect, heading: Float, showVal
     }
 
     if (showValue) {
-        // Prominent current-heading cell: subtle fill, big orange (no yellow border).
         drawRect(Color(0xFF1E1E1E), topLeft = cell.topLeft, size = cell.size)
         val txt = "${heading.roundToInt()}"
         val sizeSp = if (heading.roundToInt() >= 100) 26f else 30f
         compactText(tm, txt, cx, cell.center.y - 1f, sizeSp = sizeSp, bold = true, color = CompactStyle.Accent)
-        // Small white index tick centred just under the cell.
         drawLine(Color.White, Offset(cx, cell.bottom), Offset(cx, cell.bottom + gradH * 0.06f), strokeWidth = 2f)
     }
 
-    // Magenta triangle cursor for the target heading, sitting in the bottom band at the
-    // target's horizontal position (pointing up towards the tape).
+    // Magenta triangle cursor for the target heading.
     if (targetHeading != null) {
         val delta = ((targetHeading - heading + 540f) % 360f) - 180f
         val x = cx + delta * pxPerDeg
@@ -285,12 +286,30 @@ fun DrawScope.efisHeadingTape(tm: TextMeasurer, r: Rect, heading: Float, showVal
             val h = 2f * arcRowH * 0.8f
             val hw = arcRowH * 0.8f
             val p = Path().apply {
-                moveTo(x, baseY - h)          // tip up
+                moveTo(x, baseY - h)
                 lineTo(x - hw, baseY)
                 lineTo(x + hw, baseY)
                 close()
             }
             drawPath(p, magenta)
+        }
+    }
+
+    // Source label overlay: dark rectangle drawn ON TOP of the tape, left side, stops at gradBottom.
+    if (sourceLabel.isNotEmpty()) {
+        val badgeW = r.height * 0.28f
+        val isCompensated = sourceLabel.endsWith("+")
+        val labelColor = if (isCompensated) Color(0xFFFF9800) else Color(0xFFCCCCCC)
+        drawRect(Color(0xDD1A1A1A), topLeft = Offset(r.left, r.top), size = Size(badgeW, gradBottom - r.top))
+        drawLine(Color(0xFF3A3A3A), Offset(r.left + badgeW, r.top), Offset(r.left + badgeW, gradBottom), strokeWidth = 1f)
+        val measured = tm.measure(
+            sourceLabel,
+            TextStyle(color = labelColor, fontSize = 14.sp, fontWeight = FontWeight.Bold),
+        )
+        val badgeCx = r.left + badgeW / 2f
+        val badgeCy = r.top + (gradBottom - r.top) / 2f
+        withTransform({ rotate(-90f, pivot = Offset(badgeCx, badgeCy)) }) {
+            drawText(measured, topLeft = Offset(badgeCx - measured.size.width / 2f, badgeCy - measured.size.height / 2f))
         }
     }
 }

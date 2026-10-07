@@ -11,14 +11,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.airchecklists.app.data.model.EfisHeadingSource
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.HeadingEntryDialog
 
@@ -31,6 +31,13 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
     val targetHeading by ServiceLocator.targetHeading.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     val bezel = LocalGaugeBezel.current
+    val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
+    val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
+
+    val sourceLabel = when (prefs.efisHeadingSource) {
+        EfisHeadingSource.MAGNETIC -> if (state.headingOffsetDeg != 0f) "MAG+" else "MAG"
+        EfisHeadingSource.GPS_TRACK -> "GPS"
+    }
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
@@ -42,13 +49,13 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
         val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         compactText(tm, "CONSERVATEUR", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
 
         val hdg = ((headingDeg % 360f) + 360f) % 360f
         val tape = Rect(0f, headerH, w, h)
-        efisHeadingTape(tm, tape, hdg, showValue, targetHeading)
+        efisHeadingTape(tm, tape, hdg, showValue, targetHeading, sourceLabel)
     }
 
     if (showDialog) {

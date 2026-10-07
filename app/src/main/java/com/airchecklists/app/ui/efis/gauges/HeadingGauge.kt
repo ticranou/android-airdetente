@@ -2,12 +2,16 @@ package com.airchecklists.app.ui.efis.gauges
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -15,6 +19,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.HeadingEntryDialog
@@ -29,11 +34,17 @@ fun HeadingGauge(headingDeg: Float, showValue: Boolean, modifier: Modifier = Mod
     val targetHeading by ServiceLocator.targetHeading.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
 
-    Canvas(
-        modifier = modifier.fillMaxSize().pointerInput(Unit) {
-            detectTapGestures(onLongPress = { showDialog = true })
-        },
-    ) {
+    // Wrap in Box so the badge overlay can be positioned relative to the gauge face.
+    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        // The badge sits just below the numeric value (at the gauge centre).
+        // showValue=true → badge below centre; showValue=false → badge at centre.
+        val badgeOffsetDp = if (showValue) (maxHeight * 0.15f) else 0.dp
+
+        Canvas(
+            modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures(onLongPress = { showDialog = true })
+            },
+        ) {
         val (cx, cy, r) = gaugeFace(bezel)
         drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
 
@@ -89,6 +100,14 @@ fun HeadingGauge(headingDeg: Float, showValue: Boolean, modifier: Modifier = Mod
             drawRoundedValue(tm, "${hdg.toString().padStart(3, '0')}°", cx, cy, sizeSp = 20f)
         }
     }
+
+    // Heading source badge: centred horizontally, just below the numeric value.
+    HeadingSourceBadge(
+        modifier = Modifier
+            .align(Alignment.Center)
+            .offset(y = badgeOffsetDp),
+    )
+    } // BoxWithConstraints
 
     if (showDialog) {
         HeadingEntryDialog(

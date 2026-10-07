@@ -10,6 +10,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.view.Surface
 import android.location.LocationManager
+import com.airchecklists.app.data.model.EfisCalibrationWatch
 import com.airchecklists.app.data.model.EfisHeadingSource
 import com.airchecklists.app.data.model.EfisVarioSource
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,10 @@ data class EfisState(
     val longitude: Double = 0.0,
     val gpsTrackDeg: Float = 0f,      // course over ground (GPS bearing)
     val hasPosition: Boolean = false,
+    val calibrationNeeded: Boolean = false,   // persistent magnetic/GPS drift detected
+    val headingDriftDeg: Float = 0f,          // current median drift absolute (degrees)
+    val headingDriftSignedDeg: Float = 0f,    // signed delta GPS − MAG (-180..+180)
+    val headingOffsetDeg: Float = 0f,         // session compensation offset applied to MAG heading
 )
 
 /**
@@ -49,6 +54,7 @@ class EfisSensorProvider(
     private var headingSource: EfisHeadingSource,
     private var varioSource: EfisVarioSource,
     private var responsiveness: Float = 0.35f,
+    private var calibrationWatch: EfisCalibrationWatch = EfisCalibrationWatch.MAGNETIC_ONLY,
 ) {
     private val appContext = context.applicationContext
     private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -98,6 +104,14 @@ class EfisSensorProvider(
     private var magneticHeading = 0f
     private var gpsTrack = 0f
 
+    // Drift detection: circular buffer of recent signed deltas (GPS − MAG, −180..+180°).
+    // Populated at ~1 Hz from GPS updates. Threshold: |median| > 15° for 10 samples → alert.
+    private val driftBuffer = ArrayDeque<Float>(DRIFT_BUFFER_SIZE)
+    @Volatile private var calibrationDismissed = false
+
+    // Session-only heading compensation offset (applied to magnetic heading). Not persisted.
+    @Volatile private var headingOffsetDeg = 0f
+
     /** Current screen rotation (Surface.ROTATION_*). Updated from the UI. */
     @Volatile private var displayRotation: Int = Surface.ROTATION_0
 
@@ -121,14 +135,83 @@ class EfisSensorProvider(
         headingSource = heading
         varioSource = vario
         if (_demoActive.value) return
-        // Re-publish heading using the newly selected source.
+        // Re-publish heading using the newly selected source (with compensation offset).
+        val rawTarget = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading
         _state.value = _state.value.copy(
-            headingDeg = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading,
+            headingDeg = (rawTarget + headingOffsetDeg + 360f) % 360f,
         )
     }
 
     fun updateResponsiveness(value: Float) {
         responsiveness = value.coerceIn(0.05f, 1f)
+    }
+
+    fun updateCalibrationWatch(mode: EfisCalibrationWatch) {
+        calibrationWatch = mode
+    }
+
+    fun dismissCalibrationAlert() {
+        calibrationDismissed = true
+        driftBuffer.clear()
+        _state.value = _state.value.copy(calibrationNeeded = false, headingDriftDeg = 0f, headingDriftSignedDeg = 0f)
+    }
+
+    /** Apply a fixed heading compensation offset for this session (session-only, not persisted). */
+    fun applyHeadingOffset(offsetDeg: Float) {
+        headingOffsetDeg = offsetDeg
+        calibrationDismissed = true
+        driftBuffer.clear()
+        _state.value = _state.value.copy(
+            calibrationNeeded = false,
+            headingDriftDeg = 0f,
+            headingDriftSignedDeg = 0f,
+            headingOffsetDeg = offsetDeg,
+            headingDeg = (magneticHeading + offsetDeg + 360f) % 360f,
+        )
+    }
+
+    /** Compute the minimal angular difference between two headings (0–180°). */
+    private fun angleDiff(a: Float, b: Float): Float {
+        val d = ((a - b + 540f) % 360f) - 180f
+        return abs(d)
+    }
+
+    /** Update the drift detection buffer and publish calibrationNeeded if threshold met. */
+    private fun updateDriftDetection(speedKmh: Float) {
+        // Only check when moving fast enough for GPS bearing to be reliable.
+        if (speedKmh < 5f) return
+        val shouldWatch = calibrationWatch == EfisCalibrationWatch.ALWAYS ||
+            (calibrationWatch == EfisCalibrationWatch.MAGNETIC_ONLY && headingSource == EfisHeadingSource.MAGNETIC)
+        if (!shouldWatch) return
+
+        // Signed delta: positive means GPS is clockwise from MAG (MAG reads too low).
+        val signedDrift = ((gpsTrack - magneticHeading + 540f) % 360f) - 180f
+        if (driftBuffer.size >= DRIFT_BUFFER_SIZE) driftBuffer.removeFirst()
+        driftBuffer.addLast(signedDrift)
+
+        if (driftBuffer.size < DRIFT_BUFFER_SIZE) return
+
+        val sorted = driftBuffer.sorted()
+        val medianSigned = sorted[DRIFT_BUFFER_SIZE / 2]
+        val medianAbs = abs(medianSigned)
+
+        val currently = _state.value.calibrationNeeded
+        val needed = if (currently) {
+            medianAbs > DRIFT_HYSTERESIS_DEG   // hysteresis: stay alert until drift < 8°
+        } else {
+            !calibrationDismissed && medianAbs > DRIFT_THRESHOLD_DEG
+        }
+        if (needed != currently || medianAbs != _state.value.headingDriftDeg) {
+            _state.value = _state.value.copy(
+                calibrationNeeded = needed,
+                headingDriftDeg = medianAbs,
+                headingDriftSignedDeg = medianSigned,
+            )
+        }
+        // Reset dismissed flag once drift naturally falls below hysteresis.
+        if (calibrationDismissed && medianAbs < DRIFT_HYSTERESIS_DEG) {
+            calibrationDismissed = false
+        }
     }
 
     /** Capture the current attitude as the level (0/0) reference. */
@@ -188,7 +271,8 @@ class EfisSensorProvider(
                     lastRawRoll = rawRoll
                     magneticHeading = azimuth
                     val cur = _state.value
-                    val newHeadingTarget = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading
+                    val rawTarget = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading
+                    val newHeadingTarget = (rawTarget + headingOffsetDeg + 360f) % 360f
                     _state.value = cur.copy(
                         // Subtract the calibrated reference so the mount orientation reads level.
                         pitchDeg = smooth(cur.pitchDeg, rawPitch - pitchOffset),
@@ -251,6 +335,7 @@ class EfisSensorProvider(
         if (location.hasBearing() && location.speed > 0.5f) {
             gpsTrack = location.bearing
         }
+        updateDriftDetection(speedKmh)
         // GPS-derived vertical speed.
         var vs = _state.value.verticalSpeedFtMin
         if (varioSource == EfisVarioSource.GPS) {
@@ -275,7 +360,8 @@ class EfisSensorProvider(
             verticalSpeedFtMin = vs,
             hasFix = true,
             headingDeg = if (headingSource == EfisHeadingSource.GPS_TRACK)
-                smoothAngle(_state.value.headingDeg, gpsTrack) else _state.value.headingDeg,
+                smoothAngle(_state.value.headingDeg, (gpsTrack + headingOffsetDeg + 360f) % 360f)
+                else _state.value.headingDeg,
             latitude = location.latitude,
             longitude = location.longitude,
             gpsTrackDeg = gpsTrack,
@@ -802,5 +888,8 @@ class EfisSensorProvider(
     private companion object {
         const val MAX_TRAIL = 2000
         const val DEMO_VARIANTS = 3
+        const val DRIFT_BUFFER_SIZE = 10      // ~10 GPS updates ≈ 10 seconds
+        const val DRIFT_THRESHOLD_DEG = 15f   // trigger alert when median drift > 15°
+        const val DRIFT_HYSTERESIS_DEG = 8f   // clear alert when median drift < 8°
     }
 }

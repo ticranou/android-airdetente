@@ -86,6 +86,10 @@
     <string name="settings_efis_heading">Source du cap</string>
     <string name="settings_efis_heading_magnetic">Magnétique</string>
     <string name="settings_efis_heading_gps">Track GPS</string>
+    <string name="settings_efis_calibration_watch">Alerte calibration magnétique</string>
+    <string name="settings_efis_calibration_magnetic_only">Cap magnétique</string>
+    <string name="settings_efis_calibration_always">Toujours</string>
+    <string name="settings_efis_calibration_launch">Calibration</string>
     <string name="settings_efis_vario">Source du variomètre</string>
     <string name="settings_efis_vario_gps">GPS</string>
     <string name="settings_efis_vario_baro">Baromètre</string>
@@ -362,5 +366,17 @@
     <string name="compat_ok">Tous les capteurs nécessaires sont présents.</string>
     <string name="compat_continue">Continuer</string>
     <string name="compat_dont_show_again">Ne plus afficher</string>
+
+    <!-- Calibration magnétique -->
+    <string name="calibration_title">Calibration magnétique</string>
+    <string name="calibration_drift_message">Écart cap GPS / magnétique détecté : %1$d°\n\nUne calibration améliorera la précision du cap.</string>
+    <string name="calibration_start">Calibrer →</string>
+    <string name="calibration_ignore">Ignorer</string>
+    <string name="calibration_in_progress_title">Calibration en cours</string>
+    <string name="calibration_instructions">Tenez le téléphone à plat et tracez lentement des 8 dans l\'air pendant 30 secondes, puis validez.</string>
+    <string name="calibration_ready">Prêt à valider ✓</string>
+    <string name="calibration_done">Terminé</string>
+    <string name="calibration_cancel">Annuler</string>
+    <string name="calibration_compensate">Compenser l\'écart</string>
 </resources>
 

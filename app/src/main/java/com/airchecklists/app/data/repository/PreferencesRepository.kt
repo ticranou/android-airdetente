@@ -4,6 +4,7 @@ import com.airchecklists.app.data.local.SettingsStore
 import com.airchecklists.app.data.model.AppPreferences
 import com.airchecklists.app.data.model.DashboardCell
 import com.airchecklists.app.data.model.EFIS_COLS
+import com.airchecklists.app.data.model.EfisCalibrationWatch
 import com.airchecklists.app.data.model.EfisHeadingSource
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.model.EfisSpeedUnit
@@ -45,6 +46,9 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setEfisHeadingSource(source: EfisHeadingSource) =
         persist { it.copy(efisHeadingSource = source) }
+
+    suspend fun setEfisCalibrationWatch(mode: EfisCalibrationWatch) =
+        persist { it.copy(efisCalibrationWatch = mode) }
 
     suspend fun setEfisVarioSource(source: EfisVarioSource) =
         persist { it.copy(efisVarioSource = source) }

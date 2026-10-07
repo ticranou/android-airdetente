@@ -824,6 +824,7 @@ private fun CockpitsSection(
         ) { Text(stringResource(R.string.settings_efis_heading_gps)) }
     }
     var showCalibrationDialog by remember { mutableStateOf(false) }
+    var showCalibrationTestDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -836,6 +837,9 @@ private fun CockpitsSection(
         )
         OutlinedButton(onClick = { showCalibrationDialog = true }) {
             Text(stringResource(R.string.settings_efis_calibration_launch))
+        }
+        OutlinedButton(onClick = { showCalibrationTestDialog = true }) {
+            Text("Test écart")
         }
     }
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -855,6 +859,17 @@ private fun CockpitsSection(
             driftDeg = 0f,
             onDismiss = { showCalibrationDialog = false },
             onCalibrated = { showCalibrationDialog = false },
+        )
+    }
+    if (showCalibrationTestDialog) {
+        CompassCalibrationDialog(
+            driftDeg = 20f,
+            driftSignedDeg = 20f,
+            gpsDeg = 145f,
+            magDeg = 125f,
+            onDismiss = { showCalibrationTestDialog = false },
+            onCalibrated = { showCalibrationTestDialog = false },
+            onCompensate = { showCalibrationTestDialog = false },
         )
     }
     } // AnchorBox COCKPITS_HEADING

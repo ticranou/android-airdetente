@@ -3,13 +3,15 @@ package com.airchecklists.app.ui.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +33,8 @@ private const val CALIBRATION_DURATION_MS = 30_000L
 fun CompassCalibrationDialog(
     driftDeg: Float,
     driftSignedDeg: Float = 0f,
+    gpsDeg: Float = 0f,
+    magDeg: Float = 0f,
     onDismiss: () -> Unit,
     onCalibrated: () -> Unit,
     onCompensate: ((Float) -> Unit)? = null,
@@ -43,25 +47,40 @@ fun CompassCalibrationDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.calibration_title)) },
             text = {
-                Text(stringResource(R.string.calibration_drift_message, driftDeg.toInt()))
-            },
-            confirmButton = {
-                TextButton(onClick = { calibrating = true }) {
-                    Text(stringResource(R.string.calibration_start))
-                }
-            },
-            dismissButton = {
-                Row {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.calibration_ignore))
+                Column {
+                    if (driftDeg > 0f) {
+                        Text(stringResource(R.string.calibration_drift_message,
+                            gpsDeg.toInt(), magDeg.toInt(), driftSignedDeg.toInt()))
+                    } else {
+                        Text(stringResource(R.string.calibration_drift_message_generic))
                     }
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
                     if (canCompensate) {
-                        TextButton(onClick = { onCompensate!!(driftSignedDeg); onDismiss() }) {
+                        Button(
+                            onClick = { onCompensate!!(driftSignedDeg); onDismiss() },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
                             Text(stringResource(R.string.calibration_compensate))
                         }
                     }
+                    OutlinedButton(
+                        onClick = { calibrating = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.calibration_start))
+                    }
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.calibration_ignore))
+                    }
                 }
             },
+            confirmButton = {},
+            dismissButton = {},
         )
     } else {
         var progress by remember { mutableFloatStateOf(0f) }

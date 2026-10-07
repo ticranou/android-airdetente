@@ -371,7 +371,8 @@
 
     <!-- Calibration magnétique -->
     <string name="calibration_title">Calibration magnétique</string>
-    <string name="calibration_drift_message">Écart cap GPS / magnétique détecté : %1$d°\n\nUne calibration améliorera la précision du cap.</string>
+    <string name="calibration_drift_message">Écart cap GPS / magnétique détecté.\n\nCap GPS : %1$d°\nCap magnétique : %2$d°\nÉcart (GPS − MAG) : %3$+d°\n\nCompenser ajoutera %3$+d° au cap magnétique.</string>
+    <string name="calibration_drift_message_generic">Une calibration améliorera la précision du cap.</string>
     <string name="calibration_start">Calibrer →</string>
     <string name="calibration_ignore">Ignorer</string>
     <string name="calibration_in_progress_title">Calibration en cours</string>

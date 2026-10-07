@@ -217,6 +217,8 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
             CompassCalibrationDialog(
                 driftDeg = headingDrift,
                 driftSignedDeg = state.headingDriftSignedDeg,
+                gpsDeg = ((state.gpsTrackDeg % 360f) + 360f) % 360f,
+                magDeg = (((state.gpsTrackDeg - state.headingDriftSignedDeg) % 360f) + 360f) % 360f,
                 onDismiss = { viewModel.dismissCalibrationAlert() },
                 onCalibrated = { viewModel.dismissCalibrationAlert() },
                 onCompensate = { viewModel.applyHeadingOffset(it) },

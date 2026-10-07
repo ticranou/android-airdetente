@@ -50,6 +50,19 @@ fun globalGaugeBezel(): GaugeBezel {
 /** Provided per instrument cell by InstrumentSlot; defaults to the global setting. */
 val LocalGaugeBezel = androidx.compose.runtime.compositionLocalOf { GaugeBezel() }
 
+/** Set to true by InstrumentSlot when the cell has hideTitle=true; instruments read
+ *  this via [numTitleBarHeight] to collapse the title bar to zero height. */
+val LocalHideTitle = androidx.compose.runtime.compositionLocalOf { false }
+
+/** Returns the standard title-bar height for a NUM instrument: 20dp capped at 40%
+ *  of the available height, or 0 when the cell's hideTitle flag is set. */
+@androidx.compose.runtime.Composable
+fun numTitleBarHeight(heightPx: Float): Float {
+    if (LocalHideTitle.current) return 0f
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    return with(density) { 20.dp.toPx() }.coerceAtMost(heightPx * 0.4f)
+}
+
 /** Title-bar background colour for a NUM instrument: the accent/bezel colour when
  *  it is a solid colour; for texture styles (carbon/brushed) use a neutral dark. */
 @androidx.compose.runtime.Composable

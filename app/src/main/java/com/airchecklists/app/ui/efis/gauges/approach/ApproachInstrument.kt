@@ -31,6 +31,7 @@ import com.airchecklists.app.data.repository.AerodromeDirectory
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -72,6 +73,7 @@ fun ApproachInstrument(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     // Transient manual override (session only): non-null → resolver uses it; null → AUTO.
@@ -104,7 +106,7 @@ fun ApproachInstrument(
             )
         },
     ) {
-        drawApproach(tm, bezel, state, speedUnit, altUnit, target, errors)
+        drawApproach(tm, bezel, state, speedUnit, altUnit, target, errors, hideTitle)
     }
 
     if (showDialog) {
@@ -131,10 +133,11 @@ private fun DrawScope.drawApproach(
     altUnit: AltitudeUnit,
     target: ApproachTarget?,
     errors: ApproachGeometry.ApproachErrors,
+    hideTitle: Boolean = false,
 ) {
     val w = size.width
     val h = size.height
-    val headerH = 22.dp.toPx().coerceAtMost(h * 0.20f)
+    val headerH = if (hideTitle) 0f else 22.dp.toPx().coerceAtMost(h * 0.20f)
     val readoutH = (h * 0.50f).coerceIn(104f, 140f)
     // Top info banner (QFU / ICAO / longueur), styled like the bottom readout strip.
     val topBandH = (h * 0.18f).coerceIn(56f, 76f)
@@ -239,10 +242,11 @@ private fun DrawScope.drawApproach(
     drawTopBanner(tm, w, headerH, topBandH, target)
 
     // ---- Title bar (drawn last, over the scene top). ----
-    drawNumTitleBar(bezel, w, headerH)
-    drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-    drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
-    compactText(tm, "APPROCHE", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
+    if (headerH > 0f) {
+        drawNumTitleBar(bezel, w, headerH)
+        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+        compactText(tm, "APPROCHE", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
+    }
     // (ICAO is shown in the dedicated sky chip below; not repeated in the title bar.)
 }
 

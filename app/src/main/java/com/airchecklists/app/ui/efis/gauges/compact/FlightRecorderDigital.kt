@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import kotlinx.coroutines.launch
 
@@ -47,6 +48,7 @@ private val FDR_PROGRESS = Color(0xFFB25E1E)   // dark orange (flush-progress ba
 fun FlightRecorderDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val status by ServiceLocator.flightRecorder.status.collectAsStateWithLifecycle()
     val efis by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val hasFix = efis.hasPosition
@@ -106,22 +108,18 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
         val w = size.width
         val h = size.height
 
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.28f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.28f)
 
         drawRect(CompactStyle.Bg, size = size)
 
         val recording = status.recording
 
         // Panel: title bar + border.
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(
-            Color(0xFF3A3A3A),
-            topLeft = Offset(0f, 0f),
-            size = Size(w, h),
-            style = Stroke(width = 2f),
-        )
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
-        compactText(tm, "FLIGHT RECORDER", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
+        if (headerH > 0f) {
+            drawNumTitleBar(bezel, w, headerH)
+            drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+            compactText(tm, "FLIGHT RECORDER", w / 2f, headerH / 2f, sizeSp = 13f, color = CompactStyle.Dim)
+        }
 
         val bodyTop = headerH
         val bodyH = h - headerH

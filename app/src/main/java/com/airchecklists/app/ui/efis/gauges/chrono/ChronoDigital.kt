@@ -1,6 +1,7 @@
 package com.airchecklists.app.ui.efis.gauges.chrono
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -75,6 +76,7 @@ private class Chrono1 {
 fun ChronoDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val chrono = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("chrono.num") { Chrono1().seed(com.airchecklists.app.di.ServiceLocator.instrumentPersist.chronoNum) } }
     var nowTick by remember { mutableLongStateOf(0L) }
     val iconPainter = rememberVectorPainter(Icons.Outlined.History)
@@ -96,12 +98,12 @@ fun ChronoDigital(modifier: Modifier = Modifier) {
     ) {
         @Suppress("UNUSED_EXPRESSION") nowTick
         val w = size.width; val h = size.height
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
-        drawNumTitleBar(bezel, w, headerH)
+        if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
         drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-        compactText(tm, "CHRONO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+        if (headerH > 0f) compactText(tm, "CHRONO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+        if (headerH > 0f) drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 
         val cy = headerH + (h - headerH) / 2f
         val iconSize = (h - headerH) * 0.42f

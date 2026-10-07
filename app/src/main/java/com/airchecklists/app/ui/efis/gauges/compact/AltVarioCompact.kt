@@ -1,6 +1,7 @@
 package com.airchecklists.app.ui.efis.gauges.compact
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -38,6 +39,7 @@ fun AltVarioCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val targetAlt by ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
@@ -53,14 +55,14 @@ fun AltVarioCompact(
     ) {
         val w = size.width
         val h = size.height
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
-        compactText(tm, "ALTITUDE (${AltitudeFormat.altLabel(altUnit)})", w * 0.27f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
-        compactText(tm, "VARIO (${AltitudeFormat.vsLabel(altUnit)})", w * 0.73f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
-        // Gesture hint (long-press + double-tap) in the title bar, top-left.
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+        if (headerH > 0f) {
+            drawNumTitleBar(bezel, w, headerH)
+            compactText(tm, "ALTITUDE (${AltitudeFormat.altLabel(altUnit)})", w * 0.27f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
+            compactText(tm, "VARIO (${AltitudeFormat.vsLabel(altUnit)})", w * 0.73f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
+            drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+        }
 
         val mainTop = headerH
         val mainBottom = h

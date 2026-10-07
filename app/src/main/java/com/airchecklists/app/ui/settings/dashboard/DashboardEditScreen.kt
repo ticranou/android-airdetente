@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Checkbox
@@ -227,13 +228,45 @@ private fun DashboardCellEditor(
         // Single "Options" button → dialog with cell colour/style + merge/separate.
         // Works regardless of cell size (no inline buttons pushed out of view).
         var showOptions by remember { mutableStateOf(false) }
-        TextButton(
-            onClick = { showOptions = true },
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 2.dp),
-        ) {
-            Icon(Icons.Filled.Tune, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.dashboard_cell_options), style = MaterialTheme.typography.labelSmall)
+        // Build the ordered list of block-start rows (same logic as the repository).
+        val blockStarts = run {
+            val list = mutableListOf<Int>()
+            var r = 0
+            while (r < dash.rows) {
+                list.add(r)
+                val span = (0 until cols)
+                    .mapNotNull { dc -> cells.getOrNull(r * cols + dc)?.takeIf { !it.covered } }
+                    .maxOfOrNull { it.rowSpan } ?: 1
+                r += span.coerceAtLeast(1)
+            }
+            list
+        }
+        val blockIdx = blockStarts.indexOf(rowIdx)
+        val canMoveUp   = blockIdx > 0
+        val canMoveDown = blockIdx >= 0 && blockIdx < blockStarts.size - 1
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(
+                onClick = { showOptions = true },
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                Icon(Icons.Filled.Tune, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(stringResource(R.string.dashboard_cell_options), style = MaterialTheme.typography.labelSmall)
+            }
+            IconButton(
+                onClick = { viewModel.moveDashboardRowUp(dash.id, rowIdx) },
+                enabled = canMoveUp,
+                modifier = Modifier.size(32.dp),
+            ) {
+                Icon(Icons.Filled.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+            IconButton(
+                onClick = { viewModel.moveDashboardRowDown(dash.id, rowIdx) },
+                enabled = canMoveDown,
+                modifier = Modifier.size(32.dp),
+            ) {
+                Icon(Icons.Filled.ArrowDownward, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
         }
         if (showOptions) {
             CellOptionsDialog(
@@ -243,6 +276,7 @@ private fun DashboardCellEditor(
                 isMerged = isMerged,
                 onColor = { viewModel.setDashboardCellAccent(dash.id, index, it) },
                 onStyle = { viewModel.setDashboardCellBezelStyle(dash.id, index, it) },
+                onHideTitle = { viewModel.setDashboardCellHideTitle(dash.id, index, it) },
                 onMergeRight = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.RIGHT) },
                 onMergeDown = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.DOWN) },
                 onUnmerge = { viewModel.unmergeDashboardCell(dash.id, index) },
@@ -300,6 +334,7 @@ private fun CellOptionsDialog(
     isMerged: Boolean,
     onColor: (Long?) -> Unit,
     onStyle: (com.airchecklists.app.data.model.GaugeBezelStyle?) -> Unit,
+    onHideTitle: (Boolean) -> Unit,
     onMergeRight: () -> Unit,
     onMergeDown: () -> Unit,
     onUnmerge: () -> Unit,
@@ -352,6 +387,21 @@ private fun CellOptionsDialog(
                         if (canMergeDown) CellActionChip(Icons.Filled.ArrowDownward, stringResource(R.string.dashboard_merge_down)) { onMergeDown(); onDismiss() }
                         if (isMerged) CellActionChip(Icons.Filled.Close, stringResource(R.string.dashboard_unmerge)) { onUnmerge(); onDismiss() }
                     }
+                }
+                // Title visibility toggle.
+                androidx.compose.material3.HorizontalDivider()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onHideTitle(!cell.hideTitle) }
+                        .padding(vertical = 4.dp),
+                ) {
+                    androidx.compose.material3.Checkbox(
+                        checked = cell.hideTitle,
+                        onCheckedChange = { onHideTitle(it) },
+                    )
+                    Text(stringResource(R.string.dashboard_cell_hide_title), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },

@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +49,7 @@ fun EfisCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val targetAltitude by com.airchecklists.app.di.ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
     var showAltitudeDialog by remember { mutableStateOf(false) }
 
@@ -63,13 +65,14 @@ fun EfisCompact(
     ) {
         val w = size.width
         val h = size.height
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
 
         drawRect(CompactStyle.Bg, size = size)
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-
-        compactText(tm, "EFIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+        if (headerH > 0f) {
+            drawNumTitleBar(bezel, w, headerH)
+            compactText(tm, "EFIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+            drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        }
 
         // --- Main area: full height below the title strip ---
         val main = Rect(6f, headerH + 4f, w - 6f, h - 6f)
@@ -253,5 +256,5 @@ private fun DrawScope.slipBall(tm: TextMeasurer, r: Rect, slip: Float, roll: Flo
     drawCircle(CompactStyle.Accent, radius = ballR, center = Offset(pcx + slip.coerceIn(-1f, 1f) * (pillW * 0.38f), pcy))
     // Bank angle just under the ball (closer to it, further from the horizon).
     val side = if (roll >= 0f) "D" else "G"
-    compactText(tm, "${abs(roll).roundToInt()}° $side", pcx, r.top + r.height * 0.62f, sizeSp = 22f, bold = true, color = CompactStyle.Accent)
+    compactText(tm, "${abs(roll).roundToInt()}° $side", pcx, r.top + r.height * 0.72f, sizeSp = 22f, bold = true, color = CompactStyle.Accent)
 }

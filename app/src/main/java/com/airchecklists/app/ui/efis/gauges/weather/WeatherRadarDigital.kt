@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.weather
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import kotlin.math.roundToInt
 fun WeatherRadarDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
 
@@ -68,13 +70,12 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
     ) {
         val w = size.width
         val h = size.height
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.2f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.2f)
         drawRect(CompactStyle.Bg, size = size)
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
 
         if (!hasPos) {
-            compactText(tm, "RADAR METEO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+            if (headerH > 0f) compactText(tm, "RADAR METEO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
             compactText(tm, "position GPS ?", w / 2f, headerH + (h - headerH) / 2f, sizeSp = 12f, color = CompactStyle.Dim)
             return@Canvas
         }
@@ -94,8 +95,10 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
         if (radar == null) compactText(tm, "radar…", cx, cy, sizeSp = 11f, color = CompactStyle.Dim)
 
         // Title on top of everything.
-        compactText(tm, "RADAR METEO", cx, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        if (headerH > 0f) {
+            compactText(tm, "RADAR METEO", cx, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+            drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        }
     }
 
     if (showDialog) {

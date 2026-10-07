@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,6 +40,7 @@ private val timeFmt = SimpleDateFormat("HH'h'mm", Locale.FRANCE)
 fun FlightSessionDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val fdrStatus by ServiceLocator.flightRecorder.status.collectAsStateWithLifecycle()
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
@@ -81,7 +83,7 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
         }
         val titleTextH = titleMeasured.maxOf { it.size.height }.toFloat()
 
-        val headerH  = titleTextH + 8.dp.toPx()
+        val headerH  = if (hideTitle) 0f else titleTextH + 8.dp.toPx()
         // Fixed body height (not a fraction of h) so shrinking the cell only trims
         // the transparent bottom margin, never the data row.
         val bodyH    = 56.dp.toPx()
@@ -92,14 +94,15 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
         // instrument from the ones below).
         drawRect(CompactStyle.Bg, topLeft = Offset.Zero, size = Size(w, contentH))
         // Title bar background: same bezel style as all other NUM instruments.
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), topLeft = Offset.Zero, size = Size(w, contentH), style = Stroke(2f))
-        val totalTW = titleMeasured.sumOf { it.size.width }.toFloat()
-        var tx = ((w - totalTW) / 2f).coerceAtLeast(4.dp.toPx())
-        val tcy = headerH / 2f
-        titleMeasured.forEach { m ->
-            drawText(m, topLeft = Offset(tx, tcy - m.size.height / 2f))
-            tx += m.size.width
+        if (headerH > 0f) {
+            drawNumTitleBar(bezel, w, headerH)
+            val totalTW = titleMeasured.sumOf { it.size.width }.toFloat()
+            var tx = ((w - totalTW) / 2f).coerceAtLeast(4.dp.toPx())
+            val tcy = headerH / 2f
+            titleMeasured.forEach { m ->
+                drawText(m, topLeft = Offset(tx, tcy - m.size.height / 2f))
+                tx += m.size.width
+            }
         }
 
         // --- Data row ---

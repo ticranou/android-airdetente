@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -35,6 +36,7 @@ private val FUEL_RED    = Color(0xFFCC2222)
 fun FuelDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     var showConfig by remember { mutableStateOf(false) }
 
     val aircraft       = ServiceLocator.currentAircraft()
@@ -71,9 +73,9 @@ fun FuelDigital(modifier: Modifier = Modifier) {
         val pad = w * 0.02f
 
         // ── Header ──
-        val headerH = h * 0.20f
-        drawNumTitleBar(bezel, w, headerH)
-        compactText(tm, "CARBURANT", w / 2f, headerH / 2f, sizeSp = 11f, color = GaugeColors.Mark)
+        val headerH = if (hideTitle) 0f else h * 0.20f
+        if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
+        if (headerH > 0f) compactText(tm, "CARBURANT", w / 2f, headerH / 2f, sizeSp = 11f, color = GaugeColors.Mark)
 
         val pct        = (fuelL / capacityL).coerceIn(0f, 1f)
         val reservePct = (reserveL / capacityL).coerceIn(0f, 1f)

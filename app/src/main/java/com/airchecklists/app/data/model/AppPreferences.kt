@@ -281,6 +281,8 @@ data class DashboardCell(
     val accentColor: Long? = null,
     /** Per-instrument bezel style override (SOLID/CARBON/BRUSHED); null = inherit global. */
     val bezelStyle: GaugeBezelStyle? = null,
+    /** When true the instrument's title bar is hidden, giving more space to the content. */
+    val hideTitle: Boolean = false,
 )
 
 /** Dark accent colours offered for gauge bezels / NUM title bars. */

@@ -220,6 +220,17 @@ class PreferencesRepository(private val store: SettingsStore) {
         })
     }
 
+    /** Toggle the per-cell title visibility. */
+    suspend fun setDashboardCellHideTitle(id: String, index: Int, hide: Boolean) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(hideTitle = hide)
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
     /** Merge the master cell at [index] with its RIGHT or DOWN neighbour(s). */
     suspend fun mergeDashboardCell(id: String, index: Int, dir: MergeDir) = persist { prefs ->
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
@@ -346,6 +357,74 @@ class PreferencesRepository(private val store: SettingsStore) {
         val ordered = orderedIds.mapNotNull { byId[it] }
         val rest = prefs.effectiveDashboards.filter { it.id !in orderedIds }
         prefs.copy(dashboards = ordered + rest)
+    }
+
+    /** Move the logical block containing [masterRow] up or down by one block position.
+     *
+     * A "block" is a master cell at column 0 (or the first non-covered cell if col 0
+     * is covered) together with all the physical rows it spans via rowSpan.  Blocks are
+     * the reorderable units: two adjacent blocks are swapped by physically relocating
+     * their rows, so blocks of different heights can be exchanged freely.
+     *
+     * [direction] is -1 (up) or +1 (down).  No-op when the block is already at the edge.
+     */
+    suspend fun moveDashboardBlock(id: String, masterRow: Int, direction: Int) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            val rowCount = d.rows
+            // Build the ordered list of block-start rows.  A new block starts at every
+            // row whose column-0 cell is a master (not covered).
+            val blockStarts = mutableListOf<Int>()
+            var r = 0
+            while (r < rowCount) {
+                blockStarts.add(r)
+                // The rowSpan of the first master cell in this row determines block height.
+                val masterSpan = (0 until EFIS_COLS)
+                    .mapNotNull { dc -> cells.getOrNull(r * EFIS_COLS + dc)?.takeIf { !it.covered } }
+                    .maxOfOrNull { it.rowSpan } ?: 1
+                r += masterSpan.coerceAtLeast(1)
+            }
+            val blockIdx = blockStarts.indexOfFirst { it == masterRow }
+            if (blockIdx < 0) return@mapDashboard d
+            val targetBlockIdx = blockIdx + direction
+            if (targetBlockIdx !in blockStarts.indices) return@mapDashboard d
+
+            // Determine the physical row ranges for the two blocks to swap.
+            val rowA = blockStarts[blockIdx]
+            val rowB = blockStarts[targetBlockIdx]
+            val spanA = (blockStarts.getOrNull(blockIdx + 1) ?: rowCount) - rowA
+            val spanB = (blockStarts.getOrNull(targetBlockIdx + 1) ?: rowCount) - rowB
+
+            // Build the new row order: everything before the earlier block, then block B,
+            // then block A, then everything after the later block.
+            val firstBlock = if (direction < 0) targetBlockIdx else blockIdx
+            val secondBlock = if (direction < 0) blockIdx else targetBlockIdx
+            val firstRow  = blockStarts[firstBlock]
+            val firstSpan = if (direction < 0) spanB else spanA
+            val secondRow  = blockStarts[secondBlock]
+            val secondSpan = if (direction < 0) spanA else spanB
+
+            val newCells = MutableList(rowCount * EFIS_COLS) { DashboardCell() }
+            // Rows before the first block — copy unchanged.
+            for (row in 0 until firstRow)
+                for (dc in 0 until EFIS_COLS)
+                    newCells[row * EFIS_COLS + dc] = cells[row * EFIS_COLS + dc]
+            // Second block goes first.
+            for (dr in 0 until secondSpan)
+                for (dc in 0 until EFIS_COLS)
+                    newCells[(firstRow + dr) * EFIS_COLS + dc] = cells[(secondRow + dr) * EFIS_COLS + dc]
+            // First block goes second.
+            for (dr in 0 until firstSpan)
+                for (dc in 0 until EFIS_COLS)
+                    newCells[(firstRow + secondSpan + dr) * EFIS_COLS + dc] = cells[(firstRow + dr) * EFIS_COLS + dc]
+            // Rows after both blocks — copy unchanged.
+            val afterRow = firstRow + firstSpan + secondSpan
+            for (row in afterRow until rowCount)
+                for (dc in 0 until EFIS_COLS)
+                    newCells[row * EFIS_COLS + dc] = cells[row * EFIS_COLS + dc]
+
+            d.copy(cells = repairCells(newCells, rowCount), slots = emptyList())
+        })
     }
 
     private suspend fun persist(transform: (AppPreferences) -> AppPreferences) {

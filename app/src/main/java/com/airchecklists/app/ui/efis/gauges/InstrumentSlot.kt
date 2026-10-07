@@ -41,6 +41,7 @@ fun InstrumentSlot(
     mapOrientation: MapOrientation = MapOrientation.NORTH_UP,
     accentColor: Long? = null,
     bezelStyleOverride: com.airchecklists.app.data.model.GaugeBezelStyle? = null,
+    hideTitle: Boolean = false,
     onOpenMap: () -> Unit = {},
     cellIdx: Int = 0,
     modifier: Modifier = Modifier,
@@ -54,7 +55,7 @@ fun InstrumentSlot(
     )
     val showHints = LocalShowGestureHints.current
     androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
-    androidx.compose.runtime.CompositionLocalProvider(LocalGaugeBezel provides bezel) {
+    androidx.compose.runtime.CompositionLocalProvider(LocalGaugeBezel provides bezel, LocalHideTitle provides hideTitle) {
     val boxModifier = if (instrument.isCompact) modifier.fillMaxSize() else modifier
     Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
         val round = Modifier.gaugeCell()

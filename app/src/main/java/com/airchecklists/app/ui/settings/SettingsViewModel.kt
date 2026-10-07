@@ -220,12 +220,24 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardCellBezelStyle(id, index, style) }
     }
 
+    fun setDashboardCellHideTitle(id: String, index: Int, hide: Boolean) {
+        viewModelScope.launch { prefsRepo.setDashboardCellHideTitle(id, index, hide) }
+    }
+
     fun mergeDashboardCell(id: String, index: Int, dir: com.airchecklists.app.data.repository.MergeDir) {
         viewModelScope.launch { prefsRepo.mergeDashboardCell(id, index, dir) }
     }
 
     fun unmergeDashboardCell(id: String, index: Int) {
         viewModelScope.launch { prefsRepo.unmergeDashboardCell(id, index) }
+    }
+
+    fun moveDashboardRowUp(id: String, rowIdx: Int) {
+        viewModelScope.launch { prefsRepo.moveDashboardBlock(id, rowIdx, -1) }
+    }
+
+    fun moveDashboardRowDown(id: String, rowIdx: Int) {
+        viewModelScope.launch { prefsRepo.moveDashboardBlock(id, rowIdx, +1) }
     }
 
     fun reorderDashboards(orderedIds: List<String>) {

@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
     val targetHeading by ServiceLocator.targetHeading.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     val bezel = LocalGaugeBezel.current
+    val hideTitle = LocalHideTitle.current
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
 
@@ -46,12 +48,13 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
     ) {
         val w = size.width
         val h = size.height
-        val headerH = 20.dp.toPx().coerceAtMost(h * 0.4f)
+        val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
-        drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
-        compactText(tm, "CONSERVATEUR", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
-        drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        if (headerH > 0f) {
+            drawNumTitleBar(bezel, w, headerH)
+            compactText(tm, "CONSERVATEUR", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+            drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
+        }
 
         val hdg = ((headingDeg % 360f) + 360f) % 360f
         val tape = Rect(0f, headerH, w, h)

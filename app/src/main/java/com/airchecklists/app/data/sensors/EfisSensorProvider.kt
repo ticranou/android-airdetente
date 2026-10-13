@@ -135,12 +135,18 @@ class EfisSensorProvider(
         headingSource = heading
         varioSource = vario
         if (_demoActive.value) return
-        // Re-publish heading using the newly selected source (with compensation offset).
-        val rawTarget = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading
+        // Re-publish heading using the newly selected source. The compensation offset
+        // corrects the magnetometer only — it must NOT be applied to the GPS bearing.
         _state.value = _state.value.copy(
-            headingDeg = (rawTarget + headingOffsetDeg + 360f) % 360f,
+            headingDeg = (headingForSource() + 360f) % 360f,
         )
     }
+
+    /** Current source heading with the magnetic-compensation offset applied ONLY in
+     *  MAGNETIC mode. The GPS bearing is already an absolute track and needs no offset. */
+    private fun headingForSource(): Float =
+        if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack
+        else magneticHeading + headingOffsetDeg
 
     fun updateResponsiveness(value: Float) {
         responsiveness = value.coerceIn(0.05f, 1f)
@@ -156,7 +162,9 @@ class EfisSensorProvider(
         _state.value = _state.value.copy(calibrationNeeded = false, headingDriftDeg = 0f, headingDriftSignedDeg = 0f)
     }
 
-    /** Apply a fixed heading compensation offset for this session (session-only, not persisted). */
+    /** Apply a fixed heading compensation offset for this session (session-only, not persisted).
+     *  The offset corrects the magnetometer; it is only reflected in the heading while the
+     *  MAGNETIC source is active (see [headingForSource]). */
     fun applyHeadingOffset(offsetDeg: Float) {
         headingOffsetDeg = offsetDeg
         calibrationDismissed = true
@@ -166,7 +174,7 @@ class EfisSensorProvider(
             headingDriftDeg = 0f,
             headingDriftSignedDeg = 0f,
             headingOffsetDeg = offsetDeg,
-            headingDeg = (magneticHeading + offsetDeg + 360f) % 360f,
+            headingDeg = (headingForSource() + 360f) % 360f,
         )
     }
 
@@ -271,8 +279,7 @@ class EfisSensorProvider(
                     lastRawRoll = rawRoll
                     magneticHeading = azimuth
                     val cur = _state.value
-                    val rawTarget = if (headingSource == EfisHeadingSource.GPS_TRACK) gpsTrack else magneticHeading
-                    val newHeadingTarget = (rawTarget + headingOffsetDeg + 360f) % 360f
+                    val newHeadingTarget = (headingForSource() + 360f) % 360f
                     _state.value = cur.copy(
                         // Subtract the calibrated reference so the mount orientation reads level.
                         pitchDeg = smooth(cur.pitchDeg, rawPitch - pitchOffset),
@@ -360,7 +367,7 @@ class EfisSensorProvider(
             verticalSpeedFtMin = vs,
             hasFix = true,
             headingDeg = if (headingSource == EfisHeadingSource.GPS_TRACK)
-                smoothAngle(_state.value.headingDeg, (gpsTrack + headingOffsetDeg + 360f) % 360f)
+                smoothAngle(_state.value.headingDeg, (gpsTrack + 360f) % 360f)
                 else _state.value.headingDeg,
             latitude = location.latitude,
             longitude = location.longitude,

@@ -38,7 +38,7 @@
 
         <h3>Sources &amp; unités EFIS</h3>
         <ul class="feat">
-          <li>Source du cap : <b>magnétique</b> ou <b>route GPS</b> (track).</li>
+          <li>Source du cap : <b>magnétique</b> ou <b>route GPS</b> (track). La compensation d'étalonnage du compas magnétique ne s'applique qu'en mode <b>magnétique</b> ; en mode <b>route GPS</b> le cap suit le relèvement GPS brut, sans offset.</li>
           <li>Source du variomètre : <b>GPS</b> ou <b>baromètre</b> (si le capteur est présent).</li>
           <li>Unité de vitesse : <b>km/h</b> ou <b>nœuds</b>.</li>
           <li>Unité d'altitude : <b>pieds (ft)</b> ou <b>mètres (m)</b> — appliquée à tous les instruments (le variomètre passe alors en m/s).</li>
@@ -52,6 +52,13 @@
           <li><b>Ajout / édition / suppression</b> (menu <b>⋮</b>) et réordonnancement des tableaux de bord.</li>
           <li>Case <b>« Afficher dans le Cockpit »</b> : slidez gauche/droite pour changer de tableau.</li>
           <li>Bouton <b>« Options »</b> d'une case : couleur / style du contour (<b>Couleur par défaut</b>, <b>Carbone</b>, <b>Métal</b>, ou une couleur sombre spécifique) <b>et</b> gestion de la case (fusionner en large / en haut, séparer) — de quoi repérer un instrument d'un coup d'œil.</li>
+        </ul>
+
+        <h3>Import / export d'un cockpit</h3>
+        <ul class="feat">
+          <li><b>Import JSON</b> et <b>Import QR</b> : ajoutent un <b>nouveau</b> cockpit (jamais destructif — nouvel identifiant, les cockpits existants sont conservés). La grille importée est renormalisée. L'import QR utilise la caméra de l'appareil (autorisation Caméra requise).</li>
+          <li>Les cockpits se préparent aussi dans un navigateur avec le <b><a href="cockpit-builder.html">Créateur de cockpit</a></b> (éditeur de grille 2 colonnes fidèle à l'éditeur Android), puis s'exportent en fichier <b>.json</b> ou en <b>QR code</b> — à importer ici. Le créateur fonctionne entièrement hors-ligne.</li>
+          <li>Format de l'enveloppe : <code>{ "type": "airdetente.cockpit", "version": 1, "dashboard": {…} }</code>.</li>
         </ul>
 
         <h3>Cartes</h3>

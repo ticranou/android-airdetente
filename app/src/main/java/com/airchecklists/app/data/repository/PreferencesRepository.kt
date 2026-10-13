@@ -178,6 +178,23 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = list)
     }
 
+    /** Import a cockpit received from the web builder (file or QR). Always assigns a
+     *  fresh id so an import never overwrites an existing cockpit, repairs the grid,
+     *  and appends it to the list. Returns the stored dashboard. */
+    suspend fun importCockpit(dashboard: com.airchecklists.app.data.model.Dashboard): com.airchecklists.app.data.model.Dashboard {
+        val rows = dashboard.rows.coerceIn(1, AppPreferences.EFIS_MAX_ROWS)
+        val stored = dashboard.copy(
+            id = java.util.UUID.randomUUID().toString(),
+            rows = rows,
+            cells = repairCells(dashboard.normalizedCells, rows),
+            slots = emptyList(),
+        )
+        persist { prefs ->
+            prefs.copy(dashboards = prefs.effectiveDashboards + stored)
+        }
+        return stored
+    }
+
     /** Update one dashboard's row count (columns are fixed at 2), resizing cells. */
     suspend fun setDashboardRows(id: String, rows: Int) = persist { prefs ->
         val r = rows.coerceIn(1, AppPreferences.EFIS_MAX_ROWS)

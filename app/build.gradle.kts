@@ -63,6 +63,12 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.maplibre.android.sdk)
 
+    // QR import: CameraX preview/analysis + ML Kit barcode scanning.
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.barcode.scanning)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

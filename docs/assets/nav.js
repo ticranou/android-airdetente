@@ -5,6 +5,7 @@
   var GROUPS = [
     { title: "Général", items: [
       ["index.html", "Accueil"],
+      ["cockpit-builder.html", "Créateur de cockpit"],
     ]},
     { title: "Instruments", items: [
       ["instrument-conservateur.html", "Conservateur"],

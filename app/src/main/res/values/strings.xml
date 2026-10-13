@@ -100,6 +100,8 @@
     <string name="settings_dashboard_in_cockpit">Afficher dans le Cockpit</string>
     <string name="settings_dashboard_show_title">Afficher le titre du Cockpit</string>
     <string name="settings_dashboard_add">Ajouter un tableau de bord</string>
+    <string name="settings_dashboard_import_file">Import JSON</string>
+    <string name="settings_dashboard_import_qr">Import QR</string>
     <string name="settings_map">Cartes</string>
     <string name="settings_map_orientation">Orientation de la carte</string>
     <string name="settings_map_north_up">Nord en haut</string>

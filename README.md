@@ -31,7 +31,10 @@ mobile** (moving map) hors-ligne.
     terrains double-tap = VAC, appui long = liste ; météo appui long = carte ; Raccourcis long-press configure le slot. Les indicateurs de gestes (tiret et points) peuvent être masqués via les réglages (« Indicateurs de gestes »).
   - **Pinch-to-zoom Focus** : deux doigts écartés (scale > 1.3×) sur un instrument pour zoomer en mode Focus (instrument plein écran avec compte à rebours auto-fermeture, durée configurable 10–120 s).
   - Sources de cap (magnétique / route GPS), de vario (GPS / baromètre), unité de
-    vitesse (km/h / kt) et réactivité réglables.
+    vitesse (km/h / kt) et réactivité réglables. L'offset de compensation du compas
+    magnétique ne s'applique qu'en source **magnétique** ; en source **route GPS** le
+    cap suit le relèvement GPS brut. Le dialogue d'étalonnage affiche cap GPS, cap
+    magnétique et l'écart signé (boutons Compenser / Calibrer / Ignorer).
 - **Checks** : liste des checklists de l'appareil sélectionné, puis exécution
   guidée — barre de progression, cochage **dans l'ordre**, élément courant en
   surbrillance, enchaînement vers la checklist suivante, bannière de fin.
@@ -46,7 +49,15 @@ mobile** (moving map) hors-ligne.
 - **Réglages** : appareils, checklists, cartes VAC, tableaux de bord EFIS, thème
   (auto/clair/sombre), taille de police, splash, écran maintenu allumé,
   import/export JSON via le sélecteur de fichiers Android (SAF). Toute suppression
-  est confirmée.
+  est confirmée. Les cockpits se partagent via **Import JSON** / **Import QR**
+  (ajout non destructif d'un nouveau cockpit, nouvel UUID, grille renormalisée ;
+  le scan QR utilise la caméra via CameraX + ML Kit, permission `CAMERA`). Un
+  **créateur de cockpit web** hors-ligne (`docs/cockpit-builder.html`) permet de
+  composer un tableau de bord dans un navigateur (grille 2 colonnes fidèle à
+  l'éditeur Android : combobox d'instrument par cellule avec recherche, fusion
+  Large/Haut/Séparer, palette de couleurs, contour Carbone/Métal, masquer le
+  titre) puis de l'exporter en `.json` ou en QR code. Format d'enveloppe :
+  `{ "type": "airdetente.cockpit", "version": 1, "dashboard": {…} }`.
 
 Un appareil complet (caractéristiques + checklists + éléments) est stocké dans
 **un fichier JSON** (`filesDir/aircraft/<id>.json`). Les préférences sont dans

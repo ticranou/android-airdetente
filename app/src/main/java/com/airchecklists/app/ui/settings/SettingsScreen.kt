@@ -30,10 +30,12 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
@@ -182,6 +184,14 @@ fun SettingsScreen(
         importForId = null
     }
 
+    // Cockpit import (single dashboard) — from a .json file or a scanned QR code.
+    var showQrScan by remember { mutableStateOf(false) }
+    val cockpitImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) viewModel.importCockpitFromUri(uri)
+    }
+
     LaunchedEffect(Unit) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
     }
@@ -197,6 +207,17 @@ fun SettingsScreen(
             scrollState.animateScrollTo((y - topBarPx).coerceAtLeast(0))
         }
         pendingAnchor = null
+    }
+
+    if (showQrScan) {
+        QrScanScreen(
+            onResult = { raw ->
+                showQrScan = false
+                viewModel.importCockpitFromText(raw)
+            },
+            onBack = { showQrScan = false },
+        )
+        return
     }
 
     Scaffold(
@@ -336,6 +357,8 @@ fun SettingsScreen(
                     onEditDashboard = onEditDashboard,
                     onDuplicateDashboard = { srcId -> onEditDashboard(viewModel.duplicateDashboard(srcId, "(copie)")) },
                     onDeleteDashboard = { dashboardToDelete = it },
+                    onImportCockpitFile = { cockpitImportLauncher.launch(arrayOf("application/json")) },
+                    onImportCockpitQr = { showQrScan = true },
                     onReorderDashboards = viewModel::reorderDashboards,
                     onMapOrientation = viewModel::setMapOrientation,
                     onMapShowZoomButtons = viewModel::setMapShowZoomButtons,
@@ -794,6 +817,8 @@ private fun CockpitsSection(
     onEditDashboard: (String) -> Unit,
     onDuplicateDashboard: (String) -> Unit,
     onDeleteDashboard: (com.airchecklists.app.data.model.Dashboard) -> Unit,
+    onImportCockpitFile: () -> Unit,
+    onImportCockpitQr: () -> Unit,
     onReorderDashboards: (orderedIds: List<String>) -> Unit,
     onMapOrientation: (com.airchecklists.app.data.model.MapOrientation) -> Unit,
     onMapShowZoomButtons: (Boolean) -> Unit,
@@ -824,7 +849,6 @@ private fun CockpitsSection(
         ) { Text(stringResource(R.string.settings_efis_heading_gps)) }
     }
     var showCalibrationDialog by remember { mutableStateOf(false) }
-    var showCalibrationTestDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -837,9 +861,6 @@ private fun CockpitsSection(
         )
         OutlinedButton(onClick = { showCalibrationDialog = true }) {
             Text(stringResource(R.string.settings_efis_calibration_launch))
-        }
-        OutlinedButton(onClick = { showCalibrationTestDialog = true }) {
-            Text("Test écart")
         }
     }
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -859,17 +880,6 @@ private fun CockpitsSection(
             driftDeg = 0f,
             onDismiss = { showCalibrationDialog = false },
             onCalibrated = { showCalibrationDialog = false },
-        )
-    }
-    if (showCalibrationTestDialog) {
-        CompassCalibrationDialog(
-            driftDeg = 20f,
-            driftSignedDeg = 20f,
-            gpsDeg = 145f,
-            magDeg = 125f,
-            onDismiss = { showCalibrationTestDialog = false },
-            onCalibrated = { showCalibrationTestDialog = false },
-            onCompensate = { showCalibrationTestDialog = false },
         )
     }
     } // AnchorBox COCKPITS_HEADING
@@ -1142,6 +1152,19 @@ private fun CockpitsSection(
     OutlinedButton(onClick = onAddDashboard, modifier = Modifier.fillMaxWidth()) {
         androidx.compose.material3.Icon(Icons.Filled.Add, contentDescription = null)
         Text(stringResource(R.string.settings_dashboard_add), modifier = Modifier.padding(start = 8.dp))
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        OutlinedButton(onClick = onImportCockpitFile, modifier = Modifier.weight(1f)) {
+            androidx.compose.material3.Icon(Icons.Filled.FileOpen, contentDescription = null)
+            Text(stringResource(R.string.settings_dashboard_import_file), modifier = Modifier.padding(start = 8.dp))
+        }
+        OutlinedButton(onClick = onImportCockpitQr, modifier = Modifier.weight(1f)) {
+            androidx.compose.material3.Icon(Icons.Filled.QrCodeScanner, contentDescription = null)
+            Text(stringResource(R.string.settings_dashboard_import_qr), modifier = Modifier.padding(start = 8.dp))
+        }
     }
     } // AnchorBox COCKPITS_DASHBOARDS
 

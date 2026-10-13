@@ -369,6 +369,37 @@ class SettingsViewModel(
         }
     }
 
+    // ---- Cockpit import (file / QR) ----
+
+    /** Decode a single-cockpit JSON envelope and append it as a new dashboard. The
+     *  text comes either from a `.json` file or from a scanned QR code. */
+    fun importCockpitFromText(text: String) {
+        viewModelScope.launch {
+            runCatching {
+                val export = datasetJson.decodeFromString(
+                    com.airchecklists.app.data.model.CockpitExport.serializer(), text,
+                )
+                require(export.type == com.airchecklists.app.data.model.CockpitExport.TYPE) {
+                    "format non reconnu"
+                }
+                prefsRepo.importCockpit(export.dashboard)
+            }
+                .onSuccess { _messages.send("Cockpit importé : ${it.name}") }
+                .onFailure { _messages.send("Échec de l'import du cockpit : ${it.message}") }
+        }
+    }
+
+    /** Read a cockpit JSON from [source] (SAF file) then import it. */
+    fun importCockpitFromUri(source: Uri) {
+        viewModelScope.launch {
+            runCatching {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { safIo.readText(source) }
+            }
+                .onSuccess { importCockpitFromText(it) }
+                .onFailure { _messages.send("Échec de la lecture du fichier : ${it.message}") }
+        }
+    }
+
     // ---- VAC ----
 
     fun setVacAiracCycle(cycle: String) {

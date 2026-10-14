@@ -73,8 +73,6 @@ import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
-import com.airchecklists.app.ui.efis.gauges.compact.efisHeadingTape
-import com.airchecklists.app.ui.efis.gauges.compact.speedColor
 import com.airchecklists.app.ui.efis.gauges.weather.drawPlaneMarker
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
@@ -113,7 +111,6 @@ fun MovingMap(
     val tm = rememberTextMeasurer()
     val basemap = remember { ServiceLocator.mapRepository.basemapFile() }
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
-    val targetHeading by ServiceLocator.targetHeading.collectAsStateWithLifecycle()
     val navRoute by ServiceLocator.activeNavRoute.collectAsStateWithLifecycle()
 
     var showLayers by remember { mutableStateOf(false) }
@@ -127,19 +124,22 @@ fun MovingMap(
     var cameraTick by remember { mutableIntStateOf(0) }
 
     val mapBezel = com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel.current
+    val hideTitle = com.airchecklists.app.ui.efis.gauges.LocalHideTitle.current
     Column(modifier = modifier.fillMaxSize().background(CompactStyle.Bg)) {
         // Title bar ("Carte de navigation") honouring the cell bezel colour/texture.
-        Text(
-            stringResource(R.string.instrument_nummap_title),
-            color = CompactStyle.Dim,
-            fontSize = 12.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind { drawNumTitleBar(mapBezel, size.width, size.height) }
-                .padding(vertical = 3.dp),
-        )
+        if (!hideTitle) {
+            Text(
+                stringResource(R.string.instrument_nummap_title),
+                color = CompactStyle.Dim,
+                fontSize = 12.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawBehind { drawNumTitleBar(mapBezel, size.width, size.height) }
+                    .padding(vertical = 3.dp),
+            )
+        }
         Box(modifier = Modifier.fillMaxWidth().weight(1f).background(CompactStyle.Bg)) {
         if (basemap == null) {
             NoMapMessage()
@@ -189,13 +189,10 @@ fun MovingMap(
             }
         }
 
-        // EFIS instrument header band (drawn over everything, at the top).
-        EfisHeaderBand(tm, state, unit, arcs, altUnit, targetHeading)
-
-        // Overlay controls (right side), placed BELOW the header band so they
-        // never overlap the SPEED cell / arc bar.
+        // Overlay controls (right side). No EFIS header band on NUMMAP — the user
+        // adds any complementary instruments in their own cockpit layout.
         Column(
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 160.dp, end = 8.dp),
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (basemap != null) {
@@ -246,50 +243,6 @@ fun MovingMap(
             current = prefs.mapLayers,
             onDismiss = { showLayers = false },
             onApply = { ServiceLocator.setMapLayers(it); showLayers = false },
-        )
-    }
-}
-
-/** The EFIS instrument band at the top of the map. Long-press the heading tape
- *  to set the heading bug. */
-@Composable
-private fun EfisHeaderBand(
-    tm: TextMeasurer,
-    state: EfisState,
-    unit: EfisSpeedUnit,
-    arcs: SpeedArcs?,
-    altUnit: AltitudeUnit,
-    targetHeading: Int?,
-) {
-    var showHeadingDialog by remember { mutableStateOf(false) }
-    // Fixed-height band at the top of the cell so the banking aircraft is fully
-    // visible and the long-press on the heading tape is reliably received.
-    val bandHeight = 150.dp
-    // The heading tape occupies the top ~36% of the band. Badge sits at ~18% (mid of tape).
-    val badgeOffsetDp = bandHeight * 0.18f
-    Box(modifier = Modifier.fillMaxWidth().height(bandHeight)) {
-        Canvas(
-            modifier = Modifier.fillMaxWidth().height(bandHeight).pointerInput(Unit) {
-                detectTapGestures(onLongPress = { pos ->
-                    // Top band (heading tape) → set the heading bug.
-                    if (pos.y <= size.height * 0.40f) showHeadingDialog = true
-                })
-            },
-        ) {
-            drawEfisHeader(tm, state, unit, arcs, size.height, Color(0xF01A1C1E), altUnit, targetHeading)
-        }
-        HeadingSourceBadge(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = badgeOffsetDp),
-        )
-    }
-    if (showHeadingDialog) {
-        com.airchecklists.app.ui.components.HeadingEntryDialog(
-            initial = targetHeading,
-            onDismiss = { showHeadingDialog = false },
-            onConfirm = { hdg -> ServiceLocator.targetHeading.value = hdg; showHeadingDialog = false },
-            onClear = { ServiceLocator.targetHeading.value = null; showHeadingDialog = false },
         )
     }
 }
@@ -1297,127 +1250,4 @@ internal fun buildStyleJson(mbtilesPath: String): String {
       ]
     }
     """.trimIndent()
-}
-
-// ---- EFIS header (unchanged rendering, matches the reference screenshot) ----
-
-private fun DrawScope.drawEfisHeader(
-    tm: TextMeasurer,
-    state: EfisState,
-    unit: EfisSpeedUnit,
-    arcs: SpeedArcs?,
-    headerH: Float,
-    headerColor: Color,
-    altUnit: AltitudeUnit = AltitudeUnit.FEET,
-    targetHeading: Int? = null,
-) {
-    val w = size.width
-    drawRect(headerColor, topLeft = Offset(0f, 0f), size = Size(w, headerH))
-
-    val topPad = headerH * 0.03f
-    val tapeH = headerH * 0.36f
-    val heading = ((state.headingDeg.roundToInt() % 360) + 360) % 360
-    efisHeadingTape(tm, Rect(0f, topPad, w, topPad + tapeH), heading.toFloat(), showValue = true, targetHeading)
-    val rowTop = topPad + tapeH
-
-    val rowH = headerH - rowTop
-
-    val toUnit = if (unit == EfisSpeedUnit.KNOTS) 1f / 1.852f else 1f
-    val speed = state.gpsSpeedKmh * toUnit
-    val speedLabel = if (unit == EfisSpeedUnit.KNOTS) "kt" else "km/h"
-    val trend = if (state.verticalSpeedFtMin >= 0f) CompactStyle.Climb else CompactStyle.Descent
-    val meters = altUnit == AltitudeUnit.METERS
-
-    // ---- Left: ALTI over VARIO, unit label to the RIGHT of each box ----
-    val cellW = w * 0.20f
-    val cellH = rowH * 0.34f
-    val boxLeft = w * 0.03f
-    fun boxWithUnit(cyc: Float, value: String, unitTxt: String, color: Color) {
-        drawRect(Color(0xFF111111), topLeft = Offset(boxLeft, cyc - cellH / 2), size = Size(cellW, cellH))
-        drawRect(Color(0xFF5A5A5A), topLeft = Offset(boxLeft, cyc - cellH / 2), size = Size(cellW, cellH), style = Stroke(width = 1.3f))
-        compactText(tm, value, boxLeft + cellW / 2, cyc, sizeSp = 22f, bold = true, color = color)
-        compactText(tm, unitTxt, boxLeft + cellW + 6f, cyc, sizeSp = 12f, color = Color(0xFFCFCFCF), center = false)
-    }
-    val altTxt = com.airchecklists.app.data.model.AltitudeFormat.altValue(state.gpsAltitudeFt, altUnit).roundToInt().toString()
-    val vsTxt = if (meters) "%.1f".format(com.airchecklists.app.data.model.AltitudeFormat.vsValue(state.verticalSpeedFtMin, altUnit))
-        else state.verticalSpeedFtMin.roundToInt().toString()
-    boxWithUnit(rowTop + rowH * 0.30f, altTxt, com.airchecklists.app.data.model.AltitudeFormat.altLabel(altUnit), trend)
-    boxWithUnit(rowTop + rowH * 0.72f, vsTxt, com.airchecklists.app.data.model.AltitudeFormat.vsLabel(altUnit), trend)
-
-    // ---- Right: unit label LEFT of the SPEED box, arc bar just under it ----
-    // The speed box is taller + wider than ALT/VARIO for readability.
-    val spCellH = cellH * 1.5f
-    val spCellW = cellW * 1.15f
-    val spBoxLeft = w - w * 0.03f - spCellW
-    val spCy = rowTop + rowH * 0.34f
-    compactText(tm, speedLabel, spBoxLeft - 48f, spCy, sizeSp = 13f, color = Color(0xFFCFCFCF))
-    drawRect(Color(0xFF111111), topLeft = Offset(spBoxLeft, spCy - spCellH / 2), size = Size(spCellW, spCellH))
-    drawRect(Color(0xFF5A5A5A), topLeft = Offset(spBoxLeft, spCy - spCellH / 2), size = Size(spCellW, spCellH), style = Stroke(width = 1.3f))
-    compactText(tm, speed.roundToInt().toString(), spBoxLeft + spCellW / 2, spCy, sizeSp = 32f, bold = true, color = speedColor(speed, arcs?.scaled(toUnit)))
-    // Speed-arc bar: taller and close under the box.
-    val barTop = spCy + spCellH / 2 + 4f
-    val barRect = Rect(spBoxLeft, barTop, spBoxLeft + spCellW, barTop + 22f)
-    drawSpeedArcBar(barRect, arcs?.scaled(toUnit), speed)
-
-    // ---- Centre: banking aircraft + slim slip ball + roll text ----
-    val ccx = w / 2f
-    val wing = w * 0.075f
-    val ay = rowTop + rowH * 0.28f
-    val stroke = 6f
-    // Bank the wings WITH the roll: roll>0 = bank right ("D") → right wing down,
-    // which is a clockwise (positive) screen rotation.
-    rotate(degrees = state.rollDeg, pivot = Offset(ccx, ay)) {
-        drawLine(CompactStyle.Accent, Offset(ccx - wing, ay), Offset(ccx - wing * 0.2f, ay), strokeWidth = stroke)
-        drawLine(CompactStyle.Accent, Offset(ccx + wing * 0.2f, ay), Offset(ccx + wing, ay), strokeWidth = stroke)
-        drawLine(CompactStyle.Accent, Offset(ccx, ay), Offset(ccx, ay - wing * 0.4f), strokeWidth = stroke)
-        drawCircle(CompactStyle.Accent, radius = 5f, center = Offset(ccx, ay))
-    }
-    // Slim ball pill.
-    val pillW = w * 0.26f; val pillH = rowH * 0.16f; val pcy = rowTop + rowH * 0.58f
-    drawRoundRect(Color(0xFF2A2A2A), topLeft = Offset(ccx - pillW / 2, pcy - pillH / 2), size = Size(pillW, pillH),
-        cornerRadius = CornerRadius(pillH / 2, pillH / 2))
-    drawRoundRect(Color(0xFF6A6A6A), topLeft = Offset(ccx - pillW / 2, pcy - pillH / 2), size = Size(pillW, pillH),
-        cornerRadius = CornerRadius(pillH / 2, pillH / 2), style = Stroke(width = 2f))
-    val ballR = pillH * 0.40f
-    listOf(-ballR - 5f, ballR + 5f).forEach { dx ->
-        drawLine(CompactStyle.Mark, Offset(ccx + dx, pcy - ballR - 2f), Offset(ccx + dx, pcy + ballR + 2f), strokeWidth = 2f)
-    }
-    drawCircle(CompactStyle.Accent, radius = ballR, center = Offset(ccx + state.slip.coerceIn(-1f, 1f) * (pillW * 0.32f), pcy))
-    val side = if (state.rollDeg >= 0f) "D" else "G"
-    compactText(tm, "${abs(state.rollDeg).roundToInt()}° $side", ccx, rowTop + rowH * 0.86f, sizeSp = 18f, bold = true, color = CompactStyle.Accent)
-}
-
-/** Horizontal speed-arc bar (Vs0..Vne) with a white cursor at the current speed,
- *  matching the NUMSPD colour bands. Values are expected in the display unit. */
-private fun DrawScope.drawSpeedArcBar(r: Rect, arcs: SpeedArcs?, speed: Float) {
-    // Track background.
-    drawRect(Color(0xFF1E1E1E), topLeft = Offset(r.left, r.top), size = Size(r.width, r.height))
-    if (arcs == null || !arcs.hasAny) return
-    // Scale the bar from 0 to Vne (or the largest known speed).
-    val maxV = (arcs.vne ?: arcs.vno ?: arcs.greenMax ?: arcs.whiteMax ?: 0).toFloat()
-    if (maxV <= 0f) return
-    fun x(v: Float) = r.left + (v / maxV).coerceIn(0f, 1f) * r.width
-    fun band(fromV: Int?, toV: Int?, color: Color) {
-        if (fromV == null || toV == null || toV <= fromV) return
-        drawRect(color, topLeft = Offset(x(fromV.toFloat()), r.top), size = Size(x(toV.toFloat()) - x(fromV.toFloat()), r.height))
-    }
-    // White arc (flap range), green arc (normal), then Vne block in red.
-    band(arcs.whiteMin, arcs.whiteMax, Color(0xFFEFEFEF))
-    band(arcs.greenMin, arcs.greenMax, CompactStyle.Climb)
-    arcs.vno?.let { vno -> arcs.vne?.let { vne -> band(vno, vne, Color(0xFFFFC107)) } }
-    arcs.vne?.let { band(it, (maxV).toInt(), CompactStyle.Descent) }
-    // Cursor lines (no room for triangles): red = stall speeds + Vne, magenta = Vpl.
-    // Overshoot only upward so nothing dangles below the bar (saves vertical space).
-    fun cursorLine(v: Int?, color: Color) {
-        if (v == null) return
-        val cx = x(v.toFloat())
-        drawLine(color, Offset(cx, r.top - 3f), Offset(cx, r.bottom), strokeWidth = 3f)
-    }
-    cursorLine(arcs.vs0, CompactStyle.Descent)
-    cursorLine(arcs.vs1, CompactStyle.Descent)
-    cursorLine(arcs.vne, CompactStyle.Descent)
-    cursorLine(arcs.vpl, Color(0xFFD24DEA))
-    // Current-speed cursor (white line).
-    val cx = x(speed)
-    drawLine(Color.White, Offset(cx, r.top - 4f), Offset(cx, r.bottom), strokeWidth = 4f)
 }

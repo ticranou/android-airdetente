@@ -33,17 +33,20 @@
         <h2>Possibilités</h2>
         <ul class="feat">
           <li>Bandeau horizontal de <b>3 slots</b> placé en haut ou en bas d'un tableau de bord.</li>
-          <li>Chaque slot peut pointer vers un <b>instrument</b> (affiché en blanc) ou un <b>tableau de bord</b> (affiché en bleu).</li>
+          <li>Chaque slot peut pointer vers un <b>instrument</b> (affiché en blanc), un <b>tableau de bord</b> (affiché en bleu) ou une <b>station météo</b> d'un terrain (affichée en <b style="color:#4CAF50">vert</b>).</li>
           <li>Le label affiche le <b>nom lisible de l'instrument</b>, sans indication de taille (ex. : <q>Altimètre</q> au lieu de <q>Altimètre (100%-3L)</q>).</li>
-          <li><b>Tap</b> sur un slot non vide → ouvre l'instrument ou le tableau de bord en plein écran, avec un bouton <b>Fermer</b>.</li>
+          <li><b>Tap</b> sur un slot non vide → ouvre l'instrument / le tableau de bord en plein écran (bouton <b>Fermer</b>), ou le détail <b>METAR/TAF</b> pour une station météo.</li>
           <li>Le tableau de bord ciblé peut être <b>masqué du cockpit principal</b> (« Afficher dans le Cockpit » décoché) — il reste accessible via le raccourci.</li>
           <li>Slots vides affichés comme <code>-----</code>.</li>
         </ul>
         <h3>Configurer un slot</h3>
         <ul class="feat">
           <li>Appui long sur un slot → dialogue de choix du type :<br>
+            <b>Tableau de bord (&gt;&gt;)</b> → naviguer vers un tableau du pager.<br>
+            <b>Tableau de bord (Focus)</b> → ouvrir un tableau en plein écran.<br>
             <b>Instruments</b> → sélecteur d'instrument habituel (toutes familles).<br>
-            <b>Tableaux de bord</b> → liste de tous les tableaux définis.
+            <b>Terrain (Carte VAC)</b> → ouvrir la carte VAC d'un terrain.<br>
+            <b>Terrain (Station Météo)</b> → choisir parmi les terrains disposant d'une station météo ; le tap ouvre le METAR/TAF.
           </li>
           <li>La configuration ne touche que le slot pressé ; pas d'avance automatique.</li>
         </ul>

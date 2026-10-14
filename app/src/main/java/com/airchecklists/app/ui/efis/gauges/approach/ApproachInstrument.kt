@@ -31,6 +31,7 @@ import com.airchecklists.app.data.repository.AerodromeDirectory
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
@@ -74,6 +75,7 @@ fun ApproachInstrument(
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     // Transient manual override (session only): non-null → resolver uses it; null → AUTO.
@@ -106,7 +108,7 @@ fun ApproachInstrument(
             )
         },
     ) {
-        drawApproach(tm, bezel, state, speedUnit, altUnit, target, errors, hideTitle)
+        drawApproach(tm, bezel, state, speedUnit, altUnit, target, errors, hideTitle, hideCellBorder)
     }
 
     if (showDialog) {
@@ -134,6 +136,7 @@ private fun DrawScope.drawApproach(
     target: ApproachTarget?,
     errors: ApproachGeometry.ApproachErrors,
     hideTitle: Boolean = false,
+    hideCellBorder: Boolean = false,
 ) {
     val w = size.width
     val h = size.height
@@ -146,6 +149,9 @@ private fun DrawScope.drawApproach(
     val sceneH = sceneBottom - bodyTop
 
     drawRect(CompactStyle.Bg, size = size)
+
+
+    if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
     val hasTarget = errors.hasTarget
     // Deviations (clamped for the on-screen offset only; readouts show real numbers).

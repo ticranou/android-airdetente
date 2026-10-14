@@ -46,6 +46,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -65,6 +66,7 @@ private val STROKE_LABELS = listOf("Moyen", "Épais", "Très épais")
 fun WhiteboardInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
 
     @Suppress("UNCHECKED_CAST")
     val strokes = remember {
@@ -187,6 +189,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
 
             drawRect(CompactStyle.Bg, size = size)
             drawRect(bgColor, topLeft = Offset(0f, headerH), size = Size(w, drawH))
+            if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
             drawNumTitleBar(bezel, w, headerH)
             val titleText = if (readOnly.value) "NOTES  [lecture seule]" else "NOTES"

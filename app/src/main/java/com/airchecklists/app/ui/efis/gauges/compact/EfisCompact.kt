@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -50,6 +51,7 @@ fun EfisCompact(
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     val targetAltitude by com.airchecklists.app.di.ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
     var showAltitudeDialog by remember { mutableStateOf(false) }
     var showCalibrateDialog by remember { mutableStateOf(false) }
@@ -73,6 +75,9 @@ fun EfisCompact(
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
 
         drawRect(CompactStyle.Bg, size = size)
+
+
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)
             compactText(tm, "EFIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

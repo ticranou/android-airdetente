@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import kotlinx.coroutines.launch
@@ -49,6 +50,7 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     val status by ServiceLocator.flightRecorder.status.collectAsStateWithLifecycle()
     val efis by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val hasFix = efis.hasPosition
@@ -111,6 +113,7 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.28f)
 
         drawRect(CompactStyle.Bg, size = size)
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
         val recording = status.recording
 

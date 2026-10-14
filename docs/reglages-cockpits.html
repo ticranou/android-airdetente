@@ -52,12 +52,12 @@
           <li><b>Ajout / édition / suppression</b> (menu <b>⋮</b>) et réordonnancement des tableaux de bord.</li>
           <li>Case <b>« Afficher dans le Cockpit »</b> : slidez gauche/droite pour changer de tableau.</li>
           <li>Flèches <b>↑ / ↓</b> à côté d'« Options » : <b>réordonner les lignes</b> (déplacement par blocs, en tenant compte des cases fusionnées sur plusieurs lignes).</li>
-          <li>Bouton <b>« Options »</b> d'une case : couleur / style du contour (<b>Couleur par défaut</b>, <b>Carbone</b>, <b>Métal</b>, ou une couleur sombre spécifique), gestion de la case (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>) <b>et</b> l'option <b>« Masquer le titre »</b> (donne plus de place au contenu) — de quoi repérer un instrument d'un coup d'œil.</li>
+          <li>Bouton <b>« Options »</b> d'une case : couleur / style du contour (<b>Couleur par défaut</b>, <b>Carbone</b>, <b>Métal</b>, ou une couleur sombre spécifique), gestion de la case (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>) <b>et</b> les options <b>« Masquer le titre »</b> (donne plus de place au contenu) et <b>« Masquer la bordure de l'instrument »</b> (supprime le contour de la case) — de quoi repérer un instrument d'un coup d'œil.</li>
         </ul>
 
         <h3>Import / export d'un cockpit</h3>
         <ul class="feat">
-          <li><b>Import JSON</b> et <b>Import QR</b> : ajoutent un <b>nouveau</b> cockpit (jamais destructif — nouvel identifiant, les cockpits existants sont conservés). La grille importée est renormalisée. L'import QR utilise la caméra de l'appareil (autorisation Caméra requise).</li>
+          <li><b>Import JSON</b> et <b>Import QR</b> : ajoutent un <b>nouveau</b> cockpit (jamais destructif — nouvel identifiant, les cockpits existants sont conservés). <b>Import JSON</b> propose le choix entre un <b>fichier .json</b> et le <b>presse-papier</b> (texte copié). La grille importée est renormalisée. L'import QR utilise la caméra de l'appareil (autorisation Caméra requise).</li>
           <li>Les cockpits se préparent aussi dans un navigateur avec le <b><a href="cockpit-builder.html">Créateur de cockpit</a></b> (éditeur de grille 2 colonnes fidèle à l'éditeur Android), puis s'exportent en fichier <b>.json</b> ou en <b>QR code</b> — à importer ici. Le créateur fonctionne entièrement hors-ligne.</li>
           <li>Format de l'enveloppe : <code>{ "type": "airdetente.cockpit", "version": 1, "dashboard": {…} }</code>.</li>
         </ul>

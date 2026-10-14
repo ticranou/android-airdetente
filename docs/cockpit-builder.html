@@ -171,6 +171,10 @@
       <input type="checkbox" id="optHideTitle">
       <label for="optHideTitle">Masquer le titre</label>
     </div>
+    <div class="inline">
+      <input type="checkbox" id="optHideBorder">
+      <label for="optHideBorder">Masquer la bordure de l'instrument</label>
+    </div>
     <div class="foot">
       <button class="primary" id="optSave">Enregistrer</button>
     </div>
@@ -2570,7 +2574,7 @@ function norm(s) {
 function newCell() {
   return {
     instrument: "NONE", colSpan: 1, rowSpan: 1, covered: false,
-    accentColor: null, bezelStyle: null, hideTitle: false,
+    accentColor: null, bezelStyle: null, hideTitle: false, hideBorder: false,
   };
 }
 
@@ -2829,6 +2833,11 @@ function renderOptions() {
   const hide = document.getElementById("optHideTitle");
   hide.checked = c.hideTitle;
   hide.onchange = () => { c.hideTitle = hide.checked; syncJson(); };
+
+  // Hide-border checkbox.
+  const hideB = document.getElementById("optHideBorder");
+  hideB.checked = c.hideBorder;
+  hideB.onchange = () => { c.hideBorder = hideB.checked; syncJson(); };
 }
 
 function mkChip(label, fn) {
@@ -2860,6 +2869,7 @@ function buildExport() {
     accentColor: c.accentColor,
     bezelStyle: c.bezelStyle,
     hideTitle: c.hideTitle,
+    hideBorder: c.hideBorder,
   }));
   return {
     type: "airdetente.cockpit",

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Toucher de piste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🛬</div>
+      <div>
+        <h1>Toucher de piste</h1>
+        <p class="subtitle">Aide latérale à l'approche : point de toucher projeté sur la piste</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLTCH · analogique</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLTCH.jpg" alt="ANLTCH — toucher de piste">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Vue latérale de l'<b>approche</b> : bande de piste (seuil marqué), icône avion et <b>point de toucher projeté</b> (triangle sur la piste).</li>
+          <li>Couleur selon la qualité d'approche : <b style="color:#2ECC40">vert</b> (zone de toucher correcte), <b style="color:#ffcc44">orange</b> (trop long), <b style="color:#E53935">rouge</b> (trop court).</li>
+          <li>Trois lobes : <b>DIST</b> (distance au seuil), <b>ICAO</b> (terrain), <b>HAUTEUR</b> (hauteur sol).</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : choisir / verrouiller le <b>terrain d'approche</b> (liste des terrains à moins de 40 nm ; bouton « Auto » pour revenir à la détection automatique).</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Détection automatique du terrain proche ; hauteur sol via l'élévation du terrain (SRTM). Longueur de piste issue des cartes VAC si disponible.</li>
+          <li>Nécessite une <b>position GPS</b>. <b>En développement</b> — indicatif, non certifié.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

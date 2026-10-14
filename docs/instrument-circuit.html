@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Circuit de piste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🛬</div>
+      <div>
+        <h1>Circuit de piste</h1>
+        <p class="subtitle">Conservateur de cap + altitude de circuit du terrain le plus proche</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLCCT · analogique</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLCCT.jpg" alt="ANLCCT — circuit de piste">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li><b>Conservateur de cap</b> : rose des caps rotative (graduations tous les 5°, cardinaux N/E/S/W), curseur fixe en haut, silhouette avion au centre.</li>
+          <li><b>QFU de la piste</b> du terrain le plus proche tracé en travers de la rose (piste primaire).</li>
+          <li>Trois lobes : <b>CAP</b> (cap actuel), centre = <b>ICAO + altitude</b> du terrain proche, <b>CIRC</b> = <b>altitude de circuit</b> = altitude du terrain + 1000 ft (circuit VFR standard).</li>
+          <li>Lobe d'altitude <b>coloré</b> : <b style="color:#E53935">rouge</b> sous le circuit, <b style="color:#2ECC40">vert</b> à ±50 ft, <b style="color:#ffcc44">jaune</b> au-delà.</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : —</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Terrain le plus proche résolu dans un rayon d'environ 15 km (annuaire + vos terrains géolocalisés), recalculé tous les ~550 m.</li>
+          <li>Nécessite une <b>position GPS</b>. <b>Indicatif</b>, non certifié.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

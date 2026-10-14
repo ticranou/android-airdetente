@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Action</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🔘</div>
+      <div>
+        <h1>Action</h1>
+        <p class="subtitle">Bascule une action moteur (démarrage / arrêt) et ses effets de session</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLACT · analogique</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLACT.jpg" alt="ANLACT — action">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Jauge ronde avec le <b>libellé de l'action</b> (ex. « Démarrage » / « Arrêt moteur »).</li>
+          <li>Interrupteur basculant : position gauche <b>OFF</b> (gris) / droite <b>DONE</b> (vert).</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : <b>choisir le type d'action</b> (Démarrage / Arrêt moteur).</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : <b>basculer</b> DONE ↔ OFF et déclencher les effets de session.</div>
+        <h3>Effets au basculement</h3>
+        <ul class="feat">
+          <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — propose le <b>calage altimétrique</b>.</li>
+          <li><b>Démarrage (OFF)</b> : arrête l'enregistreur et le suivi, efface l'heure de départ.</li>
+          <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b>.</li>
+        </ul>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Chaque case ANLACT mémorise son action et son état DONE/OFF. Les horaires alimentent l'instrument <b>Session de vol</b> (CMNFGT).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

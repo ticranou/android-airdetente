@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Carburant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">⛽</div>
+      <div>
+        <h1>Carburant</h1>
+        <p class="subtitle">Niveau · autonomie · distance franchissable</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">ANLCRB · analogique</span>
+      <span class="chip num">NUMCRB · numérique (100%-1L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/ANLCRB.jpg" alt="ANLCRB — jauge carburant">
+        <div style="height:16px"></div>
+        <img class="shot" src="screenshots/NUMCRB.jpg" alt="NUMCRB — bande carburant">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li><b>Niveau de carburant</b> avec zones colorées : <b style="color:#E53935">rouge</b> (jusqu'à la réserve), <b style="color:#ffcc44">orange</b> (réserve → 50%), <b style="color:#2ECC40">vert</b> (50% → plein).</li>
+          <li><b>ANLCRB</b> : cadran à aiguille façon altimètre + volume restant (litres) au centre.</li>
+          <li><b>NUMCRB</b> : barre pleine largeur + curseur, et trois colonnes <b>Carburant restant</b> (L) / <b>Autonomie</b> (h:mm) / <b>Range</b> (km).</li>
+          <li><b>Autonomie</b> = carburant ÷ consommation ; <b>Range</b> = autonomie × vitesse sol (affiché au-dessus de ~30 km/h).</li>
+          <li><b>Alerte réserve</b> : notification unique dès l'entrée en réserve de sécurité.</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : ouvrir la saisie du <b>carburant embarqué</b> (pavé numérique, bouton « Plein », puis <b>Démarrer</b> le suivi ou <b>Arrêter</b>).</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Capacité réservoir, consommation et réserve viennent de la <b>fiche appareil</b> (défauts : 91 L, 22 L/h, 30 min).</li>
+          <li>Pendant le suivi, le carburant décroît en temps réel selon la consommation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Prépa Navigation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🗺</div>
+      <div>
+        <h1>Prépa Navigation</h1>
+        <p class="subtitle">Préparation de navigation : carte, log de branches, notes, export PDF</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">CMNNAV · plein écran (100%-6L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/CMNNAV.jpg" alt="CMNNAV — prépa navigation">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Préparation d'une <b>route</b> par liste de terrains : carte, blocs terrain (ICAO, nom, fréquence, altitude, piste) et <b>log</b>.</li>
+          <li>Log par branche : <b>RM</b> (route magnétique), <b>DIST</b> (nm), <b>TSV</b> (temps estimé, min).</li>
+          <li>Branches calculées entre terrains consécutifs selon la <b>vitesse de croisière</b> de l'appareil (arc vert / VNO ; défaut 90 kt).</li>
+          <li><b>Export PDF</b> du dossier (capture la carte + METAR/TAF autour de la route).</li>
+        </ul>
+        <h3>Commandes</h3>
+        <ul class="feat">
+          <li><b>+</b> : ajouter un terrain (recherche par ICAO ou nom).</li>
+          <li><b>PDF</b> : exporter le dossier de navigation.</li>
+          <li><b>Carte</b> : ouvrir la carte plein écran.</li>
+        </ul>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Terrains issus de vos cartes VAC + annuaire OpenAIP (France).</li>
+          <li>Le plan (liste de terrains + notes) est <b>mémorisé</b> dans les préférences.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      CMNNAV est un instrument plein écran (utilitaire de préparation), sans gestes d'appui long / double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

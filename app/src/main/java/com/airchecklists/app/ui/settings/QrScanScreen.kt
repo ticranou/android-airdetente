@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -106,35 +107,63 @@ private fun QrCameraPreview(onResult: (String) -> Unit) {
                 .build(),
         )
     }
+    // Dedicated single-thread executor so analysis never runs on the UI thread.
+    val analysisExecutor = remember { java.util.concurrent.Executors.newSingleThreadExecutor() }
+    DisposableEffect(Unit) {
+        onDispose {
+            analysisExecutor.shutdown()
+            scanner.close()
+        }
+    }
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
-            val previewView = PreviewView(ctx)
+            val previewView = PreviewView(ctx).apply {
+                // TextureView mode renders inside the view hierarchy (capturable by
+                // screencap) and is more robust across devices than the default SurfaceView.
+                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            }
             val providerFuture = ProcessCameraProvider.getInstance(ctx)
             providerFuture.addListener({
                 val provider = providerFuture.get()
                 val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
+                // Dense cockpit QRs need more pixels than the default (~640×480) or
+                // their modules blur together → ML Kit never decodes. Ask for ~1280×720.
+                val resolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                    .setResolutionStrategy(
+                        androidx.camera.core.resolutionselector.ResolutionStrategy(
+                            android.util.Size(1280, 720),
+                            androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+                        ),
+                    )
+                    .build()
                 val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setResolutionSelector(resolutionSelector)
                     .build()
-                analysis.setAnalyzer(ContextCompat.getMainExecutor(ctx)) { proxy ->
+                analysis.setAnalyzer(analysisExecutor) { proxy ->
                     processFrame(scanner, proxy) { raw ->
                         if (!handled) {
                             handled = true
-                            onResult(raw)
+                            // onResult touches Compose state → hop back to the main thread.
+                            ContextCompat.getMainExecutor(ctx).execute { onResult(raw) }
                         }
                     }
                 }
                 provider.unbindAll()
-                provider.bindToLifecycle(
-                    lifecycleOwner,
-                    CameraSelector.DEFAULT_BACK_CAMERA,
-                    preview,
-                    analysis,
-                )
+                try {
+                    provider.bindToLifecycle(
+                        lifecycleOwner,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        preview,
+                        analysis,
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("QrScanScreen", "bindToLifecycle failed", e)
+                }
             }, ContextCompat.getMainExecutor(ctx))
             previewView
         },
@@ -157,5 +186,8 @@ private fun processFrame(
         .addOnSuccessListener { barcodes ->
             barcodes.firstOrNull { it.rawValue != null }?.rawValue?.let(onDecoded)
         }
-        .addOnCompleteListener { proxy.close() }
+        .addOnFailureListener { e ->
+            android.util.Log.w("QrScanScreen", "ML Kit barcode scan failed", e)
+        }
+        .addOnCompleteListener { proxy.close() }   // always free the frame, success or failure
 }

@@ -184,13 +184,15 @@ fun SettingsScreen(
         importForId = null
     }
 
-    // Cockpit import (single dashboard) — from a .json file or a scanned QR code.
+    // Cockpit import (single dashboard) — from a .json file, the clipboard, or a scanned QR code.
     var showQrScan by remember { mutableStateOf(false) }
+    var showJsonImportChoice by remember { mutableStateOf(false) }
     val cockpitImportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
     ) { uri ->
         if (uri != null) viewModel.importCockpitFromUri(uri)
     }
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
 
     LaunchedEffect(Unit) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
@@ -218,6 +220,28 @@ fun SettingsScreen(
             onBack = { showQrScan = false },
         )
         return
+    }
+
+    if (showJsonImportChoice) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showJsonImportChoice = false },
+            title = { Text(stringResource(R.string.dashboard_import_json_title)) },
+            text = { Text(stringResource(R.string.dashboard_import_json_message)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showJsonImportChoice = false
+                    cockpitImportLauncher.launch(arrayOf("application/json"))
+                }) { Text(stringResource(R.string.dashboard_import_json_file)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showJsonImportChoice = false
+                    val text = clipboard.getText()?.text
+                    if (text.isNullOrBlank()) viewModel.notifyEmptyClipboard()
+                    else viewModel.importCockpitFromText(text)
+                }) { Text(stringResource(R.string.dashboard_import_json_clipboard)) }
+            },
+        )
     }
 
     Scaffold(
@@ -357,7 +381,7 @@ fun SettingsScreen(
                     onEditDashboard = onEditDashboard,
                     onDuplicateDashboard = { srcId -> onEditDashboard(viewModel.duplicateDashboard(srcId, "(copie)")) },
                     onDeleteDashboard = { dashboardToDelete = it },
-                    onImportCockpitFile = { cockpitImportLauncher.launch(arrayOf("application/json")) },
+                    onImportCockpitFile = { showJsonImportChoice = true },
                     onImportCockpitQr = { showQrScan = true },
                     onReorderDashboards = viewModel::reorderDashboards,
                     onMapOrientation = viewModel::setMapOrientation,

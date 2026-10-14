@@ -224,6 +224,10 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardCellHideTitle(id, index, hide) }
     }
 
+    fun setDashboardCellHideBorder(id: String, index: Int, hide: Boolean) {
+        viewModelScope.launch { prefsRepo.setDashboardCellHideBorder(id, index, hide) }
+    }
+
     fun mergeDashboardCell(id: String, index: Int, dir: com.airchecklists.app.data.repository.MergeDir) {
         viewModelScope.launch { prefsRepo.mergeDashboardCell(id, index, dir) }
     }
@@ -398,6 +402,11 @@ class SettingsViewModel(
                 .onSuccess { importCockpitFromText(it) }
                 .onFailure { _messages.send("Échec de la lecture du fichier : ${it.message}") }
         }
+    }
+
+    /** Presse-papier vide / sans texte lors d'un import JSON. */
+    fun notifyEmptyClipboard() {
+        viewModelScope.launch { _messages.send("Presse-papier vide : aucun JSON à importer.") }
     }
 
     // ---- VAC ----

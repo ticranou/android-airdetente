@@ -3,6 +3,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ fun AirspeedCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     Canvas(modifier = modifier.fillMaxSize()) {
         val w = size.width
@@ -34,7 +36,7 @@ fun AirspeedCompact(
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
-        drawRect(androidx.compose.ui.graphics.Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+        if (!hideCellBorder) drawRect(androidx.compose.ui.graphics.Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
 
         val title = if (unit == EfisSpeedUnit.KNOTS) "VITESSE (kt)" else "VITESSE (km/h)"
         if (headerH > 0f) compactText(tm, title, w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

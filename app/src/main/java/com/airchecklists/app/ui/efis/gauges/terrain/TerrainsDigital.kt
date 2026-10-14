@@ -3,6 +3,7 @@ package com.airchecklists.app.ui.efis.gauges.terrain
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -59,6 +60,7 @@ private const val N_NEAR = 3
 fun TerrainsDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -117,7 +119,7 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         drawRect(CompactStyle.Bg, size = size)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "TERRAINS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         if (headerH > 0f) drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
 

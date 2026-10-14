@@ -283,6 +283,8 @@ data class DashboardCell(
     val bezelStyle: GaugeBezelStyle? = null,
     /** When true the instrument's title bar is hidden, giving more space to the content. */
     val hideTitle: Boolean = false,
+    /** When true the instrument's cell border is hidden. */
+    val hideBorder: Boolean = false,
 )
 
 /** Dark accent colours offered for gauge bezels / NUM title bars. */

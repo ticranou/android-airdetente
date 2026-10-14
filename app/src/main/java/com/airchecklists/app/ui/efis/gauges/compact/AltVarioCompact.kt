@@ -3,6 +3,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,7 @@ fun AltVarioCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     val targetAlt by ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
@@ -59,10 +61,10 @@ fun AltVarioCompact(
         drawRect(CompactStyle.Bg, size = size)
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)
-            compactText(tm, "ALTITUDE (${AltitudeFormat.altLabel(altUnit)})", w * 0.27f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
-            compactText(tm, "VARIO (${AltitudeFormat.vsLabel(altUnit)})", w * 0.73f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
             drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
         }
+        // Instrument border (matches the other compact instruments).
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
 
         val mainTop = headerH
         val mainBottom = h
@@ -70,9 +72,13 @@ fun AltVarioCompact(
         val climbing = verticalSpeedFtMin >= 0f
         val trendColor = if (climbing) CompactStyle.Climb else CompactStyle.Descent
 
-        // Two value cells with colour-coded borders (text stays white).
+        // Two value cells with colour-coded borders: label (top) / value (centre) /
+        // unit (bottom), all inside the box. Pushed toward the edges to leave room
+        // for the trend arrow in the centre.
         val cellW = w * 0.34f
-        val cellH = (mainBottom - mainTop) * 0.62f
+        val cellH = (mainBottom - mainTop) * 0.74f
+        val altCx = w * 0.23f
+        val varCx = w * 0.77f
         val altText = AltitudeFormat.altValue(altitudeFt, altUnit).roundToInt().toString()
         val varText = if (altUnit == AltitudeUnit.METERS)
             "%.1f".format(AltitudeFormat.vsValue(verticalSpeedFtMin, altUnit))
@@ -84,21 +90,33 @@ fun AltVarioCompact(
             maxLen == 4 -> 24f
             else -> 28f
         }
-        fun cell(cxc: Float, text: String) {
-            if (showValue) compactText(tm, text, cxc, cy, sizeSp = valueSp, bold = true, color = trendColor)
+        fun cell(cxc: Float, label: String, text: String, unit: String) {
+            // Boxed value: dark fill + neutral grey border; label on top, big
+            // trend-coloured value centred (green climb / red descent), unit at bottom.
+            val left = cxc - cellW / 2f
+            val top = cy - cellH / 2f
+            val topLeft = androidx.compose.ui.geometry.Offset(left, top)
+            val boxSize = androidx.compose.ui.geometry.Size(cellW, cellH)
+            drawRect(Color(0xFF111111), topLeft = topLeft, size = boxSize)
+            drawRect(Color(0xFF5A5A5A), topLeft = topLeft, size = boxSize,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
+            compactText(tm, label, cxc, top + cellH * 0.17f, sizeSp = 10f, bold = true, color = CompactStyle.Dim)
+            if (showValue) compactText(tm, text, cxc, cy + cellH * 0.02f, sizeSp = valueSp, bold = true, color = trendColor)
+            compactText(tm, unit, cxc, top + cellH * 0.84f, sizeSp = 9f, bold = true, color = CompactStyle.Dim)
         }
-        cell(w * 0.27f, altText)
-        cell(w * 0.73f, varText)
+        cell(altCx, "ALTI", altText, AltitudeFormat.altLabel(altUnit).uppercase())
+        cell(varCx, "VARIO", varText, AltitudeFormat.vsLabel(altUnit).uppercase())
 
         // Target altitude (magenta) above the ALT cell.
         targetAlt?.let { t ->
             val tTxt = AltitudeFormat.altValue(t.toFloat(), altUnit).roundToInt().toString()
-            compactText(tm, "▲ $tTxt", w * 0.27f, cy - cellH / 2 - mainTop * 0.20f - 6f, sizeSp = 11f, bold = true, color = Color(0xFFD24DEA))
+            compactText(tm, "▲ $tTxt", altCx, cy - cellH / 2 - 7f, sizeSp = 10f, bold = true, color = Color(0xFFD24DEA))
         }
 
-        // Calibration indicator: magenta dot to the right of the altitude title.
+        // Calibration indicator: magenta dot above the ALTI cell.
         if (calibAlt != null) {
-            drawCircle(Color(0xFFAA00CC), radius = 5f, center = androidx.compose.ui.geometry.Offset(w * 0.46f, headerH / 2f))
+            drawCircle(Color(0xFFAA00CC), radius = 5f,
+                center = androidx.compose.ui.geometry.Offset(altCx + cellW / 2f - 6f, cy - cellH / 2f - 7f))
         }
 
         // Single centred trend arrow between the two cells.

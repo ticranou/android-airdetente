@@ -54,6 +54,10 @@ val LocalGaugeBezel = androidx.compose.runtime.compositionLocalOf { GaugeBezel()
  *  this via [numTitleBarHeight] to collapse the title bar to zero height. */
 val LocalHideTitle = androidx.compose.runtime.compositionLocalOf { false }
 
+/** Set to true by InstrumentSlot when the cell has hideBorder=true; instruments read
+ *  this to skip drawing their cell border. */
+val LocalHideBorder = androidx.compose.runtime.compositionLocalOf { false }
+
 /** Returns the standard title-bar height for a NUM instrument: 20dp capped at 40%
  *  of the available height, or 0 when the cell's hideTitle flag is set. */
 @androidx.compose.runtime.Composable

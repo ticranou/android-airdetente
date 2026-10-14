@@ -102,6 +102,10 @@
     <string name="settings_dashboard_add">Ajouter un tableau de bord</string>
     <string name="settings_dashboard_import_file">Import JSON</string>
     <string name="settings_dashboard_import_qr">Import QR</string>
+    <string name="dashboard_import_json_title">Importer un cockpit JSON</string>
+    <string name="dashboard_import_json_message">Depuis un fichier .json ou le texte présent dans le presse-papier ?</string>
+    <string name="dashboard_import_json_file">Fichier</string>
+    <string name="dashboard_import_json_clipboard">Presse-papier</string>
     <string name="settings_map">Cartes</string>
     <string name="settings_map_orientation">Orientation de la carte</string>
     <string name="settings_map_north_up">Nord en haut</string>
@@ -143,6 +147,7 @@
     <string name="dashboard_cell_options">Options</string>
     <string name="dashboard_cell_manage">Cellule</string>
     <string name="dashboard_cell_hide_title">Masquer le titre</string>
+    <string name="dashboard_cell_hide_border">Masquer la bordure de l\'instrument</string>
     <string name="instr_picker_title">Choisir un instrument</string>
     <string name="instr_picker_search">Rechercher…</string>
     <string name="instr_filter_all">Tous</string>

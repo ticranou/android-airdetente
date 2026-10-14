@@ -62,6 +62,7 @@ import com.airchecklists.app.ui.components.InstrumentPickerDialog
 import com.airchecklists.app.ui.components.efisInstrumentLabel
 import com.airchecklists.app.ui.efis.DashboardGrid
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
@@ -78,6 +79,7 @@ private enum class ConfigStep {
 fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     val context = LocalContext.current
     val prefs = ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
@@ -158,7 +160,7 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
         drawRect(CompactStyle.Bg, size = size)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "RACCOURCIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         if (headerH > 0f) drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = false)
 

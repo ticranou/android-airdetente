@@ -248,6 +248,17 @@ class PreferencesRepository(private val store: SettingsStore) {
         })
     }
 
+    /** Toggle the per-cell border visibility. */
+    suspend fun setDashboardCellHideBorder(id: String, index: Int, hide: Boolean) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(hideBorder = hide)
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
     /** Merge the master cell at [index] with its RIGHT or DOWN neighbour(s). */
     suspend fun mergeDashboardCell(id: String, index: Int, dir: MergeDir) = persist { prefs ->
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->

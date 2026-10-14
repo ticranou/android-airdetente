@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.compact
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -52,6 +53,7 @@ fun AttitudeCompact(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     var showCalibrate by remember { mutableStateOf(false) }
     Canvas(
@@ -65,7 +67,7 @@ fun AttitudeCompact(
         // Panel background + header + border.
         drawRect(CompactStyle.Bg, size = size)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
-        drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "HORIZON", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
 
         val horizon = Rect(2f, headerH, w - 2f, h - 2f)

@@ -277,6 +277,7 @@ private fun DashboardCellEditor(
                 onColor = { viewModel.setDashboardCellAccent(dash.id, index, it) },
                 onStyle = { viewModel.setDashboardCellBezelStyle(dash.id, index, it) },
                 onHideTitle = { viewModel.setDashboardCellHideTitle(dash.id, index, it) },
+                onHideBorder = { viewModel.setDashboardCellHideBorder(dash.id, index, it) },
                 onMergeRight = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.RIGHT) },
                 onMergeDown = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.DOWN) },
                 onUnmerge = { viewModel.unmergeDashboardCell(dash.id, index) },
@@ -335,6 +336,7 @@ private fun CellOptionsDialog(
     onColor: (Long?) -> Unit,
     onStyle: (com.airchecklists.app.data.model.GaugeBezelStyle?) -> Unit,
     onHideTitle: (Boolean) -> Unit,
+    onHideBorder: (Boolean) -> Unit,
     onMergeRight: () -> Unit,
     onMergeDown: () -> Unit,
     onUnmerge: () -> Unit,
@@ -402,6 +404,20 @@ private fun CellOptionsDialog(
                         onCheckedChange = { onHideTitle(it) },
                     )
                     Text(stringResource(R.string.dashboard_cell_hide_title), style = MaterialTheme.typography.bodyMedium)
+                }
+                // Border visibility toggle.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onHideBorder(!cell.hideBorder) }
+                        .padding(vertical = 4.dp),
+                ) {
+                    androidx.compose.material3.Checkbox(
+                        checked = cell.hideBorder,
+                        onCheckedChange = { onHideBorder(it) },
+                    )
+                    Text(stringResource(R.string.dashboard_cell_hide_border), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },

@@ -423,6 +423,7 @@ internal fun DashboardGrid(
                         accentColor = cell.accentColor,
                         bezelStyleOverride = cell.bezelStyle,
                         hideTitle = cell.hideTitle,
+                        hideBorder = cell.hideBorder,
                         onOpenMap = onOpenMap,
                         cellIdx = i,
                         modifier = Modifier.fillMaxSize(),

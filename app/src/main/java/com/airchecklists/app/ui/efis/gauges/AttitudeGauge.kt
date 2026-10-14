@@ -1,8 +1,13 @@
 package com.airchecklists.app.ui.efis.gauges
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -10,15 +15,22 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 
 /** Round artificial horizon: blue sky / brown ground rotating with roll and
- *  shifting with pitch, fixed aircraft symbol + roll index. */
+ *  shifting with pitch, fixed aircraft symbol + roll index.
+ *  Long-press confirms "caler l'horizon" (set the current attitude as 0/0). */
 @Composable
 fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
-    Canvas(modifier = modifier.fillMaxSize()) {
+    var showCalibrate by remember { mutableStateOf(false) }
+    Canvas(
+        modifier = modifier.fillMaxSize().pointerInput(Unit) {
+            detectTapGestures(onLongPress = { showCalibrate = true })
+        },
+    ) {
         val (cx, cy, r) = gaugeFace(bezel)
         val pxPerDeg = r / 30f
 
@@ -90,5 +102,12 @@ fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier
         drawLine(GaugeColors.Accent, Offset(cx - wing, cy), Offset(cx + wing, cy), strokeWidth = stroke)
         drawLine(GaugeColors.Accent, Offset(cx, cy - r * 0.18f), Offset(cx, cy + r * 0.10f), strokeWidth = stroke)
         drawCircle(GaugeColors.Accent, radius = r * 0.09f, center = Offset(cx, cy))
+    }
+
+    if (showCalibrate) {
+        com.airchecklists.app.ui.components.CalibrateHorizonDialog(
+            onConfirm = { com.airchecklists.app.di.ServiceLocator.efisProvider.calibrate() },
+            onDismiss = { showCalibrate = false },
+        )
     }
 }

@@ -356,21 +356,9 @@ private fun AircraftBanner(
     )
 
     if (confirmCalibrate) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { confirmCalibrate = false },
-            title = { Text(stringResource(R.string.efis_calibrate_confirm_title)) },
-            text = { Text(stringResource(R.string.efis_calibrate_confirm_message)) },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    confirmCalibrate = false
-                    onCalibrate()
-                }) { Text(stringResource(R.string.efis_calibrate_confirm_ok)) }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { confirmCalibrate = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
+        com.airchecklists.app.ui.components.CalibrateHorizonDialog(
+            onConfirm = onCalibrate,
+            onDismiss = { confirmCalibrate = false },
         )
     }
 

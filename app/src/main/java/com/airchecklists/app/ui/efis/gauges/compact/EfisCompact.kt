@@ -52,13 +52,18 @@ fun EfisCompact(
     val hideTitle = LocalHideTitle.current
     val targetAltitude by com.airchecklists.app.di.ServiceLocator.targetAltitude.collectAsStateWithLifecycle()
     var showAltitudeDialog by remember { mutableStateOf(false) }
+    var showCalibrateDialog by remember { mutableStateOf(false) }
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(
                 onLongPress = { pos ->
-                    // Left ALT column → set the target altitude.
-                    if (pos.x <= size.width * 0.23f) showAltitudeDialog = true
+                    // Left ALT column → set the target altitude; central horizon → caler l'horizon.
+                    val colFrac = pos.x / size.width
+                    when {
+                        colFrac <= 0.23f -> showAltitudeDialog = true
+                        colFrac < 0.77f -> showCalibrateDialog = true
+                    }
                 },
             )
         },
@@ -116,6 +121,13 @@ fun EfisCompact(
             onDismiss = { showAltitudeDialog = false },
             onConfirm = { a -> com.airchecklists.app.di.ServiceLocator.targetAltitude.value = a; showAltitudeDialog = false },
             onClear = { com.airchecklists.app.di.ServiceLocator.targetAltitude.value = null; showAltitudeDialog = false },
+        )
+    }
+
+    if (showCalibrateDialog) {
+        com.airchecklists.app.ui.components.CalibrateHorizonDialog(
+            onConfirm = { com.airchecklists.app.di.ServiceLocator.efisProvider.calibrate() },
+            onDismiss = { showCalibrateDialog = false },
         )
     }
 }

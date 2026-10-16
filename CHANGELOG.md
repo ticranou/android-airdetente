@@ -29,6 +29,20 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ### Modifié
 
+- **NUMNGT — refonte du rendu** :
+  - Le rendu central passe d'un arc progressbar à un **gradient horizontal gris foncé
+    (nuit) → blanc (midi solaire)** avec marges gauche et droite.
+  - Le curseur de l'heure courante devient un **cercle orange agrandi avec bordure
+    noire** (remplace l'ancienne flèche).
+  - Le **trait 12h dépasse le gradient vers le haut** ; le label "12h" est positionné
+    au-dessus du trait.
+  - Les heures de crépuscule civil (aube/crépuscule) sont affichées en **bleu**,
+    espacées en dessous du gradient.
+  - Seuils de couleur du temps disponible révisés : **vert ≥ 90 min** (était ≥ 60 min),
+    **orange 30–90 min** (était toute durée < 60 min), **rouge < 30 min** (nouveau
+    seuil critique).
+  - Libellé **"TEMPS DISPO"** affiché sur une seule ligne (était sur deux lignes).
+
 - **Visibilité des graduations sous la pastille de titre** : la géométrie des ticks
   et étiquettes a été ajustée sur plusieurs instruments pour rester lisible sous la
   pastille :

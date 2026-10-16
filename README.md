@@ -22,7 +22,7 @@ mobile** (moving map) hors-ligne.
   - **Numériques** (rectangulaires, tailles normalisées 50/100 % × 1/2/3/5 lignes) :
     Conservateur, Anémomètre, Altimètre/Variomètre, Bille, Horizon, Chronomètre,
     Compte à rebours, Horamètre, Terrains proches, Radar météo, **Montre**, EFIS
-    (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes), **Carburant (NUMCRB)** — niveau + autonomie, **Enregistreur de vol (NUMFDR)** — durée + paramètres.
+    (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes), **Carburant (NUMCRB)** — niveau + autonomie, **Enregistreur de vol (NUMFDR)** — durée + paramètres, **Nuit aéronautique (NUMNGT)** — crépuscule civil + temps disponible.
   - **Commun (CMN)** : **Raccourcis (CMNSCT)** — 4 slots configurables pour accès rapide. Chaque slot supporte 4 types de cibles : navigation tableau de bord (>> : double-tap), tableau de bord Focus (tap), instrument Focus (tap), ou VAC chart Terrain (tap). Long-press configure un slot. **Espaceurs (S/M/L)** — éléments vides (16/32/64 dp) pour espacer les rangées de la grille. **Session de vol (CMNFGT)** — affichage numérique de la durée de vol. **Tableau blanc (CMNWHB)** — notes et dessin libre avec historique et réglages.
   - **Pastille de titre** : chaque instrument analogique affiche un libellé arrondi
     au sommet du cadran (rendu au premier plan). L'option **« Masquer le titre »** dans
@@ -90,6 +90,8 @@ Un appareil complet (caractéristiques + checklists + éléments) est stocké da
 **ANLFDR — Enregistreur de vol** : Cadran analogique à lobes affichant l'état de l'enregistrement (Enregistrement/Pause) et la liste des paramètres captés (position GPS, accélération, inclinaison, altitude, baromètre) avec pastilles vertes (capteur disponible et enregistré) ou oranges (capteur absent sur l'appareil). Double-tap pause/reprend l'enregistrement. Long-press exporte un trace KML (Google Earth), GPX (positions + altitude) ou log brut CSV des dernières minutes dans Téléchargements.
 
 **NUMFDR — Enregistreur de vol numérique** : Affichage rectangulaire compact avec durée du vol et liste des paramètres. Même comportement et interactions qu'ANLFDR.
+
+**NUMNGT — Nuit aéronautique** : Instrument numérique compact (50% × 1 ligne) dédié à la gestion de la nuit aéronautique. Affiche un gradient horizontal allant du gris foncé (nuit) au blanc (midi solaire) matérialisant la progression de la journée. Le curseur de l'heure courante est un cercle orange avec bordure noire. Le trait et le label "12h" dépassent au-dessus du gradient. Les heures de crépuscule civil (aube/crépuscule) sont affichées en bleu sous le gradient. Panneau droit : libellé "TEMPS DISPO" et durée avant la prochaine nuit, colorée en vert (≥ 90 min), orange (30–90 min) ou rouge (< 30 min). Requiert une position GPS.
 
 ## Instruments communs
 

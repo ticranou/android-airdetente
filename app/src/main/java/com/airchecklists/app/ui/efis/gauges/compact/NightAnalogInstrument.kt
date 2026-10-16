@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import com.airchecklists.app.data.local.SunCalc
@@ -34,8 +34,9 @@ import kotlin.math.roundToInt
 
 private val ANGT_GREEN  = Color(0xFF35C759)
 private val ANGT_ORANGE = Color(0xFFE8843A)
-private val ANGT_RED    = Color(0xFFFF5252)
 private val ANGT_DIM    = Color(0xFF888888)
+private val PILL_BG     = Color(0xE8101418)
+private val PILL_BORDER = Color(0x99FFFFFF)
 
 /**
  * ANLNGT — Nuit aéronautique, jauge ronde.
@@ -99,8 +100,13 @@ fun NightAnalogInstrument(state: EfisState, modifier: Modifier = Modifier) {
             val h2 = availMin / 60; val m2 = availMin % 60
             "%dh%02d".format(h2, m2)
         }
+        val availColor = when {
+            availMin == null || availMin == 0 -> ANGT_DIM
+            availMin < 60  -> ANGT_ORANGE
+            else           -> ANGT_GREEN
+        }
 
-        drawNightGauge(tm, bezel, remainFrac, dawnStr, duskStr, availStr, availMin, st != null)
+        drawNightGauge(tm, bezel, remainFrac, dawnStr, duskStr, availStr, availColor, st != null)
     }
 }
 
@@ -111,79 +117,60 @@ private fun DrawScope.drawNightGauge(
     dawnStr: String,
     duskStr: String,
     availStr: String,
-    availMin: Int?,
+    availColor: Color,
     hasGps: Boolean,
 ) {
     val (cx, cy, r) = gaugeFace(bezel)
 
-    // ── Gradient horizontal jour/nuit ─────────────────────────────────────────
-    val gradMargin = r * 0.12f
-    val gradLeft   = cx - r + gradMargin
-    val gradRight  = cx + r - gradMargin
-    val gradW      = gradRight - gradLeft
-    val gradH      = r * 0.28f
-    val gradTop    = cy - r * 0.22f
+    // ── Arc de temps disponible (style carburant : 240° de 150° à 30°) ────────
+    val arcStart  = 150f
+    val arcSweep  = 240f
+    val arcRadius = r * 0.72f
+    val strokeW   = r * 0.10f
 
-    val gradBrush = Brush.horizontalGradient(
-        colors = listOf(
-            Color(0xFF111318),
-            Color(0xFF444444),
-            Color(0xFFCCCCCC),
-            Color(0xFFFFFFFF),
-            Color(0xFFCCCCCC),
-            Color(0xFF444444),
-            Color(0xFF111318),
-        ),
-        startX = gradLeft,
-        endX   = gradRight,
+    // Arc de fond gris
+    drawArc(
+        color      = Color(0xFF2A2A2A),
+        startAngle = arcStart,
+        sweepAngle = arcSweep,
+        useCenter  = false,
+        topLeft    = Offset(cx - arcRadius, cy - arcRadius),
+        size       = Size(arcRadius * 2, arcRadius * 2),
+        style      = Stroke(width = strokeW * 1.1f),
     )
-    drawRoundRect(
-        brush        = gradBrush,
-        topLeft      = Offset(gradLeft, gradTop),
-        size         = Size(gradW, gradH),
-        cornerRadius = CornerRadius(gradH * 0.3f),
-    )
-
-    // ── Trait + label 12h ─────────────────────────────────────────────────────
-    val noonX    = cx
-    val tickOver = gradH * 0.5f
-    drawLine(
-        color       = Color(0xFF888888),
-        start       = Offset(noonX, gradTop - tickOver),
-        end         = Offset(noonX, gradTop + gradH),
-        strokeWidth = 1.5f,
-    )
-    compactText(tm, "12h", noonX, gradTop - tickOver - r * 0.08f,
-        sizeSp = 9f, color = Color(0xFF888888))
-
-    // ── Curseur heure courante ────────────────────────────────────────────────
-    if (hasGps) {
-        val dayFrac2  = 1f - remainFrac
-        val dawnFrac  = 0.20f
-        val duskFrac  = 0.80f
-        val nowFrac   = dawnFrac + dayFrac2 * (duskFrac - dawnFrac)
-        val nowX      = gradLeft + gradW * nowFrac.coerceIn(0f, 1f)
-        val cursorR   = r * 0.055f
-        drawCircle(Color.Black,      radius = cursorR + 3f, center = Offset(nowX, gradTop + gradH / 2f))
-        drawCircle(Color(0xFFFF9500), radius = cursorR,      center = Offset(nowX, gradTop + gradH / 2f))
+    // Arc vert proportionnel au temps restant
+    if (hasGps && remainFrac > 0f) {
+        drawArc(
+            color      = ANGT_GREEN,
+            startAngle = arcStart,
+            sweepAngle = arcSweep * remainFrac,
+            useCenter  = false,
+            topLeft    = Offset(cx - arcRadius, cy - arcRadius),
+            size       = Size(arcRadius * 2, arcRadius * 2),
+            style      = Stroke(width = strokeW),
+        )
     }
 
-    // ── Heures bleues espacées du gradient ────────────────────────────────────
-    val hoursY = gradTop + gradH + r * 0.18f
-    compactText(tm, if (hasGps) dawnStr else "--:--",
-        gradLeft + gradW * 0.18f, hoursY,
-        sizeSp = 14f, bold = true, color = Color(0xFF5BA4E8))
-    compactText(tm, if (hasGps) duskStr else "--:--",
-        gradLeft + gradW * 0.82f, hoursY,
-        sizeSp = 14f, bold = true, color = Color(0xFF5BA4E8))
+    // ── Pills "D HH:MM" et "F HH:MM" ─────────────────────────────────────────
+    val pillW    = r * 1.20f
+    val pillH    = r * 0.34f
+    val pillCorr = CornerRadius(pillH / 2f)
+    val gap      = r * 0.06f
 
-    // ── Couleur temps disponible : vert ≥90min, orange 30–90min, rouge <30min ─
-    val availColor = when {
-        availMin == null || availMin == 0 -> ANGT_DIM
-        availMin < 30  -> ANGT_RED
-        availMin < 90  -> ANGT_ORANGE
-        else           -> ANGT_GREEN
-    }
+    // Pill supérieure : D (Dawn)
+    val pill1Y = cy - r * 0.26f
+    drawRoundRect(PILL_BG, Offset(cx - pillW / 2f, pill1Y - pillH / 2f), Size(pillW, pillH), pillCorr)
+    drawRoundRect(PILL_BORDER, Offset(cx - pillW / 2f, pill1Y - pillH / 2f), Size(pillW, pillH), pillCorr, style = Stroke(1.5f))
+    val dLabelX = cx - pillW / 2f + pillH * 0.55f
+    compactText(tm, "D", dLabelX, pill1Y, sizeSp = 13f, color = ANGT_DIM)
+    compactText(tm, if (hasGps) dawnStr else "--:--", cx + pillW * 0.06f, pill1Y, sizeSp = 18f, bold = true, color = GaugeColors.Mark)
+
+    // Pill inférieure : F (Fin / Dusk)
+    val pill2Y = pill1Y + pillH + gap
+    drawRoundRect(PILL_BG, Offset(cx - pillW / 2f, pill2Y - pillH / 2f), Size(pillW, pillH), pillCorr)
+    drawRoundRect(PILL_BORDER, Offset(cx - pillW / 2f, pill2Y - pillH / 2f), Size(pillW, pillH), pillCorr, style = Stroke(1.5f))
+    compactText(tm, "F", dLabelX, pill2Y, sizeSp = 13f, color = ANGT_DIM)
+    compactText(tm, if (hasGps) duskStr else "--:--", cx + pillW * 0.06f, pill2Y, sizeSp = 18f, bold = true, color = GaugeColors.Mark)
 
     // ── Lobe central : TEMPS DISPO ────────────────────────────────────────────
     drawGaugeLobes(

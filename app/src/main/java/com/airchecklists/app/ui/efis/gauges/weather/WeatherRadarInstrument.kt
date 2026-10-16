@@ -60,7 +60,9 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.GaugeLobe
 import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
@@ -119,6 +121,7 @@ fun WeatherRadarInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
+    val bezel = LocalGaugeBezel.current
 
     val hasPos = state.hasPosition
     val lat = state.latitude
@@ -157,6 +160,7 @@ fun WeatherRadarInstrument(modifier: Modifier = Modifier) {
         drawWinds(tm, winds, cx, cy, r, arrowWide = true)
         // Title drawn LAST so the radar tiles never cover it.
         drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
+        drawGaugeTitlePill(tm, "METEO", cx, cy, r, bezel.hideTitle)
     }
 
     if (showDialog) {

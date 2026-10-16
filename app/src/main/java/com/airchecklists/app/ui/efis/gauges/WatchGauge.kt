@@ -30,19 +30,19 @@ fun WatchGauge(showValue: Boolean, modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.fillMaxSize()) {
         val (cx, cy, r) = gaugeFace(bezel)
 
-        // Hour ticks (12) + minute ticks (60).
+        // Hour ticks (12) + minute ticks (60); shifted inward to leave room for the title pill.
         for (i in 0 until 60) {
             val deg = i * 6f
             val major = i % 5 == 0
-            val outer = r * 0.96f
-            val inner = r * (if (major) 0.86f else 0.91f)
+            val outer = r * 0.88f
+            val inner = r * (if (major) 0.76f else 0.82f)
             drawLine(GaugeColors.Mark, polar(cx, cy, inner, deg), polar(cx, cy, outer, deg),
                 strokeWidth = if (major) 2.5f else 1.2f)
         }
         // Hour numerals 12/3/6/9.
         for (h in intArrayOf(12, 3, 6, 9)) {
             val deg = (h % 12) * 30f
-            val pos = polar(cx, cy, r * 0.72f, deg)
+            val pos = polar(cx, cy, r * 0.64f, deg)
             gaugeText(tm, h.toString(), pos.x, pos.y, sizeSp = 15f, bold = true)
         }
 
@@ -65,5 +65,6 @@ fun WatchGauge(showValue: Boolean, modifier: Modifier = Modifier) {
         if (showValue) {
             drawRoundedValue(tm, "%02d:%02d".format(h24, mm), cx, cy + r * 0.30f, sizeSp = 18f)
         }
+        drawGaugeTitlePill(tm, "MONTRE", cx, cy, r, bezel.hideTitle)
     }
 }

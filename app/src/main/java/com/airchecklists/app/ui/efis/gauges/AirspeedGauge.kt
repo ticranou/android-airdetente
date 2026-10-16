@@ -64,21 +64,21 @@ fun AirspeedGauge(
             val greenMin = conv(arcs.greenMin); val greenMax = conv(arcs.greenMax)
             val whiteMin = conv(arcs.whiteMin); val whiteMax = conv(arcs.whiteMax)
             val vno = conv(arcs.vno); val vne = conv(arcs.vne)
-            sweepArc(whiteMin, whiteMax, Color.White, radiusFactor = 0.78f)   // white arc (flap range), inner ring
-            sweepArc(greenMin, greenMax, Color(0xFF2E7D32), radiusFactor = 0.90f)  // green arc (normal), outer ring
-            sweepArc(vno, vne, Color(0xFFFFC107), radiusFactor = 0.90f)       // yellow arc (caution), outer ring
+            sweepArc(whiteMin, whiteMax, Color.White, radiusFactor = 0.68f)   // white arc (flap range), inner ring
+            sweepArc(greenMin, greenMax, Color(0xFF2E7D32), radiusFactor = 0.80f)  // green arc (normal), outer ring
+            sweepArc(vno, vne, Color(0xFFFFC107), radiusFactor = 0.80f)       // yellow arc (caution), outer ring
             vne?.let {
                 val a = angleFor(it)
-                drawLine(Color(0xFFD32F2F), polar(cx, cy, r * 0.80f, a), polar(cx, cy, r * 0.98f, a), strokeWidth = r * 0.06f)
+                drawLine(Color(0xFFD32F2F), polar(cx, cy, r * 0.70f, a), polar(cx, cy, r * 0.88f, a), strokeWidth = r * 0.06f)
             }
             // Vs0/Vs1 red cursors + Vpl magenta cursor.
             listOfNotNull(conv(arcs.vs0), conv(arcs.vs1)).forEach {
                 val a = angleFor(it)
-                drawLine(Color(0xFFD32F2F), polar(cx, cy, r * 0.78f, a), polar(cx, cy, r * 0.90f, a), strokeWidth = r * 0.04f)
+                drawLine(Color(0xFFD32F2F), polar(cx, cy, r * 0.68f, a), polar(cx, cy, r * 0.80f, a), strokeWidth = r * 0.04f)
             }
             conv(arcs.vpl)?.let {
                 val a = angleFor(it)
-                drawLine(Color(0xFFB94DD6), polar(cx, cy, r * 0.78f, a), polar(cx, cy, r * 0.98f, a), strokeWidth = r * 0.05f)
+                drawLine(Color(0xFFB94DD6), polar(cx, cy, r * 0.68f, a), polar(cx, cy, r * 0.88f, a), strokeWidth = r * 0.05f)
             }
         }
 
@@ -86,26 +86,25 @@ fun AirspeedGauge(
         while (v <= maxVal.toInt()) {
             val deg = angleFor(v.toFloat())
             val major = v % (step * 2) == 0
-            val outer = r * 0.96f
-            val inner = r * (if (major) 0.82f else 0.88f)
+            val outer = r * 0.88f
+            val inner = r * (if (major) 0.74f else 0.80f)
             drawLine(GaugeColors.Mark, polar(cx, cy, inner, deg), polar(cx, cy, outer, deg),
                 strokeWidth = if (major) 2.5f else 1.5f)
             if (major) {
-                val pos = polar(cx, cy, r * 0.68f, deg)
+                val pos = polar(cx, cy, r * 0.52f, deg)
                 gaugeText(tm, v.toString(), pos.x, pos.y, sizeSp = 12f, bold = true)
             }
             v += step
         }
-        gaugeText(tm, "SPEED", cx, cy - r * 0.34f, sizeSp = 10f, color = GaugeColors.MarkDim)
+
         gaugeText(tm, unitLabel, cx, cy + r * 0.52f, sizeSp = 11f, color = GaugeColors.MarkDim)
 
         drawNeedle(cx, cy, length = r * 0.78f, angleDeg = angleFor(value), width = 6f, tailLength = r * 0.10f)
         drawCircle(GaugeColors.Mark, radius = r * 0.05f, center = Offset(cx, cy))
 
-        // Numeric value at the bottom, under the unit.
-        // Numeric value in a dedicated box at the instrument centre.
         if (showValue) {
             drawRoundedValue(tm, value.toInt().toString(), cx, cy, sizeSp = 20f)
         }
+        drawGaugeTitlePill(tm, "VITESSE", cx, cy, r, bezel.hideTitle)
     }
 }

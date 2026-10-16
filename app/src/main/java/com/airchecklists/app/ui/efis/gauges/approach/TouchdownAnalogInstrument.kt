@@ -35,7 +35,7 @@ import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
-import com.airchecklists.app.ui.efis.gauges.gaugeTitle
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import kotlin.math.atan2
 import kotlin.math.roundToInt
@@ -109,8 +109,6 @@ private fun DrawScope.drawTouchdown(
     val runwayLengthM = target?.runwayLengthM?.toFloat() ?: RUNWAY_LENGTH_M
     val fieldElevFt = target?.fieldElevFt ?: 0
     val aglFt = state.gpsAltitudeFt - fieldElevFt
-
-    gaugeTitle(tm, "TOUCHER", cx, cy, r)
 
     // ── Piste ──
     val runwayY    = cy + r * 0.10f
@@ -222,4 +220,6 @@ private fun DrawScope.drawTouchdown(
     rotate(degrees = -30f, pivot = Offset(cx, cy)) {
         compactText(tm, "EN DÉVELOPPEMENT", cx, cy, sizeSp = 14f, bold = true, color = Color(0x55FFFFFF))
     }
+
+    drawGaugeTitlePill(tm, "TOUCHER", cx, cy, r, bezel.hideTitle)
 }

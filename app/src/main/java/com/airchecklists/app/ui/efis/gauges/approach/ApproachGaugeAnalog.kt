@@ -35,7 +35,7 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
-import com.airchecklists.app.ui.efis.gauges.gaugeTitle
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -202,8 +202,6 @@ private fun DrawScope.drawIls(
     val circTxt   = circuitAltFt?.let { "$it ft" } ?: "—"
     val icaoTxt   = target?.icao ?: "—"
 
-    gaugeTitle(tm, "APPROCHE", cx, cy, r)
-
     drawGaugeLobes(
         tm, cx, cy, r,
         left   = GaugeLobe("AXE", axeVal, axeColor),
@@ -217,6 +215,7 @@ private fun DrawScope.drawIls(
     )
 
     drawGestureHints(cx - r * 0.92f, cy - r * 0.92f, hasLongPress = true, hasDoubleTap = false)
+    drawGaugeTitlePill(tm, "APPROCHE", cx, cy, r, bezel.hideTitle)
 }
 
 /** Small filled diamond (ILS scale marker) centred on [c] with half-diagonal [rad]. */

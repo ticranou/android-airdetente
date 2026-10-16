@@ -28,9 +28,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
 private enum class Cd { STOPPED, RUNNING, PAUSED }
@@ -101,6 +104,7 @@ fun CountdownAnalogInstrument(modifier: Modifier = Modifier) {
         }
     }
 
+    val bezel = LocalGaugeBezel.current
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             fun target(y: Float): TimerState = if (y < size.height / 2f) top else bottom
@@ -112,7 +116,7 @@ fun CountdownAnalogInstrument(modifier: Modifier = Modifier) {
     ) {
         @Suppress("UNUSED_EXPRESSION") nowTick
         drawCountdownRound(
-            tm,
+            tm, bezel,
             top.setMs, top.remainingNow(), Color(0xFFE8843A),
             bottom.setMs, bottom.remainingNow(), Color(0xFF2E9BE6),
         )
@@ -130,13 +134,13 @@ fun CountdownAnalogInstrument(modifier: Modifier = Modifier) {
 
 private fun DrawScope.drawCountdownRound(
     tm: TextMeasurer,
+    bezel: GaugeBezel,
     topSet: Long, topRem: Long, topColor: Color,
     botSet: Long, botRem: Long, botColor: Color,
 ) {
     val w = size.width; val h = size.height
     // Round black face + bezel (same style as the analog gauges, e.g. altimeter).
-    val (cx, cy, r) = gaugeFace()
-    compactText(tm, "REBOURS", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
+    val (cx, cy, r) = gaugeFace(bezel)
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
 
     val cellW = r * 1.25f
@@ -157,6 +161,7 @@ private fun DrawScope.drawCountdownRound(
     }
     timer(cy - r * 0.26f, topSet, topRem, topColor)
     timer(cy + r * 0.44f, botSet, botRem, botColor)
+    drawGaugeTitlePill(tm, "REBOURS", cx, cy, r, bezel.hideTitle)
 }
 
 private fun fmt(ms: Long): String {

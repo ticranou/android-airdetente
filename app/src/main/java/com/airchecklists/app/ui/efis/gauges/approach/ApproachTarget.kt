@@ -42,7 +42,14 @@ object ApproachTargetResolver {
 
     /** Nearest aerodrome as an AUTO target, or null when none is reachable. */
     suspend fun auto(lat: Double, lon: Double, userCharts: List<VacChart>): ApproachTarget? {
-        val a = AerodromeDirectory.nearest(lat, lon, 1).firstOrNull() ?: return null
+        val directory = AerodromeDirectory.nearest(lat, lon, 1)
+        val a = directory.firstOrNull()
+
+        // If OpenAIP directory is unavailable, fall back to the user's own VacCharts.
+        if (a == null) {
+            return nearestFromCharts(lat, lon, userCharts)
+        }
+
         // Prefer the user's own chart (richer circuit) matched by ICAO.
         val chart = userCharts.firstOrNull { it.icao.equals(a.icao, ignoreCase = true) }
         val circuit = chart?.circuit ?: ""
@@ -55,6 +62,27 @@ object ApproachTargetResolver {
             fieldElevFt = a.elevationFt,
             qfuTrueDeg = qfu,
             runwayLengthM = chart?.runwayLengthM,
+            source = ApproachTarget.Source.AUTO,
+        )
+    }
+
+    /** Nearest target from the user's own VacCharts (fallback when OpenAIP is absent). */
+    private fun nearestFromCharts(lat: Double, lon: Double, userCharts: List<VacChart>): ApproachTarget? {
+        val chart = userCharts
+            .filter { it.latitude != null && it.longitude != null }
+            .minByOrNull { NavMath.distanceNm(lat, lon, it.latitude!!, it.longitude!!) }
+            ?: return null
+        val chartLat = chart.latitude ?: return null
+        val chartLon = chart.longitude ?: return null
+        val qfu = pickLandingQfu(lat, lon, chartLat, chartLon, chart.circuit ?: "")
+        return ApproachTarget(
+            icao = chart.icao,
+            name = chart.airfieldName,
+            lat = chartLat,
+            lon = chartLon,
+            fieldElevFt = parseElevationFt(chart.altitude),
+            qfuTrueDeg = qfu,
+            runwayLengthM = chart.runwayLengthM,
             source = ApproachTarget.Source.AUTO,
         )
     }

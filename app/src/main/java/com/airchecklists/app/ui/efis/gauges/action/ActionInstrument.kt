@@ -1,10 +1,13 @@
 package com.airchecklists.app.ui.efis.gauges.action
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -33,6 +36,7 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
 private val GREEN_DONE  = Color(0xFF32C832)
@@ -65,6 +69,10 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
     var showPicker by remember { mutableStateOf(false) }
     var showCalibDialog by remember { mutableStateOf(false) }
+    var showFlightSummaryDialog by remember { mutableStateOf(false) }
+    var showFuelDialog by remember { mutableStateOf(false) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Canvas(
         modifier = modifier.pointerInput(actionId, isDone) {
@@ -80,6 +88,10 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                         }
                         if (newDone && actionId == ActionId.ENGINE_START) {
                             showCalibDialog = true
+                            showFuelDialog = true
+                        }
+                        if (newDone && actionId == ActionId.ENGINE_STOP) {
+                            showFlightSummaryDialog = true
                         }
                     }
                 },
@@ -90,8 +102,6 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
         val ringColor = if (isDone) GREEN_DONE else RING_GRAY
         drawCircle(ringColor, radius = r * 0.92f, center = Offset(cx, cy), style = Stroke(width = r * 0.05f))
-
-        compactText(tm, "ACTION", cx, cy - r * 0.65f, sizeSp = 11f, color = CompactStyle.Dim)
         drawGestureHints(cx - r * 0.82f, cy - r * 0.65f, hasLongPress = true, hasDoubleTap = true)
 
         if (actionId == null) {
@@ -139,6 +149,7 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 color = if (isDone) Color.White else Color(0xFF909090),
             )
         }
+        drawGaugeTitlePill(tm, "ACTION", cx, cy, r, bezel.hideTitle)
     }
 
     if (showPicker) {
@@ -163,6 +174,69 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             onClear = { ServiceLocator.clearAltCalibration(); showCalibDialog = false },
         )
     }
+
+    if (showFlightSummaryDialog) {
+        val summary = remember { com.airchecklists.app.data.local.buildFlightSummary() }
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showFlightSummaryDialog = false },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            androidx.compose.foundation.layout.Column(
+                modifier = androidx.compose.ui.Modifier
+                    .fillMaxSize()
+                    .background(androidx.compose.ui.graphics.Color(0xFF0A0A0A))
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                com.airchecklists.app.ui.efis.gauges.flight.FlightSummaryCard(
+                    summary = summary,
+                    modifier = androidx.compose.ui.Modifier.weight(1f),
+                )
+                androidx.compose.foundation.layout.Row(
+                    modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(onClick = { showFlightSummaryDialog = false }) {
+                        Text("Fermer")
+                    }
+                    Button(onClick = {
+                        com.airchecklists.app.ui.efis.gauges.flight.exportFlightSessionZip(scope) { name ->
+                            android.widget.Toast.makeText(
+                                context,
+                                if (name != null) "Dossier exporté : Téléchargements/$name"
+                                else "Échec de l'export du dossier.",
+                                android.widget.Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                        showFlightSummaryDialog = false
+                    }) {
+                        Text("Enregistrer le dossier (ZIP)")
+                    }
+                }
+            }
+        }
+    }
+
+    if (showFuelDialog) {
+        val aircraft  = ServiceLocator.currentAircraft()
+        val capacityL = aircraft?.fuelCapacityL?.toFloat()?.takeIf { it > 0f } ?: 91f
+        val currentL  = ServiceLocator.instrumentPersist.fuelStartL ?: capacityL
+        com.airchecklists.app.ui.efis.gauges.fuel.FuelConfigDialog(
+            currentL  = currentL,
+            capacityL = capacityL,
+            onDismiss = { showFuelDialog = false },
+            onConfirm = { startL, startTracking ->
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        fuelStartL          = startL,
+                        fuelTrackingStartMs = if (startTracking) System.currentTimeMillis() else null,
+                        fuelAlertShown      = false,
+                    )
+                }
+                showFuelDialog = false
+            },
+        )
+    }
 }
 
 private fun executeAction(action: ActionId, s: InstrumentPersistState): InstrumentPersistState = when (action) {
@@ -172,7 +246,6 @@ private fun executeAction(action: ActionId, s: InstrumentPersistState): Instrume
         s.copy(
             engineStartMs = System.currentTimeMillis(),
             engineStopMs = null,
-            fuelTrackingStartMs = System.currentTimeMillis(),
         )
     }
     ActionId.ENGINE_STOP -> {

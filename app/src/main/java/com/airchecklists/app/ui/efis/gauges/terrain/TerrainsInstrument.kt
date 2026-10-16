@@ -41,9 +41,12 @@ import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -70,6 +73,7 @@ fun TerrainsInstrument(modifier: Modifier = Modifier) {
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
+    val bezel = LocalGaugeBezel.current
 
     // Nearby terrains come from the full offline OpenAIP aerodrome directory,
     // enriched by the user's own VAC charts (by ICAO). Parsed off the UI thread;
@@ -115,7 +119,7 @@ fun TerrainsInstrument(modifier: Modifier = Modifier) {
             )
         },
     ) {
-        drawFace(tm, nearest, state.hasPosition)
+        drawFace(tm, nearest, state.hasPosition, bezel)
     }
 
     if (showDialog) {
@@ -141,15 +145,15 @@ private fun rowIndexAtImpl(y: Float, w: Float, h: Float): Int? {
     return idx.coerceIn(0, NEAR_COUNT - 1)
 }
 
-private fun DrawScope.drawFace(tm: TextMeasurer, nearest: List<NearTerrain>, hasPosition: Boolean) {
+private fun DrawScope.drawFace(tm: TextMeasurer, nearest: List<NearTerrain>, hasPosition: Boolean, bezel: GaugeBezel) {
     // Round black face + bezel, like the other analog gauges.
-    val (cx, cy, r) = gaugeFace()
-    compactText(tm, "Terrains (VAC)", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
+    val (cx, cy, r) = gaugeFace(bezel)
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
 
     if (nearest.isEmpty()) {
         compactText(tm, "—", cx, cy, sizeSp = 24f, bold = true, color = CompactStyle.Dim)
         compactText(tm, if (hasPosition) "aucun terrain" else "position GPS ?", cx, cy + r * 0.25f, sizeSp = 12f, color = CompactStyle.Dim)
+        drawGaugeTitlePill(tm, "TERRAINS", cx, cy, r, bezel.hideTitle)
         return
     }
 
@@ -181,6 +185,7 @@ private fun DrawScope.drawFace(tm: TextMeasurer, nearest: List<NearTerrain>, has
         val right = if (hasPosition && t.hasCoords) "${t.distanceKm.roundToInt()}km ${t.bearingDeg}°" else "—"
         compactText(tm, right, cx + cellW * 0.24f, rowCy, sizeSp = 12f, color = CompactStyle.Dim)
     }
+    drawGaugeTitlePill(tm, "TERRAINS", cx, cy, r, bezel.hideTitle)
 }
 
 @Composable

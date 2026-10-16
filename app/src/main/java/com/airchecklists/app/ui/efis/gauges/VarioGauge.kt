@@ -54,7 +54,7 @@ fun VarioGauge(
             }
             v += tickStep
         }
-        gaugeText(tm, "V/S", cx, cy - r * 0.30f, sizeSp = 11f, color = GaugeColors.MarkDim)
+
         gaugeText(tm, if (meters) "m/s" else "1000 ft/min", cx, cy + r * 0.32f, sizeSp = 8f, color = GaugeColors.MarkDim)
         gaugeText(tm, "UP", cx + r * 0.30f, cy - r * 0.12f, sizeSp = 8f, color = GaugeColors.MarkDim)
         gaugeText(tm, "DN", cx + r * 0.30f, cy + r * 0.12f, sizeSp = 8f, color = GaugeColors.MarkDim)
@@ -70,5 +70,6 @@ fun VarioGauge(
                 else verticalSpeedFtMin.toInt().toString()
             drawRoundedValue(tm, txt, cx, cy, sizeSp = 20f)
         }
+        drawGaugeTitlePill(tm, "V/S", cx, cy, r, bezel.hideTitle)
     }
 }

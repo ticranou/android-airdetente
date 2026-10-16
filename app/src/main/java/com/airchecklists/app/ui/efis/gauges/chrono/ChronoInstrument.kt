@@ -16,9 +16,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
 private enum class RunState { STOPPED, RUNNING, PAUSED }
@@ -61,6 +64,7 @@ private class StopwatchState(private val onChange: (StopwatchState) -> Unit = {}
 @Composable
 fun ChronoInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
+    val bezel = LocalGaugeBezel.current
     val top = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("chrono.anl.top") { StopwatchState { s -> com.airchecklists.app.di.ServiceLocator.updateInstruments { it.copy(chronoAnlTop = s.snapshot()) } }.seed(com.airchecklists.app.di.ServiceLocator.instrumentPersist.chronoAnlTop) } }
     val bottom = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("chrono.anl.bot") { StopwatchState { s -> com.airchecklists.app.di.ServiceLocator.updateInstruments { it.copy(chronoAnlBot = s.snapshot()) } }.seed(com.airchecklists.app.di.ServiceLocator.instrumentPersist.chronoAnlBot) } }
 
@@ -84,18 +88,17 @@ fun ChronoInstrument(modifier: Modifier = Modifier) {
             )
         },
     ) {
-        drawChrono(tm, top.elapsed(), top.run != RunState.STOPPED, bottom.elapsed(), bottom.run != RunState.STOPPED)
+        drawChrono(tm, top.elapsed(), top.run != RunState.STOPPED, bottom.elapsed(), bottom.run != RunState.STOPPED, bezel)
     }
 }
 
 private fun DrawScope.drawChrono(
-    tm: TextMeasurer, topMs: Long, topActive: Boolean, botMs: Long, botActive: Boolean,
+    tm: TextMeasurer, topMs: Long, topActive: Boolean, botMs: Long, botActive: Boolean, bezel: GaugeBezel,
 ) {
     val w = size.width; val h = size.height
     // Round black face + bezel (same style as the analog gauges, e.g. altimeter).
     val (cx, cy, r) = gaugeFace()
 
-    compactText(tm, "CHRONO", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
     // Gesture hints (long-press reset, double-tap start/stop) just outside the face.
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
 
@@ -107,6 +110,7 @@ private fun DrawScope.drawChrono(
     // Top chrono orange, bottom chrono blue (same convention as ANLCWN).
     cell(cy - r * 0.22f, fmt(topMs), Color(0xFFE8843A))
     cell(cy + r * 0.30f, fmt(botMs), Color(0xFF2E9BE6))
+    drawGaugeTitlePill(tm, "CHRONO", cx, cy, r, bezel.hideTitle)
 }
 
 /** Format millis as H:MM:SS (or MM:SS under an hour). */

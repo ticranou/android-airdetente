@@ -28,10 +28,13 @@ import androidx.compose.ui.unit.dp
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
 import com.airchecklists.app.ui.efis.gauges.GaugeLobe
 import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 
 /** One hour-meter reading, stored as hundredths of an hour (e.g. 106.22 -> 10622),
@@ -54,6 +57,7 @@ fun HorameterInstrument(modifier: Modifier = Modifier) {
     val top = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("horameter.anl.top") { HourReading().also { it.hundredths = com.airchecklists.app.di.ServiceLocator.instrumentPersist.horameterAnl.a } } }
     val bottom = remember { com.airchecklists.app.di.ServiceLocator.instrumentState("horameter.anl.bot") { HourReading().also { it.hundredths = com.airchecklists.app.di.ServiceLocator.instrumentPersist.horameterAnl.b } } }
     var dialogFor by remember { mutableStateOf<HourReading?>(null) }
+    val bezel = LocalGaugeBezel.current
     fun persist() {
         com.airchecklists.app.di.ServiceLocator.updateInstruments {
             it.copy(horameterAnl = com.airchecklists.app.data.model.HorameterSnapshot(a = top.hundredths, b = bottom.hundredths))
@@ -67,7 +71,7 @@ fun HorameterInstrument(modifier: Modifier = Modifier) {
             )
         },
     ) {
-        drawHorameter(tm, top.display(), bottom.display(), durationLabel(top.hundredths, bottom.hundredths))
+        drawHorameter(tm, top.display(), bottom.display(), durationLabel(top.hundredths, bottom.hundredths), bezel)
     }
 
     dialogFor?.let { reading ->
@@ -95,9 +99,8 @@ private fun durationLabel(top: Int?, bottom: Int?): String? {
     return "$totalMin' – $hm"
 }
 
-private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: String, duration: String?) {
+private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: String, duration: String?, bezel: GaugeBezel) {
     val (cx, cy, r) = gaugeFace()
-    compactText(tm, "HORAMETRE", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
     drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = false)
 
     val cellW = r * 1.25f
@@ -124,6 +127,7 @@ private fun DrawScope.drawHorameter(tm: TextMeasurer, topText: String, botText: 
         ),
         right  = GaugeLobe("", "", GaugeColors.MarkDim),
     )
+    drawGaugeTitlePill(tm, "HORAMETRE", cx, cy, r, bezel.hideTitle)
 }
 
 /**

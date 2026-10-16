@@ -52,21 +52,21 @@ fun AltimeterGauge(
     ) {
         val (cx, cy, r) = gaugeFace(bezel)
 
-        // Ticks every 20 ft-equivalent (i.e. 50 divisions around); labels 0..9.
+        // Ticks every 20 ft-equivalent (50 divisions); longer ticks push labels inward,
+        // clearing the top area used by the title pill.
         for (i in 0 until 50) {
             val deg = i * 360f / 50f
             val major = i % 5 == 0
-            val outer = r * 0.96f
-            val inner = r * (if (major) 0.84f else 0.90f)
+            val outer = r * 0.92f
+            val inner = r * (if (major) 0.78f else 0.85f)
             drawLine(GaugeColors.Mark, polar(cx, cy, inner, deg), polar(cx, cy, outer, deg),
                 strokeWidth = if (major) 2.5f else 1.5f)
         }
         for (n in 0..9) {
             val deg = n * 36f
-            val pos = polar(cx, cy, r * 0.70f, deg)
+            val pos = polar(cx, cy, r * 0.60f, deg)
             gaugeText(tm, n.toString(), pos.x, pos.y, sizeSp = 15f, bold = true)
         }
-        gaugeText(tm, "ALT", cx, cy - r * 0.32f, sizeSp = 11f, color = GaugeColors.MarkDim)
         gaugeText(tm, AltitudeFormat.altLabel(altUnit), cx, cy + r * 0.34f, sizeSp = 10f, color = GaugeColors.MarkDim)
 
         // Calibration override indicator: magenta pill behind the numeric value.
@@ -115,6 +115,7 @@ fun AltimeterGauge(
 
         // Gesture hint (long-press + double-tap) just outside the face, top-left.
         drawGestureHints(cx - r * 0.98f, cy - r * 0.98f, hasLongPress = true, hasDoubleTap = true)
+        drawGaugeTitlePill(tm, "ALT", cx, cy, r, bezel.hideTitle)
     }
 
     if (showDialog) {

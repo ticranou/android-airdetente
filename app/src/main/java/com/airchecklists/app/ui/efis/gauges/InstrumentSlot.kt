@@ -53,6 +53,7 @@ fun InstrumentSlot(
     val bezel = global.copy(
         color = accentColor?.let { androidx.compose.ui.graphics.Color(it.toInt()) } ?: global.color,
         style = bezelStyleOverride ?: global.style,
+        hideTitle = hideTitle,
     )
     val showHints = LocalShowGestureHints.current
     androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
@@ -125,7 +126,9 @@ fun InstrumentSlot(
             EfisInstrument.ANLSCT -> com.airchecklists.app.ui.efis.gauges.shortcutdash.DashboardShortcutInstrument(cellIdx, round)
             EfisInstrument.ANLCCT -> com.airchecklists.app.ui.efis.gauges.circuit.CircuitInstrument(state.headingDeg, state.gpsAltitudeFt, showValues, round)
             EfisInstrument.ANLCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelAnalogInstrument(round)
+            EfisInstrument.ANLNGT -> com.airchecklists.app.ui.efis.gauges.compact.NightAnalogInstrument(state, round)
             EfisInstrument.NUMCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelDigital(slotFill)
+            EfisInstrument.NUMNGT -> com.airchecklists.app.ui.efis.gauges.compact.NightInstrument(state, slotFill)
             EfisInstrument.CMNFGT -> com.airchecklists.app.ui.efis.gauges.compact.FlightSessionDigital(fill)
             EfisInstrument.CMNWHB -> com.airchecklists.app.ui.efis.gauges.whiteboard.WhiteboardInstrument(fill)
             EfisInstrument.SPACER_S, EfisInstrument.SPACER_M, EfisInstrument.SPACER_L -> Unit

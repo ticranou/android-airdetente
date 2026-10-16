@@ -32,6 +32,7 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -138,15 +139,12 @@ private fun DrawScope.drawFuelGauge(
         else              -> FUEL_GREEN
     }
 
-    // ── Titre ──
-    compactText(tm, "CARBURANT", cx, cy - r * 0.78f, sizeSp = 12f, color = GaugeColors.MarkDim)
-
     // ── Arc de niveau (style altimètre) : 220° d'arc, de -110° à +110° depuis le bas ──
     // Angles en degrés Compose : 0°=droite, sens horaire.
     // On veut l'arc de 7h à 5h (ouverture en bas), soit startAngle=150°, sweep=240°.
     val arcStart  = 150f
     val arcSweep  = 240f
-    val arcRadius = r * 0.60f
+    val arcRadius = r * 0.72f
     val strokeW   = r * 0.10f
 
     // Arc de fond (gris) — légèrement plus épais que les arcs colorés
@@ -261,4 +259,6 @@ private fun DrawScope.drawFuelGauge(
     )
 
     drawGestureHints(cx - r * 0.92f, cy - r * 0.92f, hasLongPress = true, hasDoubleTap = false)
+
+    drawGaugeTitlePill(tm, "CARBURANT", cx, cy, r, bezel.hideTitle)
 }

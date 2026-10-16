@@ -68,6 +68,7 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import com.airchecklists.app.ui.theme.scaledByPrefs
 
@@ -125,8 +126,6 @@ fun ChecklistInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         }
         drawCircle(ringColor, radius = r * 0.92f, center = Offset(cx, cy), style = Stroke(width = r * 0.05f))
 
-        // Title
-        compactText(tm, "CHECKLIST", cx, cy - r * 0.65f, sizeSp = 11f, color = CompactStyle.Dim)
         drawGestureHints(cx - r * 0.82f, cy - r * 0.65f, hasLongPress = true, hasDoubleTap = true)
 
         if (checklist == null) {
@@ -173,6 +172,7 @@ fun ChecklistInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 drawCircle(GREEN_DONE, radius = r * 0.12f, center = Offset(cx, cy + r * 0.78f))
             }
         }
+        drawGaugeTitlePill(tm, "CHECKLIST", cx, cy, r, bezel.hideTitle)
     }
 
     if (showPicker && checklists.isNotEmpty()) {

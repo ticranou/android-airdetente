@@ -79,7 +79,9 @@ fun efisInstrumentLabel(instrument: EfisInstrument): String = stringResource(
         EfisInstrument.ANLSCT -> R.string.efis_instr_sct_dash
         EfisInstrument.ANLCCT -> R.string.efis_instr_cct
         EfisInstrument.ANLCRB -> R.string.efis_instr_crb
+        EfisInstrument.ANLNGT -> R.string.efis_instr_ngt_anl
         EfisInstrument.NUMCRB -> R.string.efis_instr_crb_c
+        EfisInstrument.NUMNGT -> R.string.efis_instr_ngt
         EfisInstrument.CMNFGT -> R.string.efis_instr_fgt
         EfisInstrument.CMNWHB -> R.string.efis_instr_whb
         EfisInstrument.SPACER_S -> R.string.efis_instr_spacer_s

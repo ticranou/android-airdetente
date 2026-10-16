@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
         // Keep-alive: start the always-on foreground service so the OS is very
         // unlikely to reclaim the app during a flight.
         com.airchecklists.app.data.service.FlightService.start(this)
+        // Expose this Activity so instruments can host a transient off-screen
+        // ComposeView for the flight-summary screenshot (resume.jpg).
+        com.airchecklists.app.di.ServiceLocator.currentActivity = this
         // A "Quitter" tap (in-app or from the notification) routes here.
         if (intent?.action == ACTION_QUIT_APP) { quit(); return }
         setContent {
@@ -137,6 +140,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (com.airchecklists.app.di.ServiceLocator.currentActivity === this) {
+            com.airchecklists.app.di.ServiceLocator.currentActivity = null
+        }
         ServiceLocator.updateInstruments {
             it.copy(
                 checklistChecked = emptyMap(),

@@ -96,6 +96,12 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
         }
     }
 
+    fun exportZip() {
+        com.airchecklists.app.ui.efis.gauges.flight.exportFlightSessionZip(scope) { name ->
+            toast(if (name != null) "Dossier exporté : Téléchargements/$name" else "Échec de l'export du dossier.")
+        }
+    }
+
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(
@@ -225,6 +231,10 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
                         onClick = { showExport = false; exportRaw() },
                         modifier = Modifier.fillMaxWidth(),
                     ) { androidx.compose.material3.Text("Log brut CSV (X dernières minutes)") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { showExport = false; exportZip() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Dossier de vol complet (ZIP)") }
                 }
             },
             confirmButton = {

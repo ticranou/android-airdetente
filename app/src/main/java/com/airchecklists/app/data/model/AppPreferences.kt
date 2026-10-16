@@ -75,7 +75,9 @@ enum class EfisInstrument {
     ANLCCT,              // Circuit de piste (jauge ronde — conservateur de cap + alti circuit)
     ANLTCH,              // Toucher de piste (jauge ronde — approche latérale)
     ANLCRB,              // Carburant (jauge ronde — niveau + autonomie + range)
+    ANLNGT,              // Nuit aéronautique (jauge ronde — crépuscule civil + temps dispo)
     NUMCRB,              // Carburant numérique (rectangulaire, 100%-1L)
+    NUMNGT,              // Nuit aéronautique (crépuscule civil, 50%-1L)
     CMNFGT,              // Session de vol (rectangulaire, 100%-1L)
     CMNWHB,              // Tableau blanc / notes (dessin libre, 100%-5L)
     SPACER_S,            // Espaceur S (16 dp)
@@ -91,13 +93,13 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, SPACER_S, SPACER_M, SPACER_L,
+            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, NUMNGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
      *  "show numeric values" preference). */
     val isAnalog: Boolean
-        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTCH, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT, ANLCCT, ANLCRB)
+        get() = this in setOf(ALTIMETER, VARIOMETER, ATTITUDE, HEADING, BALL, AIRSPEED, ANLFDR, ANLAPP, ANLTCH, ANLTRF, ANLPRX, ANLCLT, ANLACT, ANLSCT, ANLCCT, ANLCRB, ANLNGT)
 
     /** True for the numeric "single-line" instruments (label "…-1L"): they render
      *  at a fixed natural height, vertically centred, instead of stretching to fill
@@ -108,7 +110,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, NUMCRB, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense

@@ -75,20 +75,20 @@ fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier
                     }
                 }
             }
-            // Roll index ticks (fixed) at top.
+            // Roll index ticks (fixed) at top — longer to stay clear of the title pill.
             for (b in intArrayOf(-60, -30, -20, -10, 0, 10, 20, 30, 60)) {
                 val deg = b.toFloat()
                 val outer = r * 0.98f
-                val inner = r * (if (b % 30 == 0 || b == 0) 0.86f else 0.91f)
+                val inner = r * (if (b % 30 == 0 || b == 0) 0.76f else 0.84f)
                 drawLine(GaugeColors.Mark, polar(cx, cy, inner, deg), polar(cx, cy, outer, deg), strokeWidth = 2f)
             }
-            // Roll pointer (moves with roll) — larger triangle.
+            // Roll pointer (moves with roll).
             rotate(degrees = rollDeg, pivot = Offset(cx, cy)) {
-                val tip = polar(cx, cy, r * 0.84f, 0f)
+                val tip = polar(cx, cy, r * 0.80f, 0f)
                 val p = Path().apply {
                     moveTo(tip.x, tip.y)
-                    lineTo(tip.x - 16f, tip.y - 26f)
-                    lineTo(tip.x + 16f, tip.y - 26f)
+                    lineTo(tip.x - 22f, tip.y - 36f)
+                    lineTo(tip.x + 22f, tip.y - 36f)
                     close()
                 }
                 drawPath(p, GaugeColors.Accent)
@@ -102,6 +102,7 @@ fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier
         drawLine(GaugeColors.Accent, Offset(cx - wing, cy), Offset(cx + wing, cy), strokeWidth = stroke)
         drawLine(GaugeColors.Accent, Offset(cx, cy - r * 0.18f), Offset(cx, cy + r * 0.10f), strokeWidth = stroke)
         drawCircle(GaugeColors.Accent, radius = r * 0.09f, center = Offset(cx, cy))
+        drawGaugeTitlePill(tm, "ASSIETTE", cx, cy, r, bezel.hideTitle)
     }
 
     if (showCalibrate) {

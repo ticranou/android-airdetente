@@ -49,5 +49,6 @@ fun BallGauge(rollDeg: Float, slip: Float, modifier: Modifier = Modifier) {
         }
         val ballX = cx + slip.coerceIn(-1f, 1f) * travel
         drawCircle(GaugeColors.Mark, radius = ballR, center = Offset(ballX, tubeY))
+        drawGaugeTitlePill(tm, "BILLE", cx, cy, r, bezel.hideTitle)
     }
 }

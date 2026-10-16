@@ -50,13 +50,15 @@ fun HeadingGauge(headingDeg: Float, showValue: Boolean, modifier: Modifier = Mod
 
         // Rotate the whole card so `headingDeg` sits under the top index.
         rotate(degrees = -headingDeg, pivot = Offset(cx, cy)) {
-            for (deg in 0 until 360 step 5) {
-                val major = deg % 10 == 0
+            // Longer ticks push labels inward, keeping all cardinal/intercardinal
+            // labels readable even near the title pill at the top.
+            // Major ticks every 10° only (no intermediate 5° ticks) — more airy.
+            for (deg in 0 until 360 step 10) {
                 val outer = r * 0.96f
-                val inner = r * (if (major) 0.86f else 0.90f)
+                val inner = r * 0.80f
                 val p1 = polar(cx, cy, inner, deg.toFloat())
                 val p2 = polar(cx, cy, outer, deg.toFloat())
-                drawLine(GaugeColors.Mark, p1, p2, strokeWidth = if (major) 2.5f else 1.5f)
+                drawLine(GaugeColors.Mark, p1, p2, strokeWidth = 2.5f)
             }
             // Labels every 30°: N, 3, 6, 9, 12 … (tens of degrees) — bigger.
             for (deg in 0 until 360 step 30) {
@@ -64,7 +66,7 @@ fun HeadingGauge(headingDeg: Float, showValue: Boolean, modifier: Modifier = Mod
                     0 -> "N"; 90 -> "E"; 180 -> "S"; 270 -> "W"
                     else -> (deg / 10).toString()
                 }
-                val pos = polar(cx, cy, r * 0.70f, deg.toFloat())
+                val pos = polar(cx, cy, r * 0.60f, deg.toFloat())
                 // Counter-rotate text so it stays upright.
                 rotate(degrees = headingDeg, pivot = pos) {
                     gaugeText(tm, label, pos.x, pos.y, sizeSp = if (deg % 90 == 0) 20f else 16f,
@@ -81,18 +83,19 @@ fun HeadingGauge(headingDeg: Float, showValue: Boolean, modifier: Modifier = Mod
             }
         }
 
-        // Fixed top index triangle — larger.
+        // Fixed top index triangle — yellow, same size as ANLCCT cursor.
         val tip = polar(cx, cy, r * 0.99f, 0f)
         val path = Path().apply {
             moveTo(tip.x, tip.y)
-            lineTo(cx - 14f, tip.y + 26f)
-            lineTo(cx + 14f, tip.y + 26f)
+            lineTo(cx - 26f, tip.y + 52f)
+            lineTo(cx + 26f, tip.y + 52f)
             close()
         }
-        drawPath(path, GaugeColors.Accent)
+        drawPath(path, Color(0xFFFFCC00))
 
         // Fixed aircraft silhouette (simple plane).
         drawAircraftSilhouette(cx, cy, r * 0.5f)
+        drawGaugeTitlePill(tm, "CAP", cx, cy, r, bezel.hideTitle)
 
         // Numeric heading in a dedicated box at the instrument centre.
         if (showValue) {

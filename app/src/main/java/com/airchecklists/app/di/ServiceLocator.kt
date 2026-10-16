@@ -47,6 +47,11 @@ object ServiceLocator {
     lateinit var appContext: Context
         private set
 
+    /** Current foreground Activity (set by MainActivity). Used to host a transient
+     *  off-screen ComposeView for the flight-summary screenshot. Null when backgrounded. */
+    @Volatile
+    var currentActivity: android.app.Activity? = null
+
     /** Stateless NOAA weather client. */
     val weatherClient: WeatherClient by lazy { WeatherClient() }
 
@@ -209,6 +214,13 @@ object ServiceLocator {
 
         // Restore durable instrument state + heading/altitude targets from disk.
         instrumentPersist = preferences.preferences.value.instruments
+        // Reset per-session fields so each app launch starts a clean flight session.
+        updateInstruments { it.copy(
+            actionDone          = emptyMap(),
+            engineStartMs       = null,
+            engineStopMs        = null,
+            fuelTrackingStartMs = null,
+        ) }
         targetHeading.value = instrumentPersist.targetHeading
         targetAltitude.value = instrumentPersist.targetAltitude
         navPlan.value = preferences.preferences.value.navPlan

@@ -77,6 +77,9 @@ object AerodromeDirectory {
 
     @Volatile private var cache: List<Aerodrome>? = null
 
+    /** Invalidate the in-memory cache (e.g. after a map update). */
+    fun invalidate() { cache = null }
+
     /** Parse (once) and return the useful aerodromes. Empty if the layer is absent. */
     suspend fun load(): List<Aerodrome> {
         cache?.let { return it }
@@ -84,12 +87,13 @@ object AerodromeDirectory {
             cache?.let { return@withContext it }
             val repo = com.airchecklists.app.di.ServiceLocator.mapRepository
             val file = repo.openAipFiles().firstOrNull { it.name.startsWith("aero") }
-                ?: return@withContext emptyList<Aerodrome>().also { cache = it }
+                ?: return@withContext emptyList<Aerodrome>()   // absent: don't cache, retry next call
             val parsed = runCatching {
                 val col = json.decodeFromString(GjCollection.serializer(), repo.readLayer(file))
                 col.features.mapNotNull { it.toAerodrome() }.filter { it.type in USEFUL_TYPES }
             }.getOrDefault(emptyList())
-            parsed.also { cache = it }
+            if (parsed.isNotEmpty()) cache = parsed   // only cache a non-empty result
+            parsed
         }
     }
 

@@ -24,12 +24,17 @@ mobile** (moving map) hors-ligne.
     Compte à rebours, Horamètre, Terrains proches, Radar météo, **Montre**, EFIS
     (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes), **Carburant (NUMCRB)** — niveau + autonomie, **Enregistreur de vol (NUMFDR)** — durée + paramètres.
   - **Commun (CMN)** : **Raccourcis (CMNSCT)** — 4 slots configurables pour accès rapide. Chaque slot supporte 4 types de cibles : navigation tableau de bord (>> : double-tap), tableau de bord Focus (tap), instrument Focus (tap), ou VAC chart Terrain (tap). Long-press configure un slot. **Espaceurs (S/M/L)** — éléments vides (16/32/64 dp) pour espacer les rangées de la grille. **Session de vol (CMNFGT)** — affichage numérique de la durée de vol. **Tableau blanc (CMNWHB)** — notes et dessin libre avec historique et réglages.
+  - **Pastille de titre** : chaque instrument analogique affiche un libellé arrondi
+    au sommet du cadran (rendu au premier plan). L'option **« Masquer le titre »** dans
+    les réglages de cellule (Cockpits ▸ Options) supprime cette pastille sur les
+    instruments analogiques comme numériques.
   - **Gestes** (indiqués sur chaque instrument par un tiret = appui long, deux
     points = double-tap) : cap et **altitude** à suivre par appui long (curseur/bug
     magenta) ; **étalonnage altitude** par double-tap (dialogue permettant de calibrer l'altitude affichée : calcule un offset permanent à partir de l'altitude connue du terrain et la position GPS actuelle, puis le réapplique à chaque mise à jour GPS pour que l'altimètre reste calibré au décollage tout en suivant les variations d'altitude en vol ; long-press = saisir, double-tap = supprimer la calibration) ; chrono double-tap = start/stop, appui long = reset ; rebours
     double-tap = start/stop, appui long = saisie ; horamètre appui long = saisie ;
     terrains double-tap = VAC, appui long = liste ; météo appui long = carte ; Raccourcis long-press configure le slot. Les indicateurs de gestes (tiret et points) peuvent être masqués via les réglages (« Indicateurs de gestes »).
   - **Pinch-to-zoom Focus** : deux doigts écartés (scale > 1.3×) sur un instrument pour zoomer en mode Focus (instrument plein écran avec compte à rebours auto-fermeture, durée configurable 10–120 s).
+  - **ANLCAP** : curseur jaune (triangle) à l'index du haut, identique à ANLCCT.
   - Sources de cap (magnétique / route GPS), de vario (GPS / baromètre), unité de
     vitesse (km/h / kt) et réactivité réglables. L'offset de compensation du compas
     magnétique ne s'applique qu'en source **magnétique** ; en source **route GPS** le

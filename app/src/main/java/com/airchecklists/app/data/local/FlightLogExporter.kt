@@ -52,6 +52,36 @@ object FlightLogExporter {
         return if (writeToDownloads(context, name, "text/csv", csv)) name else null
     }
 
+    /**
+     * Bundles the whole flight session into one ZIP in Downloads:
+     * trace.gpx + trace.kml + log.csv (+ resume.jpg if a screenshot is provided).
+     * Returns the ZIP file name, or null on failure.
+     */
+    fun exportSessionZip(
+        context: Context,
+        track: List<FdrSample>,
+        samples: List<FdrSample>,
+        screenshotJpeg: ByteArray?,
+    ): String? {
+        val name = "airdetente-vol-${stamp()}.zip"
+        val bytes = runCatching {
+            val bos = java.io.ByteArrayOutputStream()
+            java.util.zip.ZipOutputStream(bos).use { zip ->
+                fun entry(entryName: String, data: ByteArray) {
+                    zip.putNextEntry(java.util.zip.ZipEntry(entryName))
+                    zip.write(data)
+                    zip.closeEntry()
+                }
+                entry("trace.gpx", buildGpx(track).toByteArray())
+                entry("trace.kml", buildKml(track).toByteArray())
+                entry("log.csv", buildCsv(samples).toByteArray())
+                if (screenshotJpeg != null) entry("resume.jpg", screenshotJpeg)
+            }
+            bos.toByteArray()
+        }.getOrNull() ?: return null
+        return if (writeBytesToDownloads(context, name, "application/zip", bytes)) name else null
+    }
+
     // ---- content builders ----
 
     private val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
@@ -120,6 +150,9 @@ object FlightLogExporter {
     // ---- Downloads writer ----
 
     private fun writeToDownloads(context: Context, name: String, mime: String, content: String): Boolean =
+        writeBytesToDownloads(context, name, mime, content.toByteArray())
+
+    private fun writeBytesToDownloads(context: Context, name: String, mime: String, bytes: ByteArray): Boolean =
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
@@ -131,7 +164,7 @@ object FlightLogExporter {
                 val resolver = context.contentResolver
                 val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
                     ?: return false
-                resolver.openOutputStream(uri)?.use { it.write(content.toByteArray()) } ?: return false
+                resolver.openOutputStream(uri)?.use { it.write(bytes) } ?: return false
                 values.clear(); values.put(MediaStore.Downloads.IS_PENDING, 0)
                 resolver.update(uri, values, null, null)
                 true
@@ -139,7 +172,7 @@ object FlightLogExporter {
                 @Suppress("DEPRECATION")
                 val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 dir.mkdirs()
-                File(dir, name).writeText(content)
+                File(dir, name).writeBytes(bytes)
                 true
             }
         }.getOrDefault(false)

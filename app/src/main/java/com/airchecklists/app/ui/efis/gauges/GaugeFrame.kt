@@ -39,6 +39,7 @@ fun Modifier.gaugeCell(): Modifier = this.aspectRatio(1f).padding(3.dp)
 data class GaugeBezel(
     val color: Color = Color(0xFF1C1C1C),
     val style: com.airchecklists.app.data.model.GaugeBezelStyle = com.airchecklists.app.data.model.GaugeBezelStyle.SOLID,
+    val hideTitle: Boolean = false,
 )
 
 /** Resolve the current global bezel preference (used as the default). */
@@ -218,6 +219,50 @@ fun DrawScope.gaugeTitle(
     color: Color = GaugeColors.MarkDim,
 ) {
     gaugeText(tm, text, cx, cy - r * 0.78f, sizeSp = 9f, color = color)
+}
+
+/**
+ * Draws an instrument title as a rounded pill centred on the top edge of the face
+ * circle (straddling the bezel). [cx],[cy],[r] come from [gaugeFace] (inner radius).
+ *
+ * The pill is sized to fit [text] with comfortable horizontal padding, and its
+ * vertical centre sits exactly at cy−r (the top of the inner face circle) so it
+ * appears half inside / half outside the bezel ring.
+ */
+fun DrawScope.drawGaugeTitlePill(
+    tm: TextMeasurer,
+    text: String,
+    cx: Float,
+    cy: Float,
+    r: Float,
+    hideTitle: Boolean = false,
+) {
+    if (hideTitle) return
+    val sizeSp  = (r * 0.095f).coerceIn(8f, 12f)
+    val measured = tm.measure(
+        text,
+        androidx.compose.ui.text.TextStyle(
+            color      = GaugeColors.MarkDim,
+            fontSize   = sizeSp.sp,
+            fontWeight = FontWeight.Bold,
+        ),
+    )
+    val padH  = r * 0.14f
+    val padV  = r * 0.06f
+    val pillW = measured.size.width + padH * 2f
+    val pillH = measured.size.height + padV * 2f
+    val pillCy = cy - r                      // pill centre Y = top of inner face
+
+    val tl = androidx.compose.ui.geometry.Offset(cx - pillW / 2f, pillCy - pillH / 2f)
+    val sz = androidx.compose.ui.geometry.Size(pillW, pillH)
+    val cr = androidx.compose.ui.geometry.CornerRadius(pillH / 2f)
+
+    drawRoundRect(Color(0xE8101418), topLeft = tl, size = sz, cornerRadius = cr)
+    drawRoundRect(
+        Color(0x55B0B0B0), topLeft = tl, size = sz, cornerRadius = cr,
+        style = Stroke(width = (r * 0.013f).coerceAtLeast(1.2f)),
+    )
+    drawText(measured, topLeft = androidx.compose.ui.geometry.Offset(cx - measured.size.width / 2f, pillCy - measured.size.height / 2f))
 }
 
 /** Point on a circle for angle in aviation degrees (0° = up, clockwise). */

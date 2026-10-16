@@ -65,6 +65,7 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
 private enum class AanlsctStep { CHOOSE_TYPE, PICK_DASHBOARD_NAV, PICK_DASHBOARD_FOCUS, PICK_TERRAIN }
@@ -137,7 +138,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     ) {
         val (cx, cy, r) = gaugeFace(bezel)
 
-        compactText(tm, "RACCOURCI", cx, cy - r * 0.65f, sizeSp = 11f, color = CompactStyle.Dim)
         drawGestureHints(cx - r * 0.82f, cy - r * 0.65f,
             hasLongPress = true, hasDoubleTap = target is ShortcutTarget.DashboardNavigate)
 
@@ -191,6 +191,7 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             // Sub-label at bottom (type indicator)
             compactText(tm, subLabel, cx, cy + r * 0.72f, sizeSp = 11f, color = CompactStyle.Dim)
         }
+        drawGaugeTitlePill(tm, "RACCOURCI", cx, cy, r, bezel.hideTitle)
     }
 
     // ── Focus dialogs ─────────────────────────────────────────────────────────

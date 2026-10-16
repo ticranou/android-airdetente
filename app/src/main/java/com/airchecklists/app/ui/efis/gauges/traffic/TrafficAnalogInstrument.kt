@@ -22,12 +22,15 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.GaugeLobe
 import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import kotlin.math.abs
 import kotlin.math.cos
@@ -57,6 +60,7 @@ fun TrafficAnalogInstrument(modifier: Modifier = Modifier) {
     val lat = state.latitude
     val lon = state.longitude
     val ownAltFt = state.gpsAltitudeFt.toInt()
+    val bezel = LocalGaugeBezel.current
 
     LaunchedEffect(hasPos, apiKey) {
         if (apiKey.isNullOrBlank()) {
@@ -77,7 +81,7 @@ fun TrafficAnalogInstrument(modifier: Modifier = Modifier) {
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
-        drawTraffic(tm, beacons, connected, ownAltFt, lat, lon)
+        drawTraffic(tm, beacons, connected, ownAltFt, lat, lon, bezel)
     }
 }
 
@@ -88,10 +92,9 @@ private fun DrawScope.drawTraffic(
     ownAltFt: Int,
     lat: Double,
     lon: Double,
+    bezel: GaugeBezel,
 ) {
     val (cx, cy, r) = gaugeFace()
-
-    compactText(tm, "TRAFIC", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
 
     val clipCircle = Path().apply { addOval(Rect(cx - r, cy - r, cx + r, cy + r)) }
     clipPath(clipCircle) {
@@ -154,6 +157,8 @@ private fun DrawScope.drawTraffic(
     rotate(degrees = -30f, pivot = Offset(cx, cy)) {
         compactText(tm, "EN DÉVELOPPEMENT", cx, cy, sizeSp = 14f, bold = true, color = Color(0x55FFFFFF))
     }
+
+    drawGaugeTitlePill(tm, "TRAFIC", cx, cy, r, bezel.hideTitle)
 }
 
 private fun DrawScope.drawRadarContent(

@@ -18,12 +18,15 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.terrain.SrtmProvider
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.efis.gauges.GaugeBezel
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.GaugeLobe
 import com.airchecklists.app.ui.efis.gauges.GaugeLobeCentre
+import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 
 // TAWS-like alert thresholds (AGL in feet)
@@ -44,6 +47,7 @@ fun ProximityAnalogInstrument(modifier: Modifier = Modifier) {
     var aglFt         by remember { mutableIntStateOf(0) }
     var tawsLevel     by remember { mutableStateOf(TawsLevel.UNKNOWN) }
     var downloading   by remember { mutableStateOf(false) }
+    val bezel = LocalGaugeBezel.current
 
     val hasPos = state.hasPosition
     val lat    = state.latitude
@@ -75,7 +79,7 @@ fun ProximityAnalogInstrument(modifier: Modifier = Modifier) {
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
-        drawProximity(tm, tawsLevel, aglFt, terrainElevFt, altFt, vsFtMin, hasPos, downloading)
+        drawProximity(tm, tawsLevel, aglFt, terrainElevFt, altFt, vsFtMin, hasPos, downloading, bezel)
     }
 }
 
@@ -88,11 +92,9 @@ private fun DrawScope.drawProximity(
     vsFtMin: Int,
     hasPos: Boolean,
     downloading: Boolean,
+    bezel: GaugeBezel,
 ) {
     val (cx, cy, r) = gaugeFace()
-
-    // ── PROXIMITY label ─────────────────────────────────────────────────────
-    compactText(tm, "Proximité", cx, cy - r * 0.78f, sizeSp = 12f, color = CompactStyle.Dim)
 
     // ── Arc segments: terrain proximity arcs ────────────────────────────────
     drawTawsArcs(cx, cy, r, level)
@@ -122,6 +124,7 @@ private fun DrawScope.drawProximity(
         centre = GaugeLobeCentre(alertLabel, mslStr, alertColor, GaugeColors.MarkDim),
         right  = GaugeLobe("MSL", "${terrainElevFt}ft", GaugeColors.Mark),
     )
+    drawGaugeTitlePill(tm, "PROXIMITE", cx, cy, r, bezel.hideTitle)
 }
 
 private fun DrawScope.drawTawsArcs(cx: Float, cy: Float, r: Float, level: TawsLevel) {

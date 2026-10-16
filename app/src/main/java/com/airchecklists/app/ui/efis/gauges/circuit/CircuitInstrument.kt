@@ -28,7 +28,7 @@ import com.airchecklists.app.ui.efis.gauges.HeadingSourceBadge
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.drawGaugeLobes
 import com.airchecklists.app.ui.efis.gauges.gaugeText
-import com.airchecklists.app.ui.efis.gauges.gaugeTitle
+import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import com.airchecklists.app.ui.efis.gauges.polar
 import com.airchecklists.app.ui.terrain.QfuParser
@@ -122,14 +122,13 @@ fun CircuitInstrument(
 
         // ── Compass card (rotates so current heading sits under top index) ──
         rotate(degrees = -headingDeg, pivot = Offset(cx, cy)) {
-            // Tick marks every 5°.
-            for (deg in 0 until 360 step 5) {
-                val major = deg % 10 == 0
+            // Major ticks every 10° only (no intermediate 5° ticks) — more airy.
+            for (deg in 0 until 360 step 10) {
                 val outer = r * 0.96f
-                val inner = r * (if (major) 0.84f else 0.90f)
+                val inner = r * 0.80f
                 val p1 = polar(cx, cy, inner, deg.toFloat())
                 val p2 = polar(cx, cy, outer, deg.toFloat())
-                drawLine(GaugeColors.Mark, p1, p2, strokeWidth = if (major) 2.5f else 1.5f)
+                drawLine(GaugeColors.Mark, p1, p2, strokeWidth = 2.5f)
             }
             // Labels every 30°.
             for (deg in 0 until 360 step 30) {
@@ -137,7 +136,7 @@ fun CircuitInstrument(
                     0 -> "N"; 90 -> "E"; 180 -> "S"; 270 -> "W"
                     else -> (deg / 10).toString()
                 }
-                val pos = polar(cx, cy, r * 0.70f, deg.toFloat())
+                val pos = polar(cx, cy, r * 0.60f, deg.toFloat())
                 rotate(degrees = headingDeg, pivot = pos) {
                     gaugeText(
                         tm, label, pos.x, pos.y,
@@ -173,9 +172,6 @@ fun CircuitInstrument(
         // ── Fixed aircraft silhouette ──
         drawAircraftSilhouette(cx, cy, r * 0.42f)
 
-        // ── Title ──
-        gaugeTitle(tm, "CIRCUIT", cx, cy, r)
-
         // ── Three lobes ──
         val hdg = (((headingDeg.toInt()) % 360) + 360) % 360
         val capTxt = "${hdg.toString().padStart(3, '0')}°"
@@ -201,6 +197,7 @@ fun CircuitInstrument(
             ),
             right = GaugeLobe("CIRC", circAltiTxt, GaugeColors.MarkDim),
         )
+        drawGaugeTitlePill(tm, "CIRCUIT", cx, cy, r, bezel.hideTitle)
     }
 
         HeadingSourceBadge(

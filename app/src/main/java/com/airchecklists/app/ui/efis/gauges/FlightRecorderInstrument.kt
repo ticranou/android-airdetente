@@ -81,6 +81,12 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
         }
     }
 
+    fun exportZip() {
+        com.airchecklists.app.ui.efis.gauges.flight.exportFlightSessionZip(scope) { name ->
+            toast(if (name != null) "Dossier exporté : Téléchargements/$name" else "Échec de l'export du dossier.")
+        }
+    }
+
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(
@@ -118,8 +124,6 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
                 style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round),
             )
         }
-
-        gaugeTitle(tm, "FLIGHT RECORDER", cx, cy, r)
 
         // Parameter list with availability dots, centred as a block within the circle.
         data class Row(val label: String, val ok: Boolean)
@@ -162,6 +166,7 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
         drawOval(chipBorder, topLeft = androidx.compose.ui.geometry.Offset(cx - cW / 2f, cCentreY - cH / 2f), size = Size(cW, cH),
             style = androidx.compose.ui.graphics.drawscope.Stroke(width = (r * 0.013f).coerceAtLeast(1.2f)))
         drawText(badgeMeasured, topLeft = androidx.compose.ui.geometry.Offset(cx - badgeMeasured.size.width / 2f, cCentreY - badgeMeasured.size.height / 2f))
+        drawGaugeTitlePill(tm, "FLIGHT RECORDER", cx, cy, r, bezel.hideTitle)
     }
 
     if (showExport) {
@@ -185,6 +190,10 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
                         onClick = { showExport = false; exportRaw() },
                         modifier = Modifier.fillMaxWidth(),
                     ) { androidx.compose.material3.Text("Log brut CSV (X dernières minutes)") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { showExport = false; exportZip() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Dossier de vol complet (ZIP)") }
                 }
             },
             confirmButton = {

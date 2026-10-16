@@ -169,7 +169,7 @@
     <div class="divider"></div>
     <div class="inline">
       <input type="checkbox" id="optHideTitle">
-      <label for="optHideTitle">Masquer le titre</label>
+      <label for="optHideTitle">Masquer le titre <span class="hint" style="font-weight:normal">(barre pour les instruments numériques, pastille pour les instruments analogiques)</span></label>
     </div>
     <div class="inline">
       <input type="checkbox" id="optHideBorder">
@@ -2769,6 +2769,8 @@ function moveBlock(masterRow, dir) {
 // ----------------------------------------------------------------------------
 // Options dialog — mirrors CellOptionsDialog (Couleur / Carbone / Métal / palette,
 // Cellule: Large / Haut / Séparer, Masquer le titre).
+// Masquer le titre cache la barre de titre sur les instruments numériques/compacts
+// et la pastille de titre (drawGaugeTitlePill) sur les instruments analogiques.
 // ----------------------------------------------------------------------------
 let optsIndex = -1;
 const overlay = document.getElementById("optsOverlay");

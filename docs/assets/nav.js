@@ -26,6 +26,7 @@
       ["instrument-montre.html", "Montre"],
       ["instrument-movingmap.html", "Moving Map"],
       ["instrument-navigation.html", "Prépa Navigation"],
+      ["instrument-nuit.html", "Nuit aéronautique"],
       ["instrument-proximite.html", "Proximité sol (TAWS)"],
       ["instrument-raccourci-dash.html", "Raccourci (ANLSCT)"],
       ["instrument-raccourcis.html", "Raccourcis (CMNSCT)"],

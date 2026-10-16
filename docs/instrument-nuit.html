@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Nuit aéronautique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🌙</div>
+      <div>
+        <h1>Nuit aéronautique</h1>
+        <p class="subtitle">Crépuscule civil · temps disponible avant la nuit</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip num">NUMNGT · numérique (50%-1L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/NUMNGT.jpg" alt="NUMNGT — nuit aéronautique">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <ul class="feat">
+          <li>Visualise la <b>fenêtre de jour VFR</b> sur un axe temporel 0h–24h UTC.</li>
+          <li><b>Gradient horizontal</b> : gris très foncé aux extrémités (nuit) vers blanc au centre (midi solaire), avec arrondi aux coins. Reflète l'alternance jour/nuit du jour courant.</li>
+          <li><b>Curseur heure courante</b> : cercle orange avec bordure noire, positionné sur le gradient à la position de l'heure UTC actuelle.</li>
+          <li><b>Trait 12h</b> : repère vertical qui dépasse au-dessus du gradient, avec le label "12h" positionné au-dessus.</li>
+          <li><b>Horaires crépuscule civil</b> (aube et crépuscule) affichés en <b style="color:#5588FF">bleu</b>, en heure locale, espacés en dessous du gradient.</li>
+          <li><b>Temps disponible</b> avant la nuit VFR (côté droit) :
+            <ul>
+              <li><b style="color:#35C759">Vert</b> : ≥ 90 minutes</li>
+              <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes</li>
+              <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes</li>
+              <li><b style="color:#888888">Gris / tiret</b> : nuit en cours ou position GPS indisponible</li>
+            </ul>
+          </li>
+          <li>Calcul solaire <b>mis à jour toutes les 30 secondes</b> à partir de la position GPS courante.</li>
+          <li><b>Pastille de titre</b> "NUIT AERO" affichée en haut (masquable via Options ▸ « Masquer le titre »).</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">–</span> Appui long : —</div>
+        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Le calcul utilise le <b>crépuscule civil</b> (soleil à −6° sous l'horizon) conformément à la réglementation VFR française.</li>
+          <li>Les horaires affichés sont en <b>heure locale</b> ; l'axe temporel du gradient est en <b>UTC</b>.</li>
+          <li>Sans position GPS, le gradient est affiché en gris uniforme et le temps disponible est masqué.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

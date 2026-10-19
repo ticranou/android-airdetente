@@ -26,7 +26,10 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -136,12 +139,19 @@ fun CountdownDigital(modifier: Modifier = Modifier) {
         compactText(tm, if (unset) "--:--" else fmtMs(rem), w * 0.58f, cy, sizeSp = 26f, bold = true, mono = true, color = col)
 
         val frac = if (cd.setMs > 0) (1f - rem.toFloat() / cd.setMs).coerceIn(0f, 1f) else 0f
-        val barW = w * 0.72f
-        val barLeft = w * 0.58f - barW / 2f
-        val barH = 9f
-        val barY = cy + mainH * 0.24f
-        drawRect(Color(0xFF3A3A3A), topLeft = Offset(barLeft, barY), size = Size(barW, barH))
-        drawRect(Color(0xFF2E9BE6), topLeft = Offset(barLeft, barY), size = Size(barW * frac, barH))
+        // Mesure la largeur réelle du texte du timer pour aligner la barre dessous
+        val timerText = if (unset) "--:--" else fmtMs(rem)
+        val timerMeasured = tm.measure(timerText, TextStyle(
+            fontSize = 26.sp, fontWeight = FontWeight.Bold,
+        ))
+        val halfTextW = timerMeasured.size.width / 2f
+        val barLeft2  = w * 0.58f - halfTextW
+        val barRight2 = w * 0.58f + halfTextW
+        val barW2     = barRight2 - barLeft2
+        val barH = 14f
+        val barY = cy + mainH * 0.27f
+        drawRect(Color(0xFF3A3A3A), topLeft = Offset(barLeft2, barY), size = Size(barW2, barH))
+        drawRect(Color(0xFF2E9BE6), topLeft = Offset(barLeft2, barY), size = Size(barW2 * frac, barH))
     }
 
     if (showDialog) {

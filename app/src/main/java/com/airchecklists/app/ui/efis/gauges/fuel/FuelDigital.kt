@@ -87,9 +87,9 @@ fun FuelDigital(modifier: Modifier = Modifier) {
 
         // ── Barre pleine largeur avec dégradé ──
         val barTop  = headerH + h * 0.04f
-        val barH    = h * 0.22f
-        val barLeft = pad
-        val barRight = w - pad
+        val barH    = h * 0.15f
+        val barLeft = pad * 4f
+        val barRight = w - pad * 4f
 
         // Fond gris
         drawRect(Color(0xFF222222), topLeft = Offset(barLeft, barTop), size = Size(barRight - barLeft, barH))

@@ -4,6 +4,18 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Route
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -14,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
@@ -170,38 +183,61 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
     }
 
     if (showExport) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showExport = false },
-            title = { androidx.compose.material3.Text("Exporter l'enregistrement") },
+            title = { Text("Exporter l'enregistrement") },
             text = {
-                androidx.compose.foundation.layout.Column {
-                    androidx.compose.material3.Text(
-                        "Écrit un fichier dans le dossier Téléchargements (accessible en branchant l'appareil au PC).",
+                androidx.compose.foundation.layout.Column(
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        "Enregistrer les données du vol sur l'appareil, dans le dossier Téléchargements.",
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
-                    androidx.compose.material3.TextButton(
+                    ExportButton(
+                        icon = { Icon(Icons.Outlined.Map, contentDescription = null) },
+                        label = "Google Earth KML",
                         onClick = { showExport = false; exportKml() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { androidx.compose.material3.Text("Trace KML (Google Earth)") }
-                    androidx.compose.material3.TextButton(
+                    )
+                    ExportButton(
+                        icon = { Icon(Icons.Outlined.Route, contentDescription = null) },
+                        label = "Autres logiciels GPX",
                         onClick = { showExport = false; exportGpx() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { androidx.compose.material3.Text("Trace GPX (QGIS, logiciels de vol)") }
-                    androidx.compose.material3.TextButton(
+                    )
+                    ExportButton(
+                        icon = { Icon(Icons.Outlined.Description, contentDescription = null) },
+                        label = "Données brutes CSV",
                         onClick = { showExport = false; exportRaw() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { androidx.compose.material3.Text("Log brut CSV (X dernières minutes)") }
-                    androidx.compose.material3.TextButton(
+                    )
+                    ExportButton(
+                        icon = { Icon(Icons.Outlined.Archive, contentDescription = null) },
+                        label = "Dossier complet ZIP",
                         onClick = { showExport = false; exportZip() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { androidx.compose.material3.Text("Dossier de vol complet (ZIP)") }
+                    )
                 }
             },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { showExport = false }) {
-                    androidx.compose.material3.Text("Fermer")
-                }
-            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { showExport = false }) { Text("Fermer") } },
         )
+    }
+}
+
+@Composable
+private fun ExportButton(icon: @Composable () -> Unit, label: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2E35)),
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        androidx.compose.foundation.layout.Row(
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            icon()
+            Text(label, color = Color.White)
+        }
     }
 }
 

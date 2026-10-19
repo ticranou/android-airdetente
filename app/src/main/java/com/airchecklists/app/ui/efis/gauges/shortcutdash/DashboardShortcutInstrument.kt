@@ -234,6 +234,20 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                                 modifier = Modifier.fillMaxWidth()) { Text("Tableau de bord (Focus)") }
                             Button(onClick = { step = AanlsctStep.PICK_TERRAIN },
                                 modifier = Modifier.fillMaxWidth()) { Text("Terrain (Carte VAC)") }
+                            if (target != null) {
+                                Button(
+                                    onClick = {
+                                        ServiceLocator.updateInstruments {
+                                            it.copy(anlsctTargets = it.anlsctTargets - cellIdx)
+                                        }
+                                        showPicker = false
+                                    },
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = androidx.compose.ui.graphics.Color(0xFF8B1A1A),
+                                    ),
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) { Text("Effacer") }
+                            }
                         }
                     },
                     confirmButton = {},

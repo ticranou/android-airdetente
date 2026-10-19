@@ -178,9 +178,16 @@ fun ChecklistInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     if (showPicker && checklists.isNotEmpty()) {
         ChecklistPickerDialog(
             checklists = checklists,
+            hasSelection = checklistId != null,
             onDismiss = { showPicker = false },
             onSelect = { chosen ->
                 ServiceLocator.updateInstruments { it.copy(checklistSlots = it.checklistSlots + (cellIdx to chosen.id)) }
+                showPicker = false
+            },
+            onClear = {
+                ServiceLocator.updateInstruments {
+                    it.copy(checklistSlots = it.checklistSlots - cellIdx)
+                }
                 showPicker = false
             },
         )
@@ -198,21 +205,32 @@ fun ChecklistInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 @Composable
 private fun ChecklistPickerDialog(
     checklists: List<Checklist>,
+    hasSelection: Boolean,
     onDismiss: () -> Unit,
     onSelect: (Checklist) -> Unit,
+    onClear: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Choisir une checklist") },
         text = {
-            LazyColumn {
-                itemsIndexed(checklists) { _, cl ->
-                    TextButton(
-                        onClick = { onSelect(cl) },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(cl.name, modifier = Modifier.weight(1f), overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Column {
+                LazyColumn {
+                    itemsIndexed(checklists) { _, cl ->
+                        TextButton(
+                            onClick = { onSelect(cl) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(cl.name, modifier = Modifier.weight(1f), overflow = TextOverflow.Ellipsis, maxLines = 2)
+                        }
                     }
+                }
+                if (hasSelection) {
+                    Button(
+                        onClick = onClear,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B1A1A)),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    ) { Text("Effacer") }
                 }
             }
         },

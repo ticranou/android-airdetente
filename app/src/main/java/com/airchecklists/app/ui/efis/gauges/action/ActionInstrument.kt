@@ -154,12 +154,22 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
     if (showPicker) {
         ActionPickerDialog(
+            hasSelection = actionId != null,
             onDismiss = { showPicker = false },
             onSelect = { chosen ->
                 ServiceLocator.updateInstruments { s ->
                     s.copy(
                         actionSlots = s.actionSlots + (cellIdx to chosen.name),
                         actionDone = s.actionDone + (cellIdx to false),
+                    )
+                }
+                showPicker = false
+            },
+            onClear = {
+                ServiceLocator.updateInstruments { s ->
+                    s.copy(
+                        actionSlots = s.actionSlots - cellIdx,
+                        actionDone = s.actionDone - cellIdx,
                     )
                 }
                 showPicker = false
@@ -264,8 +274,10 @@ private fun cancelAction(action: ActionId, s: InstrumentPersistState): Instrumen
 
 @Composable
 private fun ActionPickerDialog(
+    hasSelection: Boolean,
     onDismiss: () -> Unit,
     onSelect: (ActionId) -> Unit,
+    onClear: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -277,6 +289,15 @@ private fun ActionPickerDialog(
                         onClick = { onSelect(action) },
                         modifier = Modifier.fillMaxWidth(),
                     ) { Text(action.label) }
+                }
+                if (hasSelection) {
+                    Button(
+                        onClick = onClear,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFF8B1A1A),
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Effacer") }
                 }
             }
         },

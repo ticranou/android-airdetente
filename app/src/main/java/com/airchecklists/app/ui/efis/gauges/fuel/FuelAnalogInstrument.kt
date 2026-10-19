@@ -239,8 +239,8 @@ private fun DrawScope.drawFuelGauge(
         style    = Stroke(width = 1.5f),
     )
     compactText(tm, valueText, cx, valY, sizeSp = 22f, bold = true, color = fuelColor)
-    compactText(tm, "Volume", cx, cy + r * 0.12f, sizeSp = 10f, color = GaugeColors.MarkDim)
-    compactText(tm, "Restant", cx, cy + r * 0.24f, sizeSp = 10f, color = GaugeColors.MarkDim)
+    compactText(tm, "Volume", cx, cy + r * 0.17f, sizeSp = 10f, color = GaugeColors.MarkDim)
+    compactText(tm, "Restant", cx, cy + r * 0.29f, sizeSp = 10f, color = GaugeColors.MarkDim)
 
     // ── Lobes ──
     val autonomyH   = if (consumptionLh > 0f) fuelL / consumptionLh else 0f

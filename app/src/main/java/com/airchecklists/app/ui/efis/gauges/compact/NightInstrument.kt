@@ -110,7 +110,8 @@ fun NightInstrument(state: EfisState, modifier: Modifier = Modifier) {
             else           -> NGT_GREEN
         }
 
-        // Fraction restante : remainFrac = availMin / dayMin (0→1 de dusk→dawn)
+        // Fraction restante : remainFrac = availMin / dayMin (0→1, gauche=plein, droite=vide)
+        // La barre représente la journée entière. Le curseur est à availMin/dayMin depuis la droite.
         val remainFrac: Float = if (availMin != null && dayMin != null && dayMin > 0 && availMin > 0)
             (availMin.toFloat() / dayMin).coerceIn(0f, 1f) else 0f
 
@@ -131,30 +132,37 @@ fun NightInstrument(state: EfisState, modifier: Modifier = Modifier) {
         val barLeft  = pad
         val barRight = divX - pad
         val barW     = barRight - barLeft
-        val barTop2  = bodyTop + bodyH * 0.38f
-        val barH2    = bodyH * 0.22f
+        val barTop2  = bodyTop + bodyH * 0.52f
+        val barH2    = bodyH * 0.20f
 
-        // Fond + 3 zones colorées fixes (rouge 0→30min, orange 30→90min, gris 90→dayMin)
+        // Les 3 zones sont fixes depuis la DROITE (fin de journée) :
+        //   rouge  : les 30 dernières minutes (extrémité droite)
+        //   orange : de 30min à 90min avant la fin
+        //   gris   : tout le reste (plus de 90min restants)
         drawRect(Color(0xFF222222), topLeft = Offset(barLeft, barTop2), size = Size(barW, barH2))
         if (dayMin != null && dayMin > 0) {
-            val redEnd2   = barLeft + barW * (30f / dayMin).coerceIn(0f, 1f)
-            val orangeEnd2 = barLeft + barW * (90f / dayMin).coerceIn(0f, 1f)
-            drawRect(NGT_RED,    topLeft = Offset(barLeft,     barTop2), size = Size(redEnd2    - barLeft,     barH2))
-            drawRect(NGT_ORANGE, topLeft = Offset(redEnd2,     barTop2), size = Size(orangeEnd2 - redEnd2,     barH2))
-            drawRect(NGT_GRAY,   topLeft = Offset(orangeEnd2,  barTop2), size = Size(barRight   - orangeEnd2,  barH2))
+            val grayEnd   = barRight - barW * (90f / dayMin).coerceIn(0f, 1f)
+            val orangeEnd = barRight - barW * (30f / dayMin).coerceIn(0f, 1f)
+            // Gris : début → grayEnd
+            drawRect(NGT_GRAY,   topLeft = Offset(barLeft,    barTop2), size = Size(grayEnd   - barLeft,    barH2))
+            // Orange : grayEnd → orangeEnd
+            drawRect(NGT_ORANGE, topLeft = Offset(grayEnd,    barTop2), size = Size(orangeEnd - grayEnd,    barH2))
+            // Rouge : orangeEnd → barRight
+            drawRect(NGT_RED,    topLeft = Offset(orangeEnd,  barTop2), size = Size(barRight  - orangeEnd,  barH2))
         }
 
-        // Masque sombre sur la partie vide (temps déjà écoulé — à droite du niveau actuel)
+        // Masque sombre sur la partie vide (temps déjà écoulé — à gauche du curseur)
+        // La partie remplie part de la droite : filledW = barW * remainFrac
         val filledW = barW * remainFrac
         if (remainFrac < 1f) {
             drawRect(
                 Color(0xCC111111),
-                topLeft = Offset(barLeft + filledW, barTop2),
+                topLeft = Offset(barLeft, barTop2),
                 size    = Size(barW - filledW, barH2),
             )
         }
 
-        // ── Horaires crépuscule civil ──────────────────────────────────────────────
+        // ── Horaires crépuscule civil (avec espace suffisant au-dessus de la barre) ──
         fun fmtLocal(utcMin: Int?): String {
             if (utcMin == null) return "---"
             val local = ((utcMin + utcOffsetMin) % 1440 + 1440) % 1440
@@ -162,17 +170,29 @@ fun NightInstrument(state: EfisState, modifier: Modifier = Modifier) {
         }
         val dawnStr = if (st != null) fmtLocal(dawn) else "---"
         val duskStr = if (st != null) fmtLocal(dusk) else "---"
-        val timeY   = barTop2 - 5.dp.toPx()
+        val timeY   = barTop2 - 10.dp.toPx()
         compactText(tm, dawnStr, barLeft, timeY, sizeSp = 11f, bold = true, color = NGT_BLUE, center = false)
         compactText(tm, duskStr, barRight, timeY, sizeSp = 11f, bold = true, color = NGT_BLUE, anchorRight = true)
 
-        // ── Curseur violet (triangle pointant vers le haut, style NUMCRB/NUMSPD) ──
+        // ── Marqueur 12h au milieu de la barre ────────────────────────────────────
+        val x12h = barLeft + barW * 0.5f
+        val tickOver = barH2 * 0.6f
+        drawLine(
+            color = Color(0xFF888888),
+            start = Offset(x12h, barTop2 - tickOver),
+            end   = Offset(x12h, barTop2 + barH2),
+            strokeWidth = 1.5f,
+        )
+        compactText(tm, "12h", x12h, barTop2 - tickOver - 6.dp.toPx(), sizeSp = 9f, color = NGT_DIM)
+
+        // ── Curseur violet (triangle pointant vers le bas, sous la barre) ─────────
+        // Position du curseur : depuis la droite, à remainFrac de la largeur totale
         if (st != null && dayMin != null && dayMin > 0) {
-            val cursorX = barLeft + filledW
-            val cursorH2 = barH2 * 0.6f
-            val cursorHW = barH2 * 0.45f
+            val cursorX  = barLeft + (barW - filledW)
+            val cursorH2 = barH2 * 0.9f    // plus haut
+            val cursorHW = barH2 * 0.60f   // plus large
             val cursorPath = Path().apply {
-                moveTo(cursorX, barTop2 + barH2)
+                moveTo(cursorX, barTop2 + barH2)              // pointe en bas de barre
                 lineTo(cursorX - cursorHW / 2f, barTop2 + barH2 + cursorH2)
                 lineTo(cursorX + cursorHW / 2f, barTop2 + barH2 + cursorH2)
                 close()

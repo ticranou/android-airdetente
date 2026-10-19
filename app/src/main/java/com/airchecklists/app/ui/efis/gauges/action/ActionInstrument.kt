@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -290,18 +291,16 @@ private fun ActionPickerDialog(
                         modifier = Modifier.fillMaxWidth(),
                     ) { Text(action.label) }
                 }
-                if (hasSelection) {
-                    Button(
-                        onClick = onClear,
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = androidx.compose.ui.graphics.Color(0xFF8B1A1A),
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Effacer") }
-                }
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (hasSelection) {
+                    TextButton(onClick = onClear) { Text("Effacer") }
+                }
+                TextButton(onClick = onDismiss) { Text("Fermer") }
+            }
+        },
     )
 }

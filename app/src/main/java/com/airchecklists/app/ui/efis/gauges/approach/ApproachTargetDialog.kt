@@ -102,7 +102,16 @@ fun ApproachTargetDialog(
         val options = qfus.ifEmpty { listOf(0, 90, 180, 270) }
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("${chart.icao} — Piste atterrissage") },
+            title = {
+                Column {
+                    Text("${chart.icao} — ${chart.airfieldName}")
+                    Text(
+                        "Piste à utiliser",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
             text = {
                 Column {
                     if (qfus.isEmpty()) {
@@ -141,7 +150,7 @@ fun ApproachTargetDialog(
             confirmButton = {},
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { picked = null }) { Text("Retour") }
+                    TextButton(onClick = { picked = null }) { Text("Terrains...") }
                     TextButton(onClick = onDismiss) { Text("Fermer") }
                 }
             },

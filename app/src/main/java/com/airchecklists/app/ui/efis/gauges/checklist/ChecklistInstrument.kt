@@ -214,28 +214,26 @@ private fun ChecklistPickerDialog(
         onDismissRequest = onDismiss,
         title = { Text("Choisir une checklist") },
         text = {
-            Column {
-                LazyColumn {
-                    itemsIndexed(checklists) { _, cl ->
-                        TextButton(
-                            onClick = { onSelect(cl) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(cl.name, modifier = Modifier.weight(1f), overflow = TextOverflow.Ellipsis, maxLines = 2)
-                        }
+            LazyColumn {
+                itemsIndexed(checklists) { _, cl ->
+                    TextButton(
+                        onClick = { onSelect(cl) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(cl.name, modifier = Modifier.weight(1f), overflow = TextOverflow.Ellipsis, maxLines = 2)
                     }
-                }
-                if (hasSelection) {
-                    Button(
-                        onClick = onClear,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8B1A1A)),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    ) { Text("Effacer") }
                 }
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (hasSelection) {
+                    TextButton(onClick = onClear) { Text("Effacer") }
+                }
+                TextButton(onClick = onDismiss) { Text("Fermer") }
+            }
+        },
     )
 }
 

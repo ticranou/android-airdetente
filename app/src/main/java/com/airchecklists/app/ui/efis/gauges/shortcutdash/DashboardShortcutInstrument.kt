@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -234,24 +235,22 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                                 modifier = Modifier.fillMaxWidth()) { Text("Tableau de bord (Focus)") }
                             Button(onClick = { step = AanlsctStep.PICK_TERRAIN },
                                 modifier = Modifier.fillMaxWidth()) { Text("Terrain (Carte VAC)") }
-                            if (target != null) {
-                                Button(
-                                    onClick = {
-                                        ServiceLocator.updateInstruments {
-                                            it.copy(anlsctTargets = it.anlsctTargets - cellIdx)
-                                        }
-                                        showPicker = false
-                                    },
-                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                        containerColor = androidx.compose.ui.graphics.Color(0xFF8B1A1A),
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) { Text("Effacer") }
-                            }
                         }
                     },
                     confirmButton = {},
-                    dismissButton = { TextButton(onClick = { showPicker = false }) { Text("Annuler") } },
+                    dismissButton = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (target != null) {
+                                TextButton(onClick = {
+                                    ServiceLocator.updateInstruments {
+                                        it.copy(anlsctTargets = it.anlsctTargets - cellIdx)
+                                    }
+                                    showPicker = false
+                                }) { Text("Effacer") }
+                            }
+                            TextButton(onClick = { showPicker = false }) { Text("Fermer") }
+                        }
+                    },
                 )
             }
             AanlsctStep.PICK_DASHBOARD_NAV -> {

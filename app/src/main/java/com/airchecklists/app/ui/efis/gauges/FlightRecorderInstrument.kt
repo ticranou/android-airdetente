@@ -195,22 +195,22 @@ fun FlightRecorderInstrument(modifier: Modifier = Modifier) {
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     ExportButton(
-                        icon = { Icon(Icons.Outlined.Map, contentDescription = null) },
+                        icon = { Icon(Icons.Outlined.Map, contentDescription = null, tint = Color.White) },
                         label = "Google Earth KML",
                         onClick = { showExport = false; exportKml() },
                     )
                     ExportButton(
-                        icon = { Icon(Icons.Outlined.Route, contentDescription = null) },
+                        icon = { Icon(Icons.Outlined.Route, contentDescription = null, tint = Color.White) },
                         label = "Autres logiciels GPX",
                         onClick = { showExport = false; exportGpx() },
                     )
                     ExportButton(
-                        icon = { Icon(Icons.Outlined.Description, contentDescription = null) },
+                        icon = { Icon(Icons.Outlined.Description, contentDescription = null, tint = Color.White) },
                         label = "Données brutes CSV",
                         onClick = { showExport = false; exportRaw() },
                     )
                     ExportButton(
-                        icon = { Icon(Icons.Outlined.Archive, contentDescription = null) },
+                        icon = { Icon(Icons.Outlined.Archive, contentDescription = null, tint = Color.White) },
                         label = "Dossier complet ZIP",
                         onClick = { showExport = false; exportZip() },
                     )

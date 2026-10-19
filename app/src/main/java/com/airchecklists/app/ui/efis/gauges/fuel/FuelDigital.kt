@@ -112,22 +112,22 @@ fun FuelDigital(modifier: Modifier = Modifier) {
             )
         }
 
-        // Labels E / F
+        // Labels E / F avec marge supplémentaire
         val labelY = barTop + barH / 2f
-        compactText(tm, "E", barLeft - pad * 0.5f, labelY, sizeSp = 11f, color = GaugeColors.MarkDim)
-        compactText(tm, "F", barRight + pad * 0.5f, labelY, sizeSp = 11f, color = GaugeColors.MarkDim)
+        compactText(tm, "E", barLeft - pad * 2.5f, labelY, sizeSp = 11f, color = GaugeColors.MarkDim)
+        compactText(tm, "F", barRight + pad * 2.5f, labelY, sizeSp = 11f, color = GaugeColors.MarkDim)
 
-        // Curseur triangulaire sous la barre, pointant vers le haut
+        // Curseur triangulaire violet sous la barre, pointant vers le bas
         val cursorX = barLeft + filledWidth
-        val cursorH = barH * 0.6f
-        val cursorW = barH * 0.45f
+        val cursorH = barH * 0.7f
+        val cursorW = barH * 0.55f
         val cursorPath = Path().apply {
-            moveTo(cursorX, barTop + barH)              // pointe touchant le bas de la barre
-            lineTo(cursorX - cursorW / 2f, barTop + barH + cursorH)  // base gauche
-            lineTo(cursorX + cursorW / 2f, barTop + barH + cursorH)  // base droite
+            moveTo(cursorX, barTop + barH)
+            lineTo(cursorX - cursorW / 2f, barTop + barH + cursorH)
+            lineTo(cursorX + cursorW / 2f, barTop + barH + cursorH)
             close()
         }
-        drawPath(cursorPath, Color.White)
+        drawPath(cursorPath, Color(0xFFB94DD6))
 
         // ── Ligne de valeurs ──
         val valY   = barTop + barH + (h - barTop - barH) * 0.78f

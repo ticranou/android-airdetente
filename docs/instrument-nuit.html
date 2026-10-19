@@ -32,11 +32,17 @@
       <div class="card">
         <h2>Possibilités</h2>
         <ul class="feat">
-          <li>Visualise la <b>fenêtre de jour VFR</b> sur un axe temporel 0h–24h UTC.</li>
-          <li><b>Gradient horizontal</b> : gris très foncé aux extrémités (nuit) vers blanc au centre (midi solaire), avec arrondi aux coins. Reflète l'alternance jour/nuit du jour courant.</li>
-          <li><b>Curseur heure courante</b> : cercle orange avec bordure noire, positionné sur le gradient à la position de l'heure UTC actuelle.</li>
-          <li><b>Trait 12h</b> : repère vertical qui dépasse au-dessus du gradient, avec le label "12h" positionné au-dessus.</li>
-          <li><b>Horaires crépuscule civil</b> (aube et crépuscule) affichés en <b style="color:#5588FF">bleu</b>, en heure locale, espacés en dessous du gradient.</li>
+          <li>Visualise le <b>temps disponible avant la nuit VFR</b> sur une barre de progression tricolore inspirée de NUMCRB.</li>
+          <li><b>Barre de progression tricolore</b> ancrée depuis la droite (fin de journée) :
+            <ul>
+              <li><b style="color:#888888">Grise</b> : plus de 90 minutes disponibles</li>
+              <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes disponibles</li>
+              <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes disponibles</li>
+            </ul>
+          </li>
+          <li><b>Curseur de l'heure courante</b> : triangle/curseur <b style="color:#B94DD6">violet (#B94DD6)</b>, plus large, dépassant au-dessus de la barre.</li>
+          <li><b>Repère 12h</b> : trait vertical placé au-dessus de la barre, avec le label "12h".</li>
+          <li><b>Horaires crépuscule civil</b> (aube et crépuscule) affichés en <b style="color:#5588FF">bleu</b>, en heure locale, espacés en dessous de la barre.</li>
           <li><b>Temps disponible</b> avant la nuit VFR (côté droit) :
             <ul>
               <li><b style="color:#35C759">Vert</b> : ≥ 90 minutes</li>
@@ -54,8 +60,8 @@
         <h3>Note</h3>
         <ul class="feat">
           <li>Le calcul utilise le <b>crépuscule civil</b> (soleil à −6° sous l'horizon) conformément à la réglementation VFR française.</li>
-          <li>Les horaires affichés sont en <b>heure locale</b> ; l'axe temporel du gradient est en <b>UTC</b>.</li>
-          <li>Sans position GPS, le gradient est affiché en gris uniforme et le temps disponible est masqué.</li>
+          <li>Les horaires affichés sont en <b>heure locale</b> ; les zones de la barre reflètent l'axe temporel de la journée.</li>
+          <li>Sans position GPS, la barre est affichée en gris uniforme et le temps disponible est masqué.</li>
         </ul>
       </div>
     </div>

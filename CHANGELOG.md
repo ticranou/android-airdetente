@@ -5,6 +5,53 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-19]
+
+### Ajouté
+
+- **ANLSCT / ANLCLT / ANLACT — bouton « Effacer »** : les dialogues de sélection
+  de ces trois instruments disposent désormais d'un bouton « Effacer » (aux côtés
+  de « Fermer ») permettant de retirer la cible ou l'action assignée à la case sans
+  reconfigurer.
+
+- **ANLAPP — dialogue de sélection de piste refonte** :
+  - Le titre du dialogue passe à `<OACI> — <Nom de l'aérodrome>` avec un sous-titre
+    fixe « Piste à utiliser ».
+  - Une **boussole de schéma d'orientation de piste** remplace l'ancien sélecteur
+    textuel : un arc compas avec le rosier des QFU disponibles, chaque piste étant
+    représentée par un **bouton QFU individuel**.
+  - Le bouton « Retour » est renommé en « Terrains… » (navigation vers la liste
+    des terrains).
+
+- **ANLFDR — dialogue d'export refonte** :
+  - L'ancien export textuel est remplacé par un dialogue descriptif avec
+    **4 boutons icône** : KML (Google Earth), GPX (positions + altitude), CSV (log
+    brut) et ZIP (tout le vol compressé).
+  - Les icônes des boutons sont teintées en **blanc**.
+
+### Modifié
+
+- **NUMNGT — barre de progression style NUMCRB** :
+  - Le rendu central passe d'un gradient à une **barre de progression tricolore**
+    à 3 zones ancrées depuis la droite (fin de journée) : grise (> 90 min
+    disponibles), orange (30–90 min), rouge (< 30 min).
+  - Le **curseur de l'heure courante** devient un triangle/curseur **violet
+    (#B94DD6)**, plus large, dépassant au-dessus de la barre.
+  - Le **repère 12h** (trait vertical) est placé au-dessus de la barre.
+  - Espacement accru entre les horaires de crépuscule civil et la barre.
+
+- **NUMCWN — barre de progression plus haute** : la hauteur de la barre de
+  progression augmente ; la largeur est calée sur la largeur du texte du minuteur.
+
+- **NUMCRB — ajustements barre** :
+  - Le **curseur** de la barre passe du blanc au **violet (#B94DD6)**.
+  - Les marges autour des libellés **E** et **F** sont élargies.
+
+- **ANLCRB — texte « Volume Restant » décalé vers le bas** pour une meilleure
+  lisibilité dans le cadran.
+
+---
+
 ## [Unreleased]
 
 ### Ajouté

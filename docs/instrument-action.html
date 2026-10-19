@@ -40,9 +40,20 @@
         <div class="gesture"><span class="g">··</span> Double-tap : <b>basculer</b> DONE ↔ OFF et déclencher les effets de session.</div>
         <h3>Effets au basculement</h3>
         <ul class="feat">
-          <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — propose le <b>calage altimétrique</b>.</li>
+          <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — puis ouvre trois dialogues séquentiels :
+            <ol>
+              <li><b>Carburant embarqué</b> — saisie du volume initial.</li>
+              <li><b>Étalonnage altimétrique</b> — calibration de l'altimètre.</li>
+              <li><b>Horamètre départ</b> — saisie du relevé de départ (format NNN.NN), stocké dans les instruments ANLHRM / NUMHRM.</li>
+            </ol>
+          </li>
           <li><b>Démarrage (OFF)</b> : arrête l'enregistreur et le suivi, efface l'heure de départ.</li>
-          <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b>.</li>
+          <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b> — puis ouvre deux dialogues séquentiels :
+            <ol>
+              <li><b>Horamètre arrivée</b> — saisie du relevé de fin de vol (format NNN.NN, optionnel — « Annuler » passe à l'étape suivante).</li>
+              <li><b>Dossier de vol</b> — récapitulatif complet de la session (horaires, durée, altitude calée, statistiques FDR, et section Horamètre si au moins un relevé est renseigné).</li>
+            </ol>
+          </li>
         </ul>
         <h3>Note</h3>
         <ul class="feat">

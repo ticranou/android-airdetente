@@ -39,6 +39,7 @@ import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
 import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
+import com.airchecklists.app.ui.efis.gauges.chrono.HorameterInputDialog
 
 private val GREEN_DONE  = Color(0xFF32C832)
 private val RING_GRAY   = Color(0xFF505050)
@@ -69,9 +70,10 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     val isDone = persist.actionDone[cellIdx] == true
 
     var showPicker by remember { mutableStateOf(false) }
-    var showCalibDialog by remember { mutableStateOf(false) }
+    // ENGINE_START sequential dialogs: 0 = fuel, 1 = calibration, 2 = horamètre départ
+    var engineStartStep by remember { mutableStateOf<Int?>(null) }
     var showFlightSummaryDialog by remember { mutableStateOf(false) }
-    var showFuelDialog by remember { mutableStateOf(false) }
+    var showHorameterStopDialog by remember { mutableStateOf(false) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -88,11 +90,10 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                             else cancelAction(actionId, toggled)
                         }
                         if (newDone && actionId == ActionId.ENGINE_START) {
-                            showCalibDialog = true
-                            showFuelDialog = true
+                            engineStartStep = 0  // start sequential dialogs: fuel → calib → horamètre
                         }
                         if (newDone && actionId == ActionId.ENGINE_STOP) {
-                            showFlightSummaryDialog = true
+                            showHorameterStopDialog = true  // horamètre end → then flight summary
                         }
                     }
                 },
@@ -178,11 +179,89 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         )
     }
 
-    if (showCalibDialog) {
+    // ENGINE_START step 0: fuel dialog
+    if (engineStartStep == 0) {
+        val aircraft  = ServiceLocator.currentAircraft()
+        val capacityL = aircraft?.fuelCapacityL?.toFloat()?.takeIf { it > 0f } ?: 91f
+        val currentL  = ServiceLocator.instrumentPersist.fuelStartL ?: capacityL
+        com.airchecklists.app.ui.efis.gauges.fuel.FuelConfigDialog(
+            currentL  = currentL,
+            capacityL = capacityL,
+            onDismiss = { engineStartStep = null },
+            onConfirm = { startL, startTracking ->
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        fuelStartL          = startL,
+                        fuelTrackingStartMs = if (startTracking) System.currentTimeMillis() else null,
+                        fuelAlertShown      = false,
+                    )
+                }
+                engineStartStep = 1  // next: calibration
+            },
+        )
+    }
+
+    // ENGINE_START step 1: altimeter calibration dialog
+    if (engineStartStep == 1) {
         AltCalibrationDialog(
-            initial = ServiceLocator.altCalibrationFt.value ?: nearestAirfieldElevationFt(),            onDismiss = { showCalibDialog = false },
-            onConfirm = { a -> ServiceLocator.setAltCalibration(a, ServiceLocator.efisProvider.state.value.gpsAltitudeFt); showCalibDialog = false },
-            onClear = { ServiceLocator.clearAltCalibration(); showCalibDialog = false },
+            initial = ServiceLocator.altCalibrationFt.value ?: nearestAirfieldElevationFt(),
+            onDismiss = { engineStartStep = null },
+            onConfirm = { a -> ServiceLocator.setAltCalibration(a, ServiceLocator.efisProvider.state.value.gpsAltitudeFt); engineStartStep = 2 },
+            onClear = { ServiceLocator.clearAltCalibration(); engineStartStep = 2 },
+        )
+    }
+
+    // ENGINE_START step 2: hour-meter start value
+    if (engineStartStep == 2) {
+        HorameterInputDialog(
+            initial = ServiceLocator.instrumentPersist.horameterNum.a,
+            onDismiss = { engineStartStep = null },
+            onConfirm = { v ->
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        horameterNum = it.horameterNum.copy(a = v),
+                        horameterAnl = it.horameterAnl.copy(a = v),
+                    )
+                }
+                engineStartStep = null
+            },
+            onClear = {
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        horameterNum = it.horameterNum.copy(a = null),
+                        horameterAnl = it.horameterAnl.copy(a = null),
+                    )
+                }
+                engineStartStep = null
+            },
+        )
+    }
+
+    // ENGINE_STOP: hour-meter end value, then flight summary
+    if (showHorameterStopDialog) {
+        HorameterInputDialog(
+            initial = ServiceLocator.instrumentPersist.horameterNum.b,
+            onDismiss = { showHorameterStopDialog = false; showFlightSummaryDialog = true },
+            onConfirm = { v ->
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        horameterNum = it.horameterNum.copy(b = v),
+                        horameterAnl = it.horameterAnl.copy(b = v),
+                    )
+                }
+                showHorameterStopDialog = false
+                showFlightSummaryDialog = true
+            },
+            onClear = {
+                ServiceLocator.updateInstruments {
+                    it.copy(
+                        horameterNum = it.horameterNum.copy(b = null),
+                        horameterAnl = it.horameterAnl.copy(b = null),
+                    )
+                }
+                showHorameterStopDialog = false
+                showFlightSummaryDialog = true
+            },
         )
     }
 
@@ -226,27 +305,6 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 }
             }
         }
-    }
-
-    if (showFuelDialog) {
-        val aircraft  = ServiceLocator.currentAircraft()
-        val capacityL = aircraft?.fuelCapacityL?.toFloat()?.takeIf { it > 0f } ?: 91f
-        val currentL  = ServiceLocator.instrumentPersist.fuelStartL ?: capacityL
-        com.airchecklists.app.ui.efis.gauges.fuel.FuelConfigDialog(
-            currentL  = currentL,
-            capacityL = capacityL,
-            onDismiss = { showFuelDialog = false },
-            onConfirm = { startL, startTracking ->
-                ServiceLocator.updateInstruments {
-                    it.copy(
-                        fuelStartL          = startL,
-                        fuelTrackingStartMs = if (startTracking) System.currentTimeMillis() else null,
-                        fuelAlertShown      = false,
-                    )
-                }
-                showFuelDialog = false
-            },
-        )
     }
 }
 

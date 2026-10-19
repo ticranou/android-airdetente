@@ -37,6 +37,8 @@
         <ul class="feat">
           <li>Deux relevés (<b>Départ</b> / <b>Arrivée</b>, format NNN.NN).</li>
           <li>La <b>durée de vol calculée</b> s'affiche (différence × 6 min → minutes et h:mm).</li>
+          <li>Les relevés sont également alimentés automatiquement par les flux <b>ACTION moteur</b> (ANLACT) : le dialogue Horamètre départ s'ouvre lors du démarrage moteur (ENGINE_START, 3e étape) et le dialogue Horamètre arrivée lors de l'arrêt moteur (ENGINE_STOP, 1re étape).</li>
+          <li>Les valeurs renseignées apparaissent dans le <b>Dossier de vol</b> affiché à l'arrêt moteur (et dans le fichier <code>resume.jpg</code> du ZIP exporté par ANLFDR).</li>
         </ul>
         <h3>Gestes</h3>
         <div class="gesture"><span class="g">–</span> Appui long sur une cellule : saisir le relevé</div>

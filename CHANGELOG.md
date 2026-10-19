@@ -5,6 +5,43 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-19] — Horamètre dans les flux moteur
+
+### Ajouté
+
+- **ANLACT ENGINE_START — 3e dialogue Horamètre** : le flux de démarrage moteur
+  comporte désormais trois dialogues séquentiels :
+  1. Carburant embarqué (inchangé)
+  2. Étalonnage altimétrique (inchangé)
+  3. **Horamètre départ** (nouveau) — saisie du relevé départ au format NNN.NN,
+     stocké (en centièmes d'heure) dans `horameterNum.a` et `horameterAnl.a`.
+
+- **ANLACT ENGINE_STOP — dialogue Horamètre avant le récapitulatif** : le
+  double-tap « Arrêt moteur » ouvre d'abord un dialogue **Horamètre arrivée**
+  (saisie du relevé fin de vol, stocké dans `horameterNum.b` / `horameterAnl.b`)
+  avant d'afficher le récapitulatif de vol. Le dialogue est optionnel : « Annuler »
+  ou la suppression de la valeur ouvrent quand même le récapitulatif.
+
+- **FlightSummaryCard — section Horamètre** : lorsqu'au moins un relevé
+  horamètre est renseigné, le dossier de vol (dialogue ENGINE_STOP et fichier
+  `resume.jpg` du ZIP exporté) affiche une nouvelle section :
+  - Horamètre départ : NNN.NN h (ou ---)
+  - Horamètre arrivée : NNN.NN h (ou ---)
+  - Durée horamètre : durée calculée (ex. 1h12 ou 72') — affichée uniquement si
+    les deux relevés sont présents et que l'arrivée est postérieure au départ.
+
+- **HorameterDialog.kt — composable partagé** : le dialogue de saisie horamètre
+  (`HorameterInputDialog`) est extrait dans un fichier dédié et partagé entre
+  ANLHRM, NUMHRM et les flux ACTION (ENGINE_START / ENGINE_STOP).
+
+### Modifié
+
+- **ANLHRM / NUMHRM** : les dialogues privés `HourReadingDialog` /
+  `HourReadingDialogD` sont remplacés par `HorameterInputDialog` (composable
+  partagé) — comportement utilisateur inchangé.
+
+---
+
 ## [2026-10-19]
 
 ### Ajouté

@@ -6,22 +6,13 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -97,7 +88,7 @@ fun HorameterDigital(modifier: Modifier = Modifier) {
     }
 
     dialogFor?.let { reading ->
-        HourReadingDialogD(
+        HorameterInputDialog(
             initial = reading.hundredths,
             onDismiss = { dialogFor = null },
             onConfirm = { v -> reading.hundredths = v; persist(); dialogFor = null },
@@ -116,57 +107,4 @@ private fun durationD(start: Int?, end: Int?): Pair<String, String>? {
     val m = totalMin % 60
     val hm = if (h > 0) "${h}h%02dm".format(m) else "${m}m"
     return "${totalMin}m" to hm
-}
-
-@Composable
-private fun HourReadingDialogD(
-    initial: Int?,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit,
-    onClear: () -> Unit,
-) {
-    var buf by remember { mutableStateOf(initial?.toString() ?: "") }
-    val value = buf.toIntOrNull()
-    val valid = value != null && value > 0
-    val padded = buf.padStart(3, '0')
-    val displayInt = padded.dropLast(2).ifEmpty { "0" }
-    val displayDec = padded.takeLast(2)
-    fun push(d: Char) { if (buf.length < 5) buf += d }
-    fun back() { buf = buf.dropLast(1) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Horamètre") },
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    "$displayInt.$displayDec",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = if (valid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                )
-                Spacer(Modifier.height(12.dp))
-                val rows = listOf(
-                    listOf("1", "2", "3"), listOf("4", "5", "6"),
-                    listOf("7", "8", "9"), listOf("C", "0", "⌫"),
-                )
-                rows.forEach { row ->
-                    Row {
-                        row.forEach { key ->
-                            TextButton(
-                                onClick = { when (key) { "C" -> buf = ""; "⌫" -> back(); else -> push(key[0]) } },
-                                modifier = Modifier.width(72.dp).height(56.dp),
-                            ) { Text(key, style = MaterialTheme.typography.headlineSmall) }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = { value?.let(onConfirm) }, enabled = valid) { Text("OK") } },
-        dismissButton = {
-            Row {
-                TextButton(onClick = onClear) { Text("Effacer") }
-                TextButton(onClick = onDismiss) { Text("Annuler") }
-            }
-        },
-    )
 }

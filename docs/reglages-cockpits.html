@@ -16,14 +16,14 @@
       <div class="logo">🛩</div>
       <div>
         <h1>Cockpits</h1>
-        <p class="subtitle">Sources EFIS, unités, tableaux de bord, carte mobile</p>
+        <p class="subtitle">Marqueurs des cockpits · tableaux de bord · import JSON / QR</p>
       </div>
     </div>
 
     <div class="card" style="margin:16px 0 22px">
-      <span class="chip">Cap · magnétique / route GPS</span>
-      <span class="chip num">Vitesse · km/h / kt</span>
-      <span class="chip num">Altitude · ft / m</span>
+      <span class="chip">Marqueur · points / barres / numéros</span>
+      <span class="chip">Position · haut / bas</span>
+      <span class="chip num">Import · JSON / QR</span>
     </div>
 
     <div class="grid2">
@@ -36,14 +36,10 @@
       <div class="card">
         <h2>Possibilités</h2>
 
-        <h3>Sources &amp; unités EFIS</h3>
+        <h3>Marqueurs des cockpits</h3>
         <ul class="feat">
-          <li>Source du cap : <b>magnétique</b> ou <b>route GPS</b> (track). La compensation d'étalonnage du compas magnétique ne s'applique qu'en mode <b>magnétique</b> ; en mode <b>route GPS</b> le cap suit le relèvement GPS brut, sans offset.</li>
-          <li>Source du variomètre : <b>GPS</b> ou <b>baromètre</b> (si le capteur est présent).</li>
-          <li>Unité de vitesse : <b>km/h</b> ou <b>nœuds</b>.</li>
-          <li>Unité d'altitude : <b>pieds (ft)</b> ou <b>mètres (m)</b> — appliquée à tous les instruments (le variomètre passe alors en m/s).</li>
-          <li>Réactivité des instruments : curseur <b>doux ↔ réactif</b> (lissage).</li>
-          <li>Affichage des <b>valeurs numériques</b> sur les instruments analogiques.</li>
+          <li>Style de l'indicateur de page (quand plusieurs cockpits sont accessibles) : <b>points</b>, <b>barres</b> ou <b>numéros</b>.</li>
+          <li><b>Position</b> du marqueur : <b>haut</b> ou <b>bas</b> de l'écran.</li>
         </ul>
 
         <h3>Tableaux de bord</h3>
@@ -61,17 +57,11 @@
           <li>Les cockpits se préparent aussi dans un navigateur avec le <b><a href="cockpit-builder.html">Créateur de cockpit</a></b> (éditeur de grille 2 colonnes fidèle à l'éditeur Android), puis s'exportent en fichier <b>.json</b> ou en <b>QR code</b> — à importer ici. Le créateur fonctionne entièrement hors-ligne.</li>
           <li>Format de l'enveloppe : <code>{ "type": "airdetente.cockpit", "version": 1, "dashboard": {…} }</code>.</li>
         </ul>
-
-        <h3>Cartes</h3>
-        <ul class="feat">
-          <li>Orientation de la carte mobile : <b>Nord en haut</b> ou <b>Cap en haut</b>.</li>
-          <li><b>Téléchargement / mise à jour</b> de la carte VFR hors-ligne (fond + données OpenAIP), avec vérification des mises à jour. À faire en Wi-Fi.</li>
-        </ul>
       </div>
     </div>
 
     <div class="footer">
-      Onglet Cockpits des Réglages : sources et unités EFIS, tableaux de bord et carte mobile s'y configurent. Attribution : © contributeurs OpenStreetMap (ODbL) ; données aéronautiques © OpenAIP (CC BY-NC).
+      Onglet Cockpits des Réglages : marqueurs de page et tableaux de bord s'y configurent. Les sources de données, unités et options d'affichage des instruments se règlent dans l'onglet <b>Instruments</b>.
     </div>
   </div>
 </div>

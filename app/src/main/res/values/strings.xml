@@ -77,12 +77,19 @@
     <!-- Settings -->
     <string name="settings_title">Réglages</string>
     <string name="help_title">Aide</string>
-    <string name="settings_section_aircraft">ULMs</string>
-    <string name="settings_section_checklists">Checks</string>
-    <string name="settings_section_data">Sauvegarde</string>
+    <string name="settings_section_aircraft">Appareils</string>
+    <string name="settings_section_checklists">Checklists</string>
+    <string name="settings_section_data">Données</string>
     <string name="settings_section_appearance">Affichage</string>
     <string name="settings_section_cockpits">Cockpits</string>
-    <string name="settings_efis">Instruments</string>
+    <string name="settings_section_application">Application</string>
+    <string name="settings_section_instruments">Instruments</string>
+    <string name="settings_section_airports">Terrains</string>
+    <string name="settings_section_map_data">Fond de Carte</string>
+    <string name="settings_section_vac_data">Cartes VAC</string>
+    <string name="settings_section_backup">Sauvegarde / Restauration</string>
+    <string name="settings_splash_label">Durée de l\'écran de démarrage</string>
+    <string name="settings_efis">Sources de données</string>
     <string name="settings_efis_heading">Source du cap</string>
     <string name="settings_efis_heading_magnetic">Magnétique</string>
     <string name="settings_efis_heading_gps">Track GPS</string>
@@ -106,7 +113,7 @@
     <string name="dashboard_import_json_message">Depuis un fichier .json ou le texte présent dans le presse-papier ?</string>
     <string name="dashboard_import_json_file">Fichier</string>
     <string name="dashboard_import_json_clipboard">Presse-papier</string>
-    <string name="settings_map">Cartes</string>
+    <string name="settings_map">Moving Map</string>
     <string name="settings_map_orientation">Orientation de la carte</string>
     <string name="settings_map_north_up">Nord en haut</string>
     <string name="settings_map_track_up">Cap en haut</string>
@@ -203,11 +210,12 @@
     <string name="efis_instr_spacer_s">CMN Espaceur - Petit (16 dp)</string>
     <string name="efis_instr_spacer_m">CMN Espaceur - Moyen (32 dp)</string>
     <string name="efis_instr_spacer_l">CMN Espaceur - Grand (64 dp)</string>
-    <string name="settings_safesky">Trafic Safesky (ANLTRF)</string>
+    <string name="settings_safesky">Trafic Safesky</string>
     <string name="settings_safesky_hint">Clé API Safesky pour l\'instrument de trafic ANLTRF. Obtenez votre clé sur safesky.app. La clé est stockée localement et n\'est jamais partagée.</string>
     <string name="settings_safesky_key_label">Clé API Safesky</string>
     <string name="settings_fdr">Enregistreur de vol</string>
-    <string name="settings_focus_section">Instruments</string>
+    <string name="settings_display_section">Paramètres d\'affichage</string>
+    <string name="settings_focus_section">Fermeture automatique du mode Focus</string>
     <string name="settings_focus_long_press">Appui long pour focaliser</string>
     <string name="settings_focus_long_press_value">Durée : %1$d s</string>
     <string name="settings_focus_duration">Fermeture automatique du mode Focus</string>
@@ -274,7 +282,7 @@
     <string name="reorder_dialog_label">Nouvelle position (1 à %1$d)</string>
     <string name="action_move">Déplacer</string>
     <string name="settings_add_aircraft">Ajouter un appareil</string>
-    <string name="settings_add_checklist">Créer une checklist</string>
+    <string name="settings_add_checklist">Ajouter une checklist</string>
     <string name="settings_add_checklist_section">Ajouter une section</string>
     <string name="settings_import">Importer un appareil (JSON)</string>
     <string name="settings_export">Exporter un appareil (JSON)</string>

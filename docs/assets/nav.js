@@ -41,11 +41,13 @@
       ["cockpit-builder.html", "Créateur de cockpit"],
     ]},
     { title: "Réglages", items: [
-      ["reglages-apparence.html", "Affichage"],
+      ["reglages-apparence.html", "Application"],
       ["reglages-cockpits.html", "Cockpits"],
+      ["reglages-instruments.html", "Instruments"],
       ["reglages-appareils.html", "Appareils"],
       ["reglages-checklists.html", "Checklists"],
       ["reglages-vac.html", "Terrains"],
+      ["reglages-donnees.html", "Données"],
     ]},
   ];
 

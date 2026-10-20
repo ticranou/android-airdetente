@@ -5,6 +5,38 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-20] — Réorganisation des Réglages
+
+### Modifié
+
+- **Refonte complète de la structure des Réglages** — les onglets passent de
+  (Affichage, Cockpits, Appareils, Checklists, Terrains) à une structure à
+  9 onglets : **Application, Cockpits, Instruments, Appareils, Checklists,
+  Terrains, Données, Aide, Avertissement** (plus Recherche).
+  - **Application** : Démarrage (durée du splash en SegmentedButton Désactivé/1s/2s/3s,
+    empêcher la mise en veille, thème Sombre/Auto) + bouton Quitter l'application.
+  - **Instruments** (nouvel onglet) : regroupe les réglages EFIS auparavant dans
+    Cockpits — Paramètres d'affichage (contour des cadrans, valeurs numériques,
+    indicateurs de gestes, réactivité, fermeture auto du mode Focus), Sources de
+    données (cap, variomètre), Unités (vitesse, altitude, géoïde), Enregistreur
+    de vol, Moving Map, Trafic Safesky.
+  - **Cockpits** : réduit aux marqueurs des cockpits + tableaux de bord.
+  - **Données** (désormais toujours visible) : Fond de Carte, Cartes VAC
+    (téléchargement/vérification déplacés depuis Terrains), Sauvegarde / Restauration.
+
+- **Hiérarchie typographique des Réglages** — trois niveaux cohérents :
+  `SectionHeader` (titre de section, gras, bordures haut/bas), `SettingsTitre`
+  (titre de groupe de paramètres) et labels. SegmentedButtons en pleine largeur
+  (labels « Durée » et « Thème » supprimés).
+
+- **Renommages** : onglet « Checks » → « Checklists » ; SectionHeader « Cartes »
+  → « Moving Map », « Trafic Safesky (ANLTRF) » → « Trafic Safesky ».
+
+- **Documentation HTML** mise à jour pour la nouvelle structure : page Application,
+  nouvelles pages Instruments et Données, nav latérale réorganisée.
+
+---
+
 ## [2026-10-19] — Horamètre dans les flux moteur
 
 ### Ajouté

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Instruments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">🧭</div>
+      <div>
+        <h1>Instruments</h1>
+        <p class="subtitle">Affichage · sources de données · unités · enregistreur · Moving Map · trafic</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip">Contour · Couleur / Carbone / Métal</span>
+      <span class="chip">Cap · magnétique / route GPS</span>
+      <span class="chip num">Vitesse · km/h / kt</span>
+      <span class="chip num">Altitude · ft / m</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/REGLAGES-COCKPITS1.jpg" alt="Réglages / Instruments">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+
+        <h3>Paramètres d'affichage</h3>
+        <ul class="feat">
+          <li>Style du <b>contour des cadrans</b> (instruments analogiques et fond des titres des instruments numériques) : <b>Couleur</b> unie, <b>Carbone</b> ou <b>Métal</b>.</li>
+          <li>En mode Couleur, choisissez la <b>teinte par défaut</b> dans une palette sombre (noir, gris, bleu, violet, orange, vert, jaune). C'est le <b>défaut</b> commun à tous les instruments ; il peut être <b>surchargé instrument par instrument</b> lors de l'édition d'un tableau de bord (Réglages ▸ Cockpits).</li>
+          <li>Affichage des <b>valeurs numériques</b> sur les instruments analogiques.</li>
+          <li><b>Indicateurs de gestes</b> : affiche les repères des interactions tactiles disponibles sur les instruments.</li>
+          <li><b>Réactivité des instruments EFIS</b> : curseur <b>doux ↔ réactif</b> (lissage des valeurs).</li>
+          <li><b>Fermeture automatique du mode Focus</b> : délai avant retour depuis l'affichage plein écran d'un instrument.</li>
+        </ul>
+
+        <h3>Sources de données</h3>
+        <ul class="feat">
+          <li>Source du <b>cap</b> : <b>magnétique (GPS)</b> ou <b>route GPS</b> (track). La compensation d'<b>étalonnage</b> du compas magnétique ne s'applique qu'en mode <b>magnétique</b> ; en mode <b>route GPS</b> le cap suit le relèvement GPS brut, sans offset.</li>
+          <li>Source du <b>variomètre</b> : <b>GPS</b> ou <b>baromètre</b> (si le capteur est présent).</li>
+        </ul>
+
+        <h3>Unités</h3>
+        <ul class="feat">
+          <li>Unité de <b>vitesse</b> : <b>km/h</b> ou <b>nœuds</b>.</li>
+          <li>Unité d'<b>altitude</b> : <b>pieds (ft)</b> ou <b>mètres (m)</b> — appliquée à tous les instruments (le variomètre passe alors en m/s).</li>
+          <li><b>Correction du géoïde</b> : conversion de l'altitude GPS ellipsoïdale vers l'altitude au-dessus du niveau de la mer.</li>
+        </ul>
+
+        <h3>Enregistreur de vol</h3>
+        <ul class="feat">
+          <li>Taille du <b>buffer</b> glissant (GPS + capteurs) conservé pour l'export.</li>
+          <li>Intervalle de <b>flush</b> (en minutes) d'écriture des données sur le stockage.</li>
+        </ul>
+
+        <h3>Moving Map</h3>
+        <ul class="feat">
+          <li>Orientation de la carte mobile : <b>Nord en haut</b> ou <b>Cap en haut</b>.</li>
+          <li>Affichage des <b>boutons de zoom</b> sur la carte.</li>
+        </ul>
+
+        <h3>Trafic Safesky</h3>
+        <ul class="feat">
+          <li>Saisie de la <b>clé API</b> Safesky pour alimenter l'instrument de trafic aérien.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

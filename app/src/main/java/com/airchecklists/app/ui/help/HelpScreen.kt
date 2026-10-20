@@ -108,8 +108,8 @@ private fun HelpContent() {
     )
     Spacer()
 
-    // --- Onglet Checks ---
-    Section("Onglet Checks")
+    // --- Onglet Checklists ---
+    Section("Onglet Checklists")
     Para("Affiche les checklists de l'appareil courant, réparties en deux sous-onglets :")
     Bullet("Normales : prévol, mise en route, roulage, etc.")
     Bullet("Urgences : pannes, feux, atterrissage d'urgence, etc.")
@@ -152,7 +152,7 @@ private fun HelpContent() {
     Bullet("Montre (ANLWCH / NUMWCH) : heure courante.")
     Bullet("Météo (ANLMTO / NUMMTO) : radar de précipitations + vent au FL20 ; tapez la tuile pour la carte météo plein écran.")
     Bullet("Terrains proches (ANLFLD / NUMFLD) : aérodromes les plus proches et leur relèvement, issus de la base aérodromes complète (hors-ligne). En voyage, ils s'adaptent à votre position — pas seulement votre liste. Un aérodrome proche non listé : ouvrez sa VAC à la demande ou ajoutez-le à vos terrains.")
-    Bullet("Enregistreur de vol (ANLFDR / NUMFDR) : conserve les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). Double-tap = pause / reprise. Appui long = exporter dans Téléchargements : trace KML (Google Earth) ou GPX couvrant tout le vol (positions + altitude), ou log brut CSV des X dernières minutes (toutes les mesures). Récupérable en branchant l'appareil au PC. Il tourne en continu tant que l'application est active (service de vol), y compris quand vous passez sur une autre application ; il s'arrête au « Quitter ». Durée conservée et fréquence de sauvegarde réglables dans Réglages ▸ Cockpits. Pastille verte = paramètre disponible et enregistré, orange = capteur absent. Anneau / barre orange = temps avant la prochaine sauvegarde disque.")
+    Bullet("Enregistreur de vol (ANLFDR / NUMFDR) : conserve les dernières minutes de vol (GPS, accélération, inclinaison, altitude, baromètre). Double-tap = pause / reprise. Appui long = exporter dans Téléchargements : trace KML (Google Earth) ou GPX couvrant tout le vol (positions + altitude), ou log brut CSV des X dernières minutes (toutes les mesures). Récupérable en branchant l'appareil au PC. Il tourne en continu tant que l'application est active (service de vol), y compris quand vous passez sur une autre application ; il s'arrête au « Quitter ». Durée conservée et fréquence de sauvegarde réglables dans Réglages ▸ Instruments. Pastille verte = paramètre disponible et enregistré, orange = capteur absent. Anneau / barre orange = temps avant la prochaine sauvegarde disque.")
     Bullet("Approche finale (NUMAPP, 3 lignes mini) : vue « tunnel » 3D vers la piste (highway-in-the-sky). Trois cadres emboîtés (vert 500 / jaune 1000 / orange 1500 ft au-dessus du tour de piste = altitude terrain + 1000 ft) fuient vers la piste. La silhouette d'ULM se décale selon l'écart d'axe (droite/gauche) et de plan (au-dessus/en dessous du plan à 3°) : verte dans les tolérances (±15 m d'axe, ±60 ft de plan), orange en dehors. Bandeau : IAS, altitude, vario, écart d'axe (m G/D) et écart au plan (ft / 3°). Cible = aérodrome le plus proche (AUTO) ; appui long = verrouiller un terrain et un QFU (ou revenir en AUTO). En v1 la cible est le point de référence de l'aérodrome (proxy du seuil) et le QFU vient de la fiche au pas de 10° : aide INDICATIVE, non certifiée, sans conscience du relief.")
     Note(
         "Gyroscope requis : l'horizon, le conservateur de cap, la bille et l'EFIS complet ont besoin " +
@@ -177,9 +177,9 @@ private fun HelpContent() {
     Bullet("Tapez la tuile « Moving Map » d'un tableau de bord pour ouvrir la carte en plein écran.")
     Bullet("Fond de carte type OACI (données OpenStreetMap) + espaces aériens, aérodromes, obstacles et points VFR (données OpenAIP), le tout hors-ligne.")
     Bullet("Votre position est au centre (icône avion jaune) ; la carte suit l'avion. Pincez pour zoomer / dézoomer.")
-    Bullet("Orientation réglable : Nord en haut ou Cap en haut (Réglages ▸ Cockpits ▸ Cartes).")
+    Bullet("Orientation réglable : Nord en haut ou Cap en haut (Réglages ▸ Instruments ▸ Moving Map).")
     Bullet("En-tête EFIS (cap, altitude, vario, vitesse, bille) affiché au-dessus de la carte.")
-    Bullet("La carte se télécharge dans Réglages ▸ Cockpits ▸ Cartes (à faire en Wi-Fi). Une alerte au démarrage signale une version plus récente.")
+    Bullet("La carte se télécharge dans Réglages ▸ Données ▸ Fond de Carte (à faire en Wi-Fi). Une alerte au démarrage signale une version plus récente.")
     Bullet("⚠️ Indicatif et non certifié — ne remplace pas une carte OACI officielle ni un GPS certifié.")
     SubSection("Mode démo")
     Para(
@@ -194,19 +194,34 @@ private fun HelpContent() {
     Section("Onglet Terrains")
     Para("La liste de vos terrains (aérodromes / plateformes). Pour chaque terrain :")
     Bullet("Météo : METAR / TAF récupérés en ligne (NOAA) quand le terrain a un code OACI.")
-    Bullet("Carte VAC : téléchargement du PDF officiel (SIA) selon le cycle AIRAC configuré.")
+    Bullet("Carte VAC : téléchargement du PDF officiel (SIA) selon le cycle AIRAC configuré (depuis Réglages ▸ Données ▸ Cartes VAC).")
     Spacer()
 
     // --- Réglages ---
     Section("Réglages")
     Para(
         "Les réglages sont répartis en onglets, accessibles par la barre défilante en haut " +
-            "de l'écran (le premier bouton « Retour » revient à l'accueil).",
+            "de l'écran (le premier bouton « Retour » revient à l'accueil) : Recherche, Application, " +
+            "Cockpits, Instruments, Appareils, Checklists, Terrains, Données, Aide et Avertissement.",
     )
-    SubSection("Affichage")
-    Bullet("Thème sombre / automatique et taille de police du texte des checklists.")
-    Bullet("Durée de l'écran d'accueil.")
+    SubSection("Recherche")
+    Bullet("Recherche globale dans tous les réglages : tapez un mot-clé pour retrouver directement le paramètre voulu.")
+    SubSection("Application")
+    Bullet("Durée de l'écran de démarrage.")
     Bullet("Empêcher la mise en veille de l'écran (activé par défaut).")
+    Bullet("Thème sombre / automatique.")
+    Bullet("« Quitter l'application » : arrête le service de vol et ferme complètement l'application (voir ci-dessous).")
+    SubSection("Cockpits")
+    Bullet("Marqueurs des cockpits : style des marqueurs (points, barres ou numéros) et position (en haut ou en bas).")
+    Bullet("Tableaux de bord : liste (ajouter / modifier / supprimer via le menu ⋮). Pastille numérotée à gauche : tapez-la pour réordonner. Case « Afficher dans le Cockpit » : détermine la présence dans l'onglet Cockpits.")
+    Bullet("Import d'un tableau de bord au format JSON ou par QR code.")
+    Bullet("L'édition d'un tableau (écran dédié) permet de choisir son nom, ses colonnes / lignes et l'instrument de chaque case.")
+    Bullet(
+        "Bouton « Options » d'une case : ouvre une dialogue regroupant la couleur / le style du contour " +
+            "(Couleur par défaut, Carbone, Métal, ou une couleur sombre spécifique) ET la gestion de la case " +
+            "(fusionner en large / en haut, ou séparer). Utile pour repérer un instrument d'un coup d'œil.",
+    )
+    SubSection("Instruments")
     Bullet(
         "Contour des cadrans : style du contour des instruments analogiques et du fond des titres " +
             "des instruments numériques — Couleur unie, Carbone ou Métal. En mode Couleur, choisissez " +
@@ -216,23 +231,16 @@ private fun HelpContent() {
         "Cette couleur par défaut s'applique à tous les instruments, mais peut être surchargée " +
             "instrument par instrument lors de l'édition d'un tableau de bord (voir Cockpits).",
     )
-    Bullet("« Quitter l'application » : arrête le service de vol et ferme complètement l'application (voir ci-dessous).")
-    SubSection("Cockpits")
-    Bullet("Source du cap (magnétique ou track GPS) et source du variomètre (GPS ou baromètre).")
-    Bullet("Unité de vitesse (km/h ou nœuds) et réactivité des instruments.")
     Bullet(
         "« Afficher les valeurs numériques » : ne concerne QUE les instruments analogiques. " +
             "Les instruments numériques affichent toujours leurs valeurs.",
     )
-    Bullet("Tableaux de bord : liste (ajouter / modifier / supprimer via le menu ⋮). Pastille numérotée à gauche : tapez-la pour réordonner. Case « Afficher dans le Cockpit » : détermine la présence dans l'onglet Cockpits.")
-    Bullet("L'édition d'un tableau (écran dédié) permet de choisir son nom, ses colonnes / lignes et l'instrument de chaque case.")
-    Bullet(
-        "Bouton « Options » d'une case : ouvre une dialogue regroupant la couleur / le style du contour " +
-            "(Couleur par défaut, Carbone, Métal, ou une couleur sombre spécifique) ET la gestion de la case " +
-            "(fusionner en large / en haut, ou séparer). Utile pour repérer un instrument d'un coup d'œil.",
-    )
-    Bullet("Cartes : téléchargement / mise à jour de la carte hors-ligne (à faire en Wi-Fi, ~400 Mo), orientation Nord en haut / Cap en haut, et « Vérifier les mises à jour ».")
-    Bullet("Attribution : fond © contributeurs OpenStreetMap (ODbL) ; données aéronautiques © OpenAIP (CC BY-NC — usage non commercial).")
+    Bullet("Indicateurs de gestes, réactivité des instruments et fermeture automatique du mode Focus.")
+    Bullet("Sources de données : source du cap (magnétique + calibration, ou track GPS) et source du variomètre (GPS ou baromètre).")
+    Bullet("Unités : vitesse (km/h ou nœuds), altitude (ft ou m) et correction géoïde.")
+    Bullet("Enregistreur de vol : durée conservée et fréquence de sauvegarde sur disque.")
+    Bullet("Moving Map : orientation Nord en haut / Cap en haut et boutons de zoom.")
+    Bullet("Trafic Safesky : affichage du trafic environnant.")
     SubSection("Appareils")
     Para("Créez, modifiez ou supprimez vos appareils. Pour chacun :")
     Bullet("Nom, sous-titre, icône.")
@@ -242,9 +250,17 @@ private fun HelpContent() {
             "arc blanc volets (Vmin/Vmoy/Vmax), Vno, Vne et Vpl (plané).",
     )
     Bullet("Import / export d'un appareil au format JSON (sauvegarde ou partage).")
-    SubSection("Checks & Terrains")
+    SubSection("Checklists")
+    Bullet("Taille du texte des checklists.")
     Bullet("Ajout / édition des checklists (et de leurs sections) de l'appareil courant.")
-    Bullet("Ajout / édition des terrains, avec le cycle AIRAC utilisé pour les cartes VAC.")
+    SubSection("Terrains")
+    Bullet("Cycle AIRAC utilisé pour les cartes VAC.")
+    Bullet("Liste des terrains (ajout / édition), avec accès à leur carte VAC.")
+    SubSection("Données")
+    Bullet("Fond de Carte : téléchargement / mise à jour de la carte VFR hors-ligne (à faire en Wi-Fi, ~400 Mo) et « Vérifier les mises à jour ».")
+    Bullet("Cartes VAC : téléchargement et vérification des PDF officiels (SIA).")
+    Bullet("Sauvegarde / Restauration : export et import de vos données.")
+    Bullet("Attribution : fond © contributeurs OpenStreetMap (ODbL) ; données aéronautiques © OpenAIP (CC BY-NC — usage non commercial).")
     SubSection("Aide")
     Bullet("Cet écran : la documentation complète et hors-ligne de l'application.")
     Spacer()
@@ -256,7 +272,7 @@ private fun HelpContent() {
             "service de premier plan (une notification persistante « vol en cours » s'affiche). L'application " +
             "reste ainsi active en arrière-plan et vos instruments continuent de tourner.",
     )
-    Bullet("Pour fermer réellement l'application : Réglages ▸ Affichage ▸ « Quitter l'application », ou l'action « Quitter » de la notification.")
+    Bullet("Pour fermer réellement l'application : Réglages ▸ Application ▸ « Quitter l'application », ou l'action « Quitter » de la notification.")
     Bullet("Les valeurs saisies restent conservées pour la prochaine ouverture.")
     Spacer()
 

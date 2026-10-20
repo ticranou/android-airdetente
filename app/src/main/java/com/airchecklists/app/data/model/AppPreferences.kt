@@ -78,6 +78,7 @@ enum class EfisInstrument {
     ANLNGT,              // Nuit aéronautique (jauge ronde — crépuscule civil + temps dispo)
     NUMCRB,              // Carburant numérique (rectangulaire, 100%-1L)
     NUMNGT,              // Nuit aéronautique (crépuscule civil, 50%-1L)
+    NUMTRM,              // Trammer (pense-bête point de report T/R/A/M/M/E/R, 100%-1L)
     CMNFGT,              // Session de vol (rectangulaire, 100%-1L)
     CMNWHB,              // Tableau blanc / notes (dessin libre, 100%-5L)
     SPACER_S,            // Espaceur S (16 dp)
@@ -93,7 +94,7 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, NUMNGT, SPACER_S, SPACER_M, SPACER_L,
+            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, NUMNGT, NUMTRM, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
@@ -110,7 +111,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, NUMTRM, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -381,6 +382,15 @@ data class HorameterSnapshot(
     val b: Int? = null,
 )
 
+/** Persisted state of one NUMTRM (TRAMMER) cell: the 7 toggle booleans
+ *  (Top, Route, Altitude, Moteur, Météo, Essence, Radio) + the frozen wall-clock
+ *  epoch-ms captured when all 7 went OK (null = not yet validated / broken). */
+@Serializable
+data class TrammerSnapshot(
+    val checks: List<Boolean> = List(7) { false },
+    val validatedMs: Long? = null,
+)
+
 /**
  * Durable state for the stateful instruments, persisted to settings.json so it
  * survives a process kill/restart. Slots are keyed the same way as
@@ -433,6 +443,8 @@ data class InstrumentPersistState(
     val actionSlots: Map<Int, String> = emptyMap(),
     /** Which ANLACT cells are currently in DONE state (keyed by cell index). */
     val actionDone: Map<Int, Boolean> = emptyMap(),
+    /** Per-cell NUMTRM (TRAMMER) state, keyed by cell index. */
+    val trammerSlots: Map<Int, TrammerSnapshot> = emptyMap(),
     /** Epoch ms when the engine was last started (null = engine not running). */
     val engineStartMs: Long? = null,
     /** Epoch ms when the engine was last stopped (null = never stopped). */

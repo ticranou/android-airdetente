@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AirDetente — Trammer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+
+<div class="poster">
+  <div class="content">
+    <div class="brand">
+      <div class="logo">✅</div>
+      <div>
+        <h1>Trammer</h1>
+        <p class="subtitle">Pense-bête du point de report — mnémonique TRAMMER</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin:16px 0 22px">
+      <span class="chip num">NUMTRM · numérique (100%-1L)</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <img class="shot" src="screenshots/NUMTRM.jpg" alt="NUMTRM — Trammer">
+      </div>
+
+      <div class="card">
+        <h2>Possibilités</h2>
+        <p>Le mnémonique <b>TRAMMER</b> à passer en revue à chaque point de report pour vérifier que rien n'a été oublié. Les 7 vérifications se valident <b>séquentiellement</b> via un seul interrupteur :</p>
+        <ul class="feat">
+          <li><b>T · Top</b> : l'heure actuelle est notée, base des calculs de temps vers le point suivant.</li>
+          <li><b>R · Route</b> : cap prévu tenu pour la branche de nav, position correcte.</li>
+          <li><b>A · Altitude</b> : altitude conforme au prévu, pas d'obstacle / pas de descente nécessaire.</li>
+          <li><b>M · Moteur</b> : paramètres moteur dans le vert, rien d'anormal.</li>
+          <li><b>M · Météo</b> : météo correcte, pas de dégradation imprévue.</li>
+          <li><b>E · Essence</b> : volume restant vérifié et cohérent, permuter les réservoirs si besoin.</li>
+          <li><b>R · Radio / Radionav</b> : fréquences attendues, suivantes déjà préaffichées.</li>
+        </ul>
+        <h3>Disposition (gauche → droite)</h3>
+        <ul class="feat">
+          <li><b>À gauche</b> : un badge sombre (même style que les tags MAG/GPS du NUMCAP) affiche l'<b>heure du dernier TRAMMER validé</b> (format <b>HHhMM</b>, ex. 14h17), écrite verticalement en <b style="color:#4aa3ff">bleu</b>.</li>
+          <li><b>Au centre</b> : les 7 lettres <b>T R A M M E R</b> en grandes pills, transparentes par défaut, qui deviennent <b>vertes</b> au fur et à mesure des validations.</li>
+          <li><b>À droite</b> : un <b>unique gros interrupteur</b>, surmonté du libellé de la vérification courante (Top, Route, Altitude…).</li>
+        </ul>
+        <h3>Gestes</h3>
+        <div class="gesture"><span class="g">··</span> <b>Double-tap</b> sur l'interrupteur : la lettre courante passe au <b>vert</b> et l'interrupteur <b>avance automatiquement</b> à la vérification suivante (le libellé au-dessus change). Les pills ne sont pas tappables ; seul le double-tap sur l'interrupteur agit.</div>
+        <h3>Cycle de validation</h3>
+        <ul class="feat">
+          <li>État initial : les 7 lettres grises (OFF), l'interrupteur pointe sur la 1re vérification (<b>Top</b>).</li>
+          <li>Au <b>dernier double-tap</b>, les 7 lettres sont vertes et l'<b>heure courante est renseignée</b> à gauche : c'est l'heure de passage au point de report.</li>
+          <li><b>5 secondes</b> après la validation complète, l'instrument se <b>réinitialise</b> automatiquement (lettres OFF, interrupteur de retour sur Top) — mais l'<b>heure du dernier TRAMMER reste affichée</b>.</li>
+          <li>Cette heure <b>persiste</b> : elle reste visible après la réinitialisation et pendant le cycle suivant, jusqu'à ce qu'un nouveau TRAMMER complet la remplace.</li>
+        </ul>
+        <h3>Note</h3>
+        <ul class="feat">
+          <li>Chaque case NUMTRM mémorise son avancement et son heure du dernier TRAMMER. L'état est <b>persistant</b> : il survit au changement de tableau de bord et au redémarrage de l'application.</li>
+          <li><b>Pastille de titre</b> affichée en haut de la case (masquable via Options ▸ « Masquer le titre »).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+    </div>
+  </div>
+</div>
+
+<script src="assets/nav.js"></script>
+</body>
+</html>

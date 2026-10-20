@@ -35,6 +35,7 @@
       ["instrument-terrains.html", "Terrains proches"],
       ["instrument-toucher.html", "Toucher de piste"],
       ["instrument-trafic.html", "Trafic Safesky"],
+      ["instrument-trammer.html", "Trammer"],
       ["instrument-variometre.html", "Variomètre"],
     ]},
     { title: "Outils", items: [

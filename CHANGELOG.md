@@ -9,6 +9,20 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ### Ajouté
 
+- **Nouvel instrument NUMTRM — Trammer** (famille NUM, une ligne) — pense-bête du
+  point de report reprenant le mnémonique **TRAMMER** : **T**op, **R**oute,
+  **A**ltitude, **M**oteur, **M**étéo, **E**ssence, **R**adio/Radionav. Disposition
+  gauche → droite : un badge sombre affiche l'**heure du dernier TRAMMER validé**
+  (format HHhMM, verticale en bleu) ; au centre les 7 lettres en grandes pills
+  (transparentes puis vertes) ; à droite un **unique interrupteur** surmonté du
+  libellé de la vérification courante. Le **double-tap** sur l'interrupteur valide
+  la lettre courante (pill verte) et **avance automatiquement** à la vérification
+  suivante. Au dernier double-tap, l'heure courante est renseignée à gauche ;
+  **5 secondes** après la validation complète, l'instrument se **réinitialise**
+  automatiquement (lettres OFF, retour sur Top) tout en **conservant l'heure
+  affichée** jusqu'au prochain cycle complet. L'état est persistant par case
+  (changement de tableau de bord, redémarrage de l'application).
+
 - **Cycle AIRAC calculé automatiquement** (Réglages ▸ Terrains) — le cycle en
   cours est désormais déduit de la date du système (publication AIRAC tous les
   28 jours selon le calendrier mondial fixe) et **pré-rempli** lorsque le champ

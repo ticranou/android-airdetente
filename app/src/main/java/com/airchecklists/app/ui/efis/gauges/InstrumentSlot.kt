@@ -129,6 +129,7 @@ fun InstrumentSlot(
             EfisInstrument.ANLNGT -> com.airchecklists.app.ui.efis.gauges.compact.NightAnalogInstrument(state, round)
             EfisInstrument.NUMCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelDigital(slotFill)
             EfisInstrument.NUMNGT -> com.airchecklists.app.ui.efis.gauges.compact.NightInstrument(state, slotFill)
+            EfisInstrument.NUMTRM -> com.airchecklists.app.ui.efis.gauges.trammer.TrammerInstrument(cellIdx, slotFill)
             EfisInstrument.CMNFGT -> com.airchecklists.app.ui.efis.gauges.compact.FlightSessionDigital(fill)
             EfisInstrument.CMNWHB -> com.airchecklists.app.ui.efis.gauges.whiteboard.WhiteboardInstrument(fill)
             EfisInstrument.SPACER_S, EfisInstrument.SPACER_M, EfisInstrument.SPACER_L -> Unit

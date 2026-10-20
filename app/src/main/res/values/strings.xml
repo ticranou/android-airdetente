@@ -205,6 +205,7 @@
     <string name="efis_instr_ngt_anl">ANLNGT - Nuit aéronautique</string>
     <string name="efis_instr_crb_c">NUMCRB - Carburant (100%-1L)</string>
     <string name="efis_instr_ngt">NUMNGT - Nuit aéronautique (50%-1L)</string>
+    <string name="efis_instr_trm">NUMTRM - Trammer (100%-1L)</string>
     <string name="efis_instr_fgt">CMNFGT - Session de vol</string>
     <string name="efis_instr_whb">CMNWHB - Tableau blanc (100%-5L)</string>
     <string name="efis_instr_spacer_s">CMN Espaceur - Petit (16 dp)</string>

@@ -1304,11 +1304,26 @@ private fun AirportsSection(
     onDeleteVac: (VacChart) -> Unit,
     onReordered: (orderedIds: List<String>) -> Unit,
 ) {
+    val currentCycle = remember { com.airchecklists.app.data.local.AiracCycle.current() }
+    // Pre-fill with the computed current cycle if no value is set yet.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (airacCycle.isBlank()) onCycleChange(currentCycle)
+    }
     OutlinedTextField(
         value = airacCycle,
         onValueChange = onCycleChange,
         label = { Text(stringResource(R.string.settings_vac_cycle)) },
         singleLine = true,
+        trailingIcon = {
+            if (airacCycle != currentCycle) {
+                TextButton(onClick = { onCycleChange(currentCycle) }) {
+                    Text(stringResource(R.string.settings_vac_cycle_today))
+                }
+            }
+        },
+        supportingText = {
+            Text(stringResource(R.string.settings_vac_cycle_hint, currentCycle))
+        },
         modifier = Modifier.fillMaxWidth(),
     )
     if (charts.isNotEmpty()) {

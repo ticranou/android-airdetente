@@ -194,7 +194,7 @@ private fun HelpContent() {
     Section("Onglet Terrains")
     Para("La liste de vos terrains (aérodromes / plateformes). Pour chaque terrain :")
     Bullet("Météo : METAR / TAF récupérés en ligne (NOAA) quand le terrain a un code OACI.")
-    Bullet("Carte VAC : téléchargement du PDF officiel (SIA) selon le cycle AIRAC configuré (depuis Réglages ▸ Données ▸ Cartes VAC).")
+    Bullet("Carte VAC : téléchargement du PDF officiel (SIA) selon le cycle AIRAC configuré dans Réglages ▸ Terrains (le téléchargement se fait depuis Réglages ▸ Données ▸ Cartes VAC).")
     Spacer()
 
     // --- Réglages ---
@@ -254,11 +254,24 @@ private fun HelpContent() {
     Bullet("Taille du texte des checklists.")
     Bullet("Ajout / édition des checklists (et de leurs sections) de l'appareil courant.")
     SubSection("Terrains")
-    Bullet("Cycle AIRAC utilisé pour les cartes VAC.")
+    Bullet(
+        "Cycle AIRAC utilisé pour les cartes VAC. Le cycle en cours est désormais " +
+            "calculé automatiquement d'après la date du système et pré-rempli quand le " +
+            "champ est vide ; il reste entièrement modifiable pour une correction manuelle. " +
+            "Le texte d'aide sous le champ rappelle le cycle calculé (ex. « Cycle en cours " +
+            "calculé : 01_OCT_2026 ») et un bouton « Aujourd'hui » apparaît pour revenir au " +
+            "cycle courant en un geste dès que la valeur saisie en diffère.",
+    )
+    Bullet(
+        "La valeur n'est plus que le segment variable DD_MON_YYYY (ex. 01_OCT_2026), avec " +
+            "le mois en abréviation anglaise de 3 lettres en majuscules (JAN, FEB, … DEC) ; " +
+            "le préfixe eAIP_ est désormais intégré à l'URL de téléchargement. Les anciennes " +
+            "valeurs enregistrées avec le préfixe sont migrées automatiquement.",
+    )
     Bullet("Liste des terrains (ajout / édition), avec accès à leur carte VAC.")
     SubSection("Données")
     Bullet("Fond de Carte : téléchargement / mise à jour de la carte VFR hors-ligne (à faire en Wi-Fi, ~400 Mo) et « Vérifier les mises à jour ».")
-    Bullet("Cartes VAC : téléchargement et vérification des PDF officiels (SIA).")
+    Bullet("Cartes VAC : téléchargement et vérification des PDF officiels (SIA), selon le cycle AIRAC configuré dans l'onglet Terrains.")
     Bullet("Sauvegarde / Restauration : export et import de vos données.")
     Bullet("Attribution : fond © contributeurs OpenStreetMap (ODbL) ; données aéronautiques © OpenAIP (CC BY-NC — usage non commercial).")
     SubSection("Aide")

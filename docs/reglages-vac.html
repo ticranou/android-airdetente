@@ -16,12 +16,12 @@
       <div class="logo">🗺</div>
       <div>
         <h1>Terrains</h1>
-        <p class="subtitle">Cycle AIRAC · liste réorderable des terrains VAC · ajout</p>
+        <p class="subtitle">Cycle AIRAC calculé automatiquement · liste réorderable des terrains VAC · ajout</p>
       </div>
     </div>
 
     <div class="card" style="margin:16px 0 22px">
-      <span class="chip">Cycle AIRAC · segment d'URL</span>
+      <span class="chip">Cycle AIRAC · calcul auto</span>
       <span class="chip num">Terrain · OACI / nom / circuit</span>
     </div>
 
@@ -35,7 +35,10 @@
       <div class="card">
         <h2>Possibilités</h2>
         <ul class="feat">
-          <li><b>Cycle AIRAC</b> configurable (segment d'URL des cartes).</li>
+          <li><b>Cycle AIRAC calculé automatiquement</b> d'après la date du système et <b>pré-rempli</b> quand le champ est vide.</li>
+          <li>Le champ reste <b>entièrement modifiable</b> pour une correction manuelle ; un texte d'aide rappelle le cycle calculé (ex. <b>« Cycle en cours calculé : 01_OCT_2026 »</b>).</li>
+          <li>Bouton <b>« Aujourd'hui »</b> pour revenir au cycle courant en un geste dès que la valeur diffère du cycle calculé.</li>
+          <li>La valeur stockée n'est que le <b>segment variable <code>DD_MON_YYYY</code></b> (ex. <code>01_OCT_2026</code>), mois en abréviation anglaise 3 lettres majuscules (JAN, FEB, … DEC) ; le préfixe <code>eAIP_</code> est intégré à l'URL. Les anciennes valeurs préfixées sont <b>migrées automatiquement</b>.</li>
           <li><b>Ajout / édition / suppression</b> de terrains VAC, avec <b>liste réorderable</b>.</li>
         </ul>
 

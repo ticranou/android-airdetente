@@ -7,7 +7,25 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ## [2026-10-20] — Réorganisation des Réglages
 
+### Ajouté
+
+- **Cycle AIRAC calculé automatiquement** (Réglages ▸ Terrains) — le cycle en
+  cours est désormais déduit de la date du système (publication AIRAC tous les
+  28 jours selon le calendrier mondial fixe) et **pré-rempli** lorsque le champ
+  est vide. Le champ reste **entièrement modifiable** pour une correction
+  manuelle. Un texte d'aide sous le champ affiche le cycle calculé
+  (« Cycle en cours calculé : 01_OCT_2026 ») et un bouton **« Aujourd'hui »**
+  apparaît dès que la valeur saisie diffère du cycle calculé, pour la réinitialiser
+  en un geste.
+
 ### Modifié
+
+- **Format du cycle AIRAC** — la valeur stockée/affichée n'est plus que le
+  **segment variable `DD_MON_YYYY`** (ex. `01_OCT_2026`), mois en abréviation
+  **anglaise** de 3 lettres majuscules (JAN, FEB, … DEC) requise par les URLs
+  média du SIA. Le préfixe fixe `eAIP_` est désormais intégré à l'URL de
+  téléchargement des cartes VAC. Les anciennes valeurs enregistrées avec le
+  préfixe `eAIP_` sont **migrées automatiquement** au chargement.
 
 - **Refonte complète de la structure des Réglages** — les onglets passent de
   (Affichage, Cockpits, Appareils, Checklists, Terrains) à une structure à

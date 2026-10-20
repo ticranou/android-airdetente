@@ -34,7 +34,7 @@ data class AppDataset(
 data class DatasetPrefs(
     val themeMode: ThemeMode = ThemeMode.AUTO,
     val fontScale: Float = 1.0f,
-    val vacAiracCycle: String = "eAIP_09_JUL_2026",
+    val vacAiracCycle: String = "09_JUL_2026",
     val splashSeconds: Int = 2,
     val efisHeadingSource: EfisHeadingSource = EfisHeadingSource.MAGNETIC,
     val efisVarioSource: EfisVarioSource = EfisVarioSource.GPS,
@@ -87,7 +87,7 @@ data class DatasetPrefs(
     fun applyOnto(current: AppPreferences): AppPreferences = current.copy(
         themeMode = themeMode,
         fontScale = fontScale,
-        vacAiracCycle = vacAiracCycle,
+        vacAiracCycle = com.airchecklists.app.data.local.AiracCycle.normalize(vacAiracCycle),
         splashSeconds = splashSeconds,
         efisHeadingSource = efisHeadingSource,
         efisVarioSource = efisVarioSource,

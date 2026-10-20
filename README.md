@@ -44,7 +44,8 @@ mobile** (moving map) hors-ligne.
   guidée — barre de progression, cochage **dans l'ordre**, élément courant en
   surbrillance, enchaînement vers la checklist suivante, bannière de fin.
 - **Terrains / VAC** : liste des terrains, fiche détaillée, ouverture de la carte
-  VAC (PDF local ou URL SIA selon le cycle AIRAC), et **météo** (METAR/TAF) quand
+  VAC (PDF local ou URL SIA selon le cycle AIRAC — calculé automatiquement d'après
+  la date, pré-rempli et modifiable), et **météo** (METAR/TAF) quand
   la station est disponible.
 - **Carte mobile (moving map)** : fond de carte hors-ligne téléchargeable, avec
   orientation North-up / Track-up. Voir `mapbuild/` pour la génération du paquet

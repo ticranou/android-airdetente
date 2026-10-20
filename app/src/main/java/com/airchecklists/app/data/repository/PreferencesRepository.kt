@@ -23,8 +23,17 @@ enum class MergeDir { RIGHT, DOWN }
 /** Source of truth for user preferences; persists every change to settings.json. */
 class PreferencesRepository(private val store: SettingsStore) {
 
-    private val _preferences = MutableStateFlow(store.read())
+    private val _preferences = MutableStateFlow(migrate(store.read()))
     val preferences: StateFlow<AppPreferences> = _preferences.asStateFlow()
+
+    /** One-shot migrations applied to the persisted prefs on load. */
+    private fun migrate(prefs: AppPreferences): AppPreferences {
+        // The `eAIP_` prefix moved into the base URL; stored cycles are now bare `DD_MON_YYYY`.
+        val normalizedCycle = com.airchecklists.app.data.local.AiracCycle.normalize(prefs.vacAiracCycle)
+        return if (normalizedCycle != prefs.vacAiracCycle)
+            prefs.copy(vacAiracCycle = normalizedCycle)
+        else prefs
+    }
 
     suspend fun setThemeMode(mode: ThemeMode) = persist { it.copy(themeMode = mode) }
 
@@ -39,7 +48,8 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setSeedVersion(version: Int) = persist { it.copy(seedVersion = version) }
 
-    suspend fun setVacAiracCycle(cycle: String) = persist { it.copy(vacAiracCycle = cycle.trim()) }
+    suspend fun setVacAiracCycle(cycle: String) =
+        persist { it.copy(vacAiracCycle = com.airchecklists.app.data.local.AiracCycle.normalize(cycle.trim())) }
 
     suspend fun setSplashSeconds(seconds: Int) =
         persist { it.copy(splashSeconds = seconds.coerceIn(0, AppPreferences.MAX_SPLASH_SECONDS)) }

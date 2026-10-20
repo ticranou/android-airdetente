@@ -22,7 +22,7 @@ class VacDownloader(private val store: VacStore) {
     private fun fileNameFor(icao: String) = "AD-2.${icao.uppercase()}.pdf"
 
     fun remoteUrl(cycle: String, icao: String): String =
-        "https://www.sia.aviation-civile.gouv.fr/media/dvd/$cycle" +
+        "https://www.sia.aviation-civile.gouv.fr/media/dvd/eAIP_$cycle" +
             "/Atlas-VAC/PDF_AIPparSSection/VAC/AD/AD-2.${icao.uppercase()}.pdf"
 
     /** Downloads the PDF and stores it locally. Returns metadata, or null on failure. */

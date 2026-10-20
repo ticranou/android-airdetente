@@ -464,8 +464,8 @@ data class AppPreferences(
     val fontScale: Float = 1.0f,
     /** Version of the bundled default dataset last seeded (0 = never). */
     val seedVersion: Int = 0,
-    /** AIRAC cycle segment used to build SIA VAC PDF URLs. */
-    val vacAiracCycle: String = "eAIP_09_JUL_2026",
+    /** AIRAC cycle segment used to build SIA VAC PDF URLs (bare `DD_MON_YYYY`, no `eAIP_` prefix). */
+    val vacAiracCycle: String = "09_JUL_2026",
     /** Splash screen duration in seconds (0 = no splash). */
     val splashSeconds: Int = 2,
     /** EFIS heading tape source. */

@@ -348,6 +348,8 @@
     <!-- VAC settings + edit -->
     <string name="settings_section_vac">Terrains</string>
     <string name="settings_vac_cycle">Cycle AIRAC (segment d\'URL)</string>
+    <string name="settings_vac_cycle_today">Aujourd\'hui</string>
+    <string name="settings_vac_cycle_hint">Cycle en cours calculé : %1$s</string>
     <string name="settings_vac_reorder_hint">Touchez le numéro d\'ordre pour déplacer une carte.</string>
     <string name="settings_add_vac">Ajouter un nouveau terrain</string>
     <string name="settings_vac_download">Télécharger les cartes VAC</string>

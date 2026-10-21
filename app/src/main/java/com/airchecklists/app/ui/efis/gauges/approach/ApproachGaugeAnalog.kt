@@ -74,6 +74,7 @@ fun ApproachGaugeAnalog(
 ) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
+    val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var locked by remember { mutableStateOf<ApproachTarget?>(null) }
@@ -103,7 +104,10 @@ fun ApproachGaugeAnalog(
             )
         },
     ) {
-        drawIls(tm, bezel, target, errors, state.gpsAltitudeFt)
+        drawIls(tm, bezel, target, errors, state.gpsAltitudeFt,
+            greenFt = prefs.approachGreenFt.toFloat(),
+            orangeFt = prefs.approachOrangeFt.toFloat(),
+            redFt = prefs.approachRedFt.toFloat())
     }
 
     if (showDialog) {
@@ -127,6 +131,9 @@ private fun DrawScope.drawIls(
     target: ApproachTarget?,
     errors: ApproachGeometry.ApproachErrors,
     altitudeFt: Float,
+    greenFt: Float,
+    orangeFt: Float,
+    redFt: Float,
 ) {
     val (cx, cy, r) = gaugeFace(bezel)
     val hasTarget = errors.hasTarget
@@ -145,15 +152,15 @@ private fun DrawScope.drawIls(
     val barColor = if (!hasTarget) GaugeColors.MarkDim else if (latOk) ON else OFF
 
     // ── Proximity rings at the edge — cumulative as altitude drops ──
-    // AGL < 900 ft → outer (green) lights up
-    // AGL < 500 ft → middle (orange) lights up
-    // AGL < 300 ft → inner (red) lights up
+    // AGL < green  → outer (green) lights up
+    // AGL < orange → middle (orange) lights up
+    // AGL < red    → inner (red) lights up
     val fieldElevFt = target?.fieldElevFt
     val aglFt = if (fieldElevFt != null) altitudeFt - fieldElevFt else null
     val ringStroke = Stroke(width = r * 0.020f)
-    val outerColor = if (aglFt != null && hasTarget && aglFt < 900f) ALT_OK   else RING_DIM
-    val midColor   = if (aglFt != null && hasTarget && aglFt < 500f) ALT_WARN else RING_DIM
-    val innerColor = if (aglFt != null && hasTarget && aglFt < 300f) ALT_LOW  else RING_DIM
+    val outerColor = if (aglFt != null && hasTarget && aglFt < greenFt)  ALT_OK   else RING_DIM
+    val midColor   = if (aglFt != null && hasTarget && aglFt < orangeFt) ALT_WARN else RING_DIM
+    val innerColor = if (aglFt != null && hasTarget && aglFt < redFt)    ALT_LOW  else RING_DIM
     drawCircle(outerColor, radius = r * 0.940f, center = Offset(cx, cy), style = ringStroke)
     drawCircle(midColor,   radius = r * 0.880f, center = Offset(cx, cy), style = ringStroke)
     drawCircle(innerColor, radius = r * 0.820f, center = Offset(cx, cy), style = ringStroke)

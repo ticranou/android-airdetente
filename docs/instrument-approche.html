@@ -16,12 +16,12 @@
       <div class="logo">🛬</div>
       <div>
         <h1>Approche finale</h1>
-        <p class="subtitle">NUMAPP — « highway in the sky » vers la piste</p>
+        <p class="subtitle">NUMAPP — bandeau horizontal d'aide à l'axe</p>
       </div>
     </div>
 
     <div class="card" style="margin:16px 0 22px">
-      <span class="chip num">NUMAPP · numérique · 100%-3L</span>
+      <span class="chip num">NUMAPP · numérique · 100%-1L</span>
       <span class="chip">GPS · Altitude</span>
       <span class="chip" style="color:#E8843A">Indicatif · non certifié</span>
     </div>
@@ -33,11 +33,12 @@
 
       <div class="card">
       <h2>Possibilités</h2>
+      <p>Instrument <b>horizontal sur une ligne</b> (famille NUM), reprenant la logique de l'analogique <b>ANLAPP</b>. Sous le bandeau de titre « APPROCHE », de gauche à droite :</p>
       <ul class="feat">
-        <li>Vue <b>tunnel 3D</b> vers la piste sur fond ciel/sol : trois cadres emboîtés en perspective fuyant vers un point de fuite unique où se trouve la piste (trapèze + seuil + QFU).</li>
-        <li>Cadres liés à la <b>hauteur du tour de piste</b> (altitude terrain de la carte VAC + 1000 ft) : <b style="color:#35C759">vert 500 ft</b>, <b style="color:#FFC107">jaune 1000 ft</b>, <b style="color:#E8843A">orange 1500 ft</b>.</li>
-        <li>La silhouette d'ULM se décale selon l'<b>écart d'axe</b> (droite/gauche) et l'<b>écart de plan</b> (au-dessus/en dessous du plan à 3°) : <b style="color:#35C759">verte</b> dans les tolérances (±15 m d'axe, ±60 ft de plan), <b style="color:#E8843A">orange</b> en dehors.</li>
-        <li>Bandeau de 5 valeurs : <b>IAS</b>, <b>altitude</b>, <b>vario</b>, <b>AXE</b> (écart latéral en m G/D), <b>PLAN</b> (écart au plan en ft / 3°).</li>
+        <li><b>Arcs de proximité sur les deux bords</b> (gauche <b>et</b> droite, en miroir) : trois barres verticales <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> qui s'allument au fur et à mesure que la <b>hauteur AGL</b> descend sous les seuils (vert sous le seuil vert, orange sous l'orange, rouge sous le rouge). Ces hauteurs sont <b>configurables et partagées avec ANLAPP</b> dans Réglages ▸ Instruments ▸ Approche finale.</li>
+        <li><b>Zone gauche — rappel terrain</b> : <b>TERRAIN</b> (code OACI + longueur de piste en m) et <b>CIRCUIT</b> (altitude de circuit = élévation terrain + 1000 ft, avec le QFU).</li>
+        <li><b>Centre — axe</b> : indicateur d'axe type <b>cross-pointer</b> identique à ANLAPP — échelle de diamants et barre verticale déviée selon l'écart latéral, <b style="color:#35C759">verte</b> dans la tolérance, <b style="color:#E8843A">orange</b> hors tolérance, drapeau <code>LOC</code> en l'absence de cible.</li>
+        <li><b>Zone droite — valeurs</b> : <b>AXE</b> (écart latéral en mètres, G/D ; <b style="color:#35C759">vert</b> dans l'axe, <b style="color:#E8843A">orange</b> sinon) et <b>ALTI</b> (altitude GPS ; <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> selon l'altitude de circuit).</li>
       </ul>
       <h3>Cible d'approche</h3>
       <ul class="feat">

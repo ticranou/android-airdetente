@@ -398,6 +398,9 @@ fun SettingsScreen(
                     onFdrFlushMinutes = viewModel::setFdrFlushMinutes,
                     onMapOrientation = viewModel::setMapOrientation,
                     onMapShowZoomButtons = viewModel::setMapShowZoomButtons,
+                    onApproachGreenFt = viewModel::setApproachGreenFt,
+                    onApproachOrangeFt = viewModel::setApproachOrangeFt,
+                    onApproachRedFt = viewModel::setApproachRedFt,
                     onSafeskyApiKey = viewModel::setSafeskyApiKey,
                 )
                 SettingsSection.AIRCRAFT -> AircraftSection(
@@ -564,6 +567,24 @@ private fun MinutesStepper(label: String, value: Int, min: Int, max: Int, onChan
     }
 }
 
+/** Stepper for a height in feet, stepping by [step] within [min]..[max]. */
+@Composable
+private fun FeetStepper(label: String, value: Int, min: Int, max: Int, step: Int, onChange: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = { onChange((value - step).coerceAtLeast(min)) }, enabled = value > min) {
+            Icon(Icons.Filled.Remove, contentDescription = "-")
+        }
+        Text(
+            stringResource(R.string.settings_approach_feet, value),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        IconButton(onClick = { onChange((value + step).coerceAtMost(max)) }, enabled = value < max) {
+            Icon(Icons.Filled.Add, contentDescription = "+")
+        }
+    }
+}
+
 /** APPLICATION tab: section "Démarrage" (splash + veille + thème) + section "Fermeture". */
 @Composable
 private fun ApplicationSection(
@@ -688,7 +709,7 @@ private fun CockpitsSection(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(top = 15.dp, bottom = 15.dp)) {
         val styles = com.airchecklists.app.data.model.CockpitPagerStyle.entries
         styles.forEachIndexed { i, s ->
             SegmentedButton(
@@ -712,7 +733,7 @@ private fun CockpitsSection(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 4.dp),
     )
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(top = 15.dp)) {
         SegmentedButton(
             selected = prefs.cockpitPagerPosition == com.airchecklists.app.data.model.CockpitPagerPosition.TOP,
             onClick = { onCockpitPagerPosition(com.airchecklists.app.data.model.CockpitPagerPosition.TOP) },
@@ -796,6 +817,9 @@ private fun InstrumentsSection(
     onFdrFlushMinutes: (Int) -> Unit,
     onMapOrientation: (com.airchecklists.app.data.model.MapOrientation) -> Unit,
     onMapShowZoomButtons: (Boolean) -> Unit,
+    onApproachGreenFt: (Int) -> Unit,
+    onApproachOrangeFt: (Int) -> Unit,
+    onApproachRedFt: (Int) -> Unit,
     onSafeskyApiKey: (String?) -> Unit,
 ) {
     // ── Paramètres d'affichage ────────────────────────────────────────────────
@@ -1152,6 +1176,40 @@ private fun InstrumentsSection(
         )
     }
     } // AnchorBox INSTRUMENTS_MAP
+
+    // ── Approche finale ───────────────────────────────────────────────────────
+    AnchorBox(SettingsAnchor.INSTRUMENTS_APPROACH, anchorOffsets) {
+    SectionHeader(stringResource(R.string.settings_approach))
+    Text(
+        stringResource(R.string.settings_approach_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    FeetStepper(
+        label = stringResource(R.string.settings_approach_green),
+        value = prefs.approachGreenFt,
+        min = prefs.approachOrangeFt,
+        max = AppPreferences.APPROACH_MAX_FT,
+        step = AppPreferences.APPROACH_STEP_FT,
+        onChange = onApproachGreenFt,
+    )
+    FeetStepper(
+        label = stringResource(R.string.settings_approach_orange),
+        value = prefs.approachOrangeFt,
+        min = prefs.approachRedFt,
+        max = prefs.approachGreenFt,
+        step = AppPreferences.APPROACH_STEP_FT,
+        onChange = onApproachOrangeFt,
+    )
+    FeetStepper(
+        label = stringResource(R.string.settings_approach_red),
+        value = prefs.approachRedFt,
+        min = AppPreferences.APPROACH_MIN_FT,
+        max = prefs.approachOrangeFt,
+        step = AppPreferences.APPROACH_STEP_FT,
+        onChange = onApproachRedFt,
+    )
+    } // AnchorBox INSTRUMENTS_APPROACH
 
     // ── Safesky ───────────────────────────────────────────────────────────────
     AnchorBox(SettingsAnchor.INSTRUMENTS_SAFESKY, anchorOffsets) {

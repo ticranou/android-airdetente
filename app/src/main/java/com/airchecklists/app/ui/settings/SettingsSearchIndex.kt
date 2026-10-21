@@ -7,7 +7,7 @@ internal enum class SettingsAnchor {
     APPEARANCE_PAGER, COCKPITS_DASHBOARDS,
     // INSTRUMENTS
     INSTRUMENTS_DISPLAY, INSTRUMENTS_SOURCES, INSTRUMENTS_UNITS,
-    INSTRUMENTS_FDR, INSTRUMENTS_MAP, INSTRUMENTS_SAFESKY,
+    INSTRUMENTS_FDR, INSTRUMENTS_MAP, INSTRUMENTS_APPROACH, INSTRUMENTS_SAFESKY,
     // Other sections — scroll to top is sufficient
     AIRCRAFT_LIST, CHECKLISTS_LIST, APPEARANCE_FONT,
     VAC_LIST, DATA_MAP, DATA_VAC, DATA_BACKUP,
@@ -118,6 +118,10 @@ internal val ALL_SETTINGS_ITEMS: List<SettingsSearchItem> = listOf(
     SettingsSearchItem("Boutons de zoom de la carte",
         listOf("zoom", "carte", "map", "bouton", "button"),
         SettingsSection.INSTRUMENTS, "Instruments", SettingsAnchor.INSTRUMENTS_MAP),
+
+    SettingsSearchItem("Arcs d'altitude de l'approche finale",
+        listOf("approche", "finale", "anlapp", "arc", "altitude", "hauteur", "agl", "rouge", "orange", "vert"),
+        SettingsSection.INSTRUMENTS, "Instruments", SettingsAnchor.INSTRUMENTS_APPROACH),
 
     SettingsSearchItem("Clé API Safesky",
         listOf("safesky", "api", "clé", "key", "trafic", "traffic"),

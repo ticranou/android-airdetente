@@ -156,6 +156,18 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setSafeskyApiKey(key) }
     }
 
+    fun setApproachGreenFt(ft: Int) {
+        viewModelScope.launch { prefsRepo.setApproachGreenFt(ft) }
+    }
+
+    fun setApproachOrangeFt(ft: Int) {
+        viewModelScope.launch { prefsRepo.setApproachOrangeFt(ft) }
+    }
+
+    fun setApproachRedFt(ft: Int) {
+        viewModelScope.launch { prefsRepo.setApproachRedFt(ft) }
+    }
+
     fun setFocusLongPressSec(sec: Int) {
         viewModelScope.launch { prefsRepo.setFocusLongPressSec(sec) }
     }

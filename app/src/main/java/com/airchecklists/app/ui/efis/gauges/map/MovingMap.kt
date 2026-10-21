@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -314,6 +315,11 @@ private fun TrackOverlay(
             return Offset(p.x, p.y)
         }
 
+        // Clip every projected overlay (trail, route, route-ahead vector, ownship)
+        // to the map's own bounds so nothing spills over the instruments above it
+        // when a waypoint projects to a negative screen Y.
+        clipRect {
+
         // Active nav route (from the planner): green polyline through all waypoints.
         if (navRoute.size >= 2) {
             val path = Path()
@@ -384,6 +390,7 @@ private fun TrackOverlay(
                 drawPlaneMarker(p.x, p.y, size = 108f, fill = Color(0xFF101010), outline = Color.White)
             }
         }
+        } // clipRect
     }
 }
 

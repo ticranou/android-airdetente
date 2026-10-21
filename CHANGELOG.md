@@ -5,6 +5,58 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-21] — Refonte de NUMAPP (Approche finale)
+
+### Ajouté
+
+- **Réglages ▸ Instruments ▸ Approche finale** (nouvelle section) — trois hauteurs
+  configurables (**arc vert / orange / rouge**, en **ft AGL**) qui pilotent les
+  **arcs de proximité partagés** des deux instruments d'approche **ANLAPP et
+  NUMAPP**. Sélecteurs + / − par pas de **50 ft** (100 → 2000 ft). Une
+  **vérification de cohérence** garantit automatiquement l'ordre
+  **vert ≥ orange ≥ rouge**. Valeurs par défaut : vert 900 ft, orange 500 ft,
+  rouge 300 ft.
+
+### Modifié
+
+- **NUMAPP — nouveau layout horizontal** (famille NUM, une ligne) remplaçant
+  l'ancienne vue « tunnel » 3D (*highway in the sky*). L'instrument reprend
+  désormais la logique de l'analogique **ANLAPP**. Sous le bandeau de titre
+  « APPROCHE », de gauche à droite :
+  - **Arcs de proximité sur les deux bords** (gauche **et** droite, en miroir) :
+    trois barres verticales vert / orange / rouge qui s'allument quand la
+    hauteur AGL descend sous les seuils (vert sous le seuil vert, orange sous
+    l'orange, rouge sous le rouge). Ces hauteurs sont **configurables et
+    partagées avec ANLAPP** (Réglages ▸ Instruments ▸ Approche finale).
+  - **Zone gauche — rappel terrain** : TERRAIN (code OACI + longueur de piste
+    en m) et CIRCUIT (altitude de circuit = élévation terrain + 1000 ft, + QFU).
+  - **Centre — axe** : indicateur d'axe type *cross-pointer* identique à ANLAPP
+    (échelle de diamants + barre verticale déviée selon l'écart latéral ; verte
+    dans la tolérance, orange hors tolérance, drapeau « LOC » sans cible).
+  - **Zone droite — valeurs** : AXE (écart latéral en m, G/D ; vert dans l'axe,
+    orange sinon) et ALTI (altitude GPS ; verte / orange / rouge selon
+    l'altitude de circuit).
+  - Appui long → dialogue de sélection du terrain cible + QFU (inchangé). Aide
+    indicative, non certifiée.
+
+- **Renommage du libellé** : « NUMAPP - Approche finale (100%-3L) » devient
+  **« NUMAPP - Approche finale (100%-1L) »** (instrument désormais sur une ligne).
+
+- **NUMTRM (Trammer)** — badge de l'heure à gauche légèrement rétréci et espace
+  ajouté avant la première pastille (ajustement cosmétique).
+
+- **Onglet Cockpits (Réglages)** — espacements augmentés autour des sélecteurs
+  segmentés des marqueurs (ajustement cosmétique).
+
+### Corrigé
+
+- **NUMMAP (Moving Map)** — la ligne pointillée de route (vecteur +6 min) et les
+  overlays (trace, route, avion) sont désormais **clippés à la zone de la carte**
+  et ne débordent plus par-dessus les instruments situés au-dessus lorsqu'un point
+  de route se projette au-delà du bord haut.
+
+---
+
 ## [2026-10-20] — Réorganisation des Réglages
 
 ### Ajouté

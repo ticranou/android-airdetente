@@ -65,7 +65,7 @@ enum class EfisInstrument {
     NAV_PLANNER,         // Prépa navigation (plein écran, 6 lignes)
     ANLFDR,              // Flight Recorder (enregistreur de vol, jauge ronde)
     NUMFDR,              // Flight Recorder numérique (rectangulaire, 100%-1L)
-    NUMAPP,              // Aide à l'approche finale (highway-in-the-sky, 100%-3L)
+    NUMAPP,              // Approche finale (bandeau horizontal : terrain / axe / valeurs + arcs, 100%-1L)
     ANLAPP,              // Aide à l'approche finale analogique (ILS cross-pointer, jauge ronde)
     ANLTRF,              // Trafic Safesky (radar aérien, jauge ronde)
     ANLPRX,              // Proximité sol TAWS (SRTM, jauge ronde)
@@ -111,7 +111,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, NUMTRM, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, NUMTRM, NUMAPP, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -125,6 +125,7 @@ enum class EfisInstrument {
             TERRAINS_COMPACT -> 110
             NUMFDR -> 96
             NUMCRB -> 120
+            NUMAPP -> 110
             CMNSCT -> 52
             CMNFGT -> 120
             SPACER_S -> 16
@@ -150,7 +151,6 @@ enum class EfisInstrument {
         get() = when (this) {
             MOVING_MAP -> AppPreferences.EFIS_MAX_ROWS
             EFIS_COMPACT -> 3
-            NUMAPP -> 3
             ATTITUDE_COMPACT -> 2
             else -> 1
         }
@@ -537,6 +537,11 @@ data class AppPreferences(
     val fdrFlushMinutes: Int = 2,
     /** Safesky API key for the ANLTRF traffic radar instrument (null = not configured). */
     val safeskyApiKey: String? = null,
+    /** ANLAPP final-approach proximity rings — AGL height (ft) at which each arc lights up.
+     *  Green (outer) ≥ orange (middle) ≥ red (inner). */
+    val approachGreenFt: Int = 900,
+    val approachOrangeFt: Int = 500,
+    val approachRedFt: Int = 300,
     /** Durable state of the stateful instruments + heading/altitude targets. */
     val instruments: InstrumentPersistState = InstrumentPersistState(),
     /** Long-press duration (seconds) to trigger instrument focus mode. */
@@ -562,6 +567,9 @@ data class AppPreferences(
         const val FOCUS_LONG_PRESS_MAX_SEC = 7
         const val FOCUS_DURATION_MIN_SEC = 10
         const val FOCUS_DURATION_MAX_SEC = 120
+        const val APPROACH_MIN_FT = 100
+        const val APPROACH_MAX_FT = 2000
+        const val APPROACH_STEP_FT = 50
     }
 
     /** efisSlots resized to exactly efisCols*efisRows (pad with NONE / truncate). */

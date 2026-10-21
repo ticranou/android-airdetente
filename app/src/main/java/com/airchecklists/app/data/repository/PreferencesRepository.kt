@@ -141,6 +141,22 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setSafeskyApiKey(key: String?) = persist { it.copy(safeskyApiKey = key?.trim()?.ifBlank { null }) }
 
+    suspend fun setApproachGreenFt(ft: Int) = persist {
+        // Green ≥ orange ≥ red : the green arc lights up highest.
+        val v = ft.coerceIn(AppPreferences.APPROACH_MIN_FT, AppPreferences.APPROACH_MAX_FT)
+        it.copy(approachGreenFt = v.coerceAtLeast(it.approachOrangeFt))
+    }
+
+    suspend fun setApproachOrangeFt(ft: Int) = persist {
+        val v = ft.coerceIn(AppPreferences.APPROACH_MIN_FT, AppPreferences.APPROACH_MAX_FT)
+        it.copy(approachOrangeFt = v.coerceIn(it.approachRedFt, it.approachGreenFt))
+    }
+
+    suspend fun setApproachRedFt(ft: Int) = persist {
+        val v = ft.coerceIn(AppPreferences.APPROACH_MIN_FT, AppPreferences.APPROACH_MAX_FT)
+        it.copy(approachRedFt = v.coerceAtMost(it.approachOrangeFt))
+    }
+
     suspend fun setFocusLongPressSec(sec: Int) = persist {
         it.copy(focusLongPressSec = sec.coerceIn(AppPreferences.FOCUS_LONG_PRESS_MIN_SEC, AppPreferences.FOCUS_LONG_PRESS_MAX_SEC))
     }

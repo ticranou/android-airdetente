@@ -148,7 +148,7 @@ fun TrammerInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         val bodyCy = bodyTop + bodyH / 2f
 
         // ── Left: dark badge with vertical validation time ───────────────────
-        val badgeW = w * 0.10f
+        val badgeW = w * 0.07f
         drawRect(BADGE_BG, topLeft = Offset(0f, bodyTop), size = Size(badgeW, bodyH))
         drawLine(Color(0xFF3A3A3A), Offset(badgeW, bodyTop), Offset(badgeW, h), strokeWidth = 1f)
         if (validatedMs != null) {
@@ -156,7 +156,7 @@ fun TrammerInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             val txt = "%02dh%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
             val measured = tm.measure(
                 txt,
-                TextStyle(color = TIME_BLUE, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                TextStyle(color = TIME_BLUE, fontSize = 14.sp, fontWeight = FontWeight.Bold),
             )
             val pivot = Offset(badgeW / 2f, bodyCy)
             withTransform({ rotate(-90f, pivot = pivot) }) {
@@ -166,7 +166,7 @@ fun TrammerInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
         // ── Right: current-letter label + one large switch ───────────────────
         val switchZoneW = w * 0.26f
-        val pillsLeft = badgeW
+        val pillsLeft = badgeW + w * 0.03f   // gap between the time badge and the first pill
         val pillsRight = w - switchZoneW
         val switchCx = pillsRight + switchZoneW / 2f
 

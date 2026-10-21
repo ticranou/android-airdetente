@@ -2,6 +2,7 @@ package com.airchecklists.app.ui.efis.gauges.weather
 
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -58,6 +59,7 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val layers = prefs.wxLayers
@@ -140,6 +142,7 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
             if (!hasPos) {
                 if (headerH > 0f) compactText(tm, "RADAR METEO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
                 compactText(tm, "position GPS ?", w / 2f, headerH + (h - headerH) / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+                if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
                 return@Canvas
             }
 
@@ -169,6 +172,7 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
             if (headerH > 0f) {
                 compactText(tm, "RADAR METEO", cx, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
             }
+            if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         }
 
         // Header overlay: vent FL20 + bouton calques, en haut de la carte.

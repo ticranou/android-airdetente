@@ -11,6 +11,13 @@
     --txt: #e6e8ec; --dim: #9aa0a6; --accent: #4fc3f7; --anl: #ffcc44; --num: #7fd1ff;
     --danger: #ef5350; --ok: #4caf50;
   }
+  /* Keep the shared left navigation on the common (orange) theme: this page's
+     :root overrides --accent/--line etc. for the editor UI, so restore the
+     docs.css palette locally on the sidebar only. */
+  .sidebar {
+    --accent: #e8843a; --accent2: #d24dea;
+    --line: #2b323c; --ink: #e7ecf2; --ink-soft: #9aa6b2; --panel-2: #1b2028;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--txt);
@@ -2531,6 +2538,7 @@ const INSTRUMENTS = [
   ["ANLSCT",                "ANLSCT - Raccourci"],
   ["ANLCCT",                "ANLCCT - Circuit de piste"],
   ["ANLCRB",                "ANLCRB - Carburant"],
+  ["ANLNGT",                "ANLNGT - Nuit aéronautique"],
   ["NUMCRB",                "NUMCRB - Carburant (100%-1L)"],
   ["NUMNGT",                "NUMNGT - Nuit aéronautique (50%-1L)"],
   ["NUMTRM",                "NUMTRM - Trammer (100%-1L)"],

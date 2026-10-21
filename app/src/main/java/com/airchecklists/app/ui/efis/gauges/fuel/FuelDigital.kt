@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
@@ -37,6 +38,7 @@ fun FuelDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     var showConfig by remember { mutableStateOf(false) }
 
     val aircraft       = ServiceLocator.currentAircraft()
@@ -159,6 +161,9 @@ fun FuelDigital(modifier: Modifier = Modifier) {
 
         compactText(tm, "Range", cx3, labY, sizeSp = 10f, color = CompactStyle.Dim)
         compactText(tm, rangeStr, cx3, valY, sizeSp = 20f, color = fuelColor, bold = true)
+
+        // Bordure de la cellule (comme les autres instruments numériques).
+        if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
     }
 
     if (showConfig) {

@@ -238,7 +238,9 @@ fun DrawScope.drawGaugeTitlePill(
     hideTitle: Boolean = false,
 ) {
     if (hideTitle) return
-    val sizeSp  = (r * 0.095f).coerceIn(8f, 12f)
+    // Fixed title size across all gauges so the pill text looks uniform regardless
+    // of the dial radius (the pill itself still scales via padding below).
+    val sizeSp  = 12f
     val measured = tm.measure(
         text,
         androidx.compose.ui.text.TextStyle(

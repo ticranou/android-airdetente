@@ -62,6 +62,7 @@ fun AltVarioCompact(
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)
             drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)
+            compactText(tm, "ALTI / VARIO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
         }
         // Instrument border (matches the other compact instruments).
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))

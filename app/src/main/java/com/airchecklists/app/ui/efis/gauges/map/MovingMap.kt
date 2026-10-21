@@ -4,6 +4,7 @@ import com.airchecklists.app.ui.efis.gauges.HeadingSourceBadge
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -126,7 +127,14 @@ fun MovingMap(
 
     val mapBezel = com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel.current
     val hideTitle = com.airchecklists.app.ui.efis.gauges.LocalHideTitle.current
-    Column(modifier = modifier.fillMaxSize().background(CompactStyle.Bg)) {
+    val hideCellBorder = com.airchecklists.app.ui.efis.gauges.LocalHideBorder.current
+    Column(
+        modifier = modifier.fillMaxSize().background(CompactStyle.Bg)
+            .then(
+                if (hideCellBorder) Modifier
+                else Modifier.border(2.dp, Color(0xFF3A3A3A))
+            ),
+    ) {
         // Title bar ("Carte de navigation") honouring the cell bezel colour/texture.
         if (!hideTitle) {
             Text(

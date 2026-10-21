@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import java.text.SimpleDateFormat
@@ -41,6 +42,7 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
+    val hideCellBorder = LocalHideBorder.current
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val fdrStatus by ServiceLocator.flightRecorder.status.collectAsStateWithLifecycle()
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
@@ -172,6 +174,13 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
         compactText(tm, "Durée",     c3, bodyCy - bodyH * 0.20f, sizeSp = labelSp, color = FGT_DIM)
         compactText(tm, durationStr, c3, bodyCy + bodyH * 0.20f, sizeSp = valueSp, bold = true,
             color = if (durationStr == "---") FGT_DIM else timeColor)
+
+        // Bordure autour de la zone active (comme les autres instruments numériques),
+        // limitée à contentH pour ne pas encadrer la marge transparente du bas.
+        if (!hideCellBorder) drawRect(
+            Color(0xFF3A3A3A), topLeft = Offset.Zero, size = Size(w, contentH),
+            style = Stroke(width = 2f),
+        )
     }
 }
 

@@ -5,6 +5,34 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-21] — Harmonisation de l'affichage des instruments & doc HTML
+
+### Corrigé
+
+- **Titres des instruments analogiques (ANL)** — la taille du titre affiché dans
+  la pastille en haut du cadran était proportionnelle au rayon (donc variable
+  selon la taille de la cellule). Elle est désormais **fixe à 12 sp** pour tous
+  les instruments ANL, pour un rendu uniforme quelle que soit la disposition.
+- **NUMALT (Altimètre / Variomètre)** — le titre « ALTI / VARIO » manquant dans
+  la barre d'en-tête a été **ajouté**.
+- **Bordures de cellule manquantes** rétablies (dans le respect de l'option
+  « masquer la bordure ») pour **NUMCRB (Carburant)**, **CMNFGT (Session de
+  vol)**, **NUMMTO (Météo radar)** et **NUMMAP (Moving Map)**.
+
+### Modifié
+
+- **Documentation HTML** :
+  - `index.html` — ajout d'un tableau **« Instruments disponibles »** (colonnes
+    Instrument / ANL / NUM) en remplacement du visuel dans la colonne droite.
+  - `docs.css` — les titres de section du menu de gauche (`.nav-group`) sont plus
+    distincts (barre d'accent orange + léger dégradé).
+  - `cockpit-builder.html` — la palette de l'éditeur ne déteint plus sur le menu
+    de navigation partagé (variables de thème restaurées localement sur la
+    `.sidebar`) ; ajout de l'entrée manquante **ANLNGT** dans le tableau des
+    instruments.
+
+---
+
 ## [2026-10-21] — Refonte de NUMAPP (Approche finale)
 
 ### Ajouté

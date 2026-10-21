@@ -7,6 +7,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/docs.css">
+<style>
+  .instr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .instr-table th, .instr-table td {
+    padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left;
+  }
+  .instr-table th {
+    font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .instr-table th:nth-child(2), .instr-table th:nth-child(3),
+  .instr-table td:nth-child(2), .instr-table td:nth-child(3) {
+    text-align: center; width: 48px;
+  }
+  .instr-table td { color: var(--ink); }
+  .instr-table td.y { color: var(--ok); font-weight: 700; }
+  .instr-table td.n { color: var(--ink-soft); }
+  .instr-table tbody tr:last-child td { border-bottom: none; }
+</style>
 </head>
 <body>
 
@@ -44,8 +62,47 @@
         <span class="chip num">NUM · numériques</span>
       </div>
 
-      <div>
-        <img class="shot portrait" src="screenshots/ACCUEIL.jpg" alt="Écran d'accueil / cockpit">
+      <div class="card">
+        <h2>Instruments disponibles</h2>
+        <p class="subtitle" style="margin-bottom:12px">Variantes <b>ANL</b> (analogique, cadran rond) et <b>NUM</b> (numérique, bandeau) par instrument.</p>
+        <table class="instr-table">
+          <thead>
+            <tr><th>Instrument</th><th>ANL</th><th>NUM</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Action</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Altimètre</td><td class="y">●</td><td class="y">●*</td></tr>
+            <tr><td>Anémomètre</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Approche finale</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Bille</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Carburant</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Checklist</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Chronomètre</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Circuit de piste</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Compte à rebours</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Conservateur</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>EFIS</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Enregistreur de vol</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Horamètre</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Horizon</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Météo (Radar + Vent)</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Montre</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Moving Map</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Nuit aéronautique</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Prépa Navigation</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Proximité sol (TAWS)</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Raccourci (dashboard)</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Raccourcis (3 slots)</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Session de vol</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Tableau blanc</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Terrains proches</td><td class="y">●</td><td class="y">●</td></tr>
+            <tr><td>Toucher de piste</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Trafic Safesky</td><td class="y">●</td><td class="n">—</td></tr>
+            <tr><td>Trammer</td><td class="n">—</td><td class="y">●</td></tr>
+            <tr><td>Variomètre</td><td class="y">●</td><td class="y">●*</td></tr>
+          </tbody>
+        </table>
+        <p class="subtitle" style="margin-top:10px;font-size:12px">* Altimètre et Variomètre partagent le bandeau numérique combiné <b>NUMALT</b>. Utilitaires CMN non listés : Vide, Espaceurs (S / M / L).</p>
       </div>
     </div>
 

@@ -44,8 +44,15 @@ body {
 }
 .sidebar .side-brand b { font-size: 18px; font-weight: 800; }
 
-.nav-group { margin: 18px 0 6px; padding: 0 8px;
-  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); }
+.nav-group {
+  margin: 22px 0 8px; padding: 7px 10px 7px 12px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--accent);
+  background: linear-gradient(90deg, rgba(232,132,58,0.12), rgba(232,132,58,0));
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+.nav-group:first-of-type { margin-top: 6px; }
 .sidebar nav a {
   display: block; padding: 8px 10px; margin: 2px 0; border-radius: 8px;
   color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 600;

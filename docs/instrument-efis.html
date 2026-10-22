@@ -12,40 +12,61 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🧩</div>
-      <div>
-        <h1>EFIS (bloc complet)</h1>
-        <p class="subtitle">Bloc combiné : cap · bille · horizon · altitude · vario · vitesse</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🧩</div>
+          <div>
+            <h1>EFIS (bloc complet)</h1>
+            <p class="subtitle">Bloc combiné : cap · bille · horizon · altitude · vario · vitesse</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip num">NUMEFS</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip num">NUMEFS · numérique (100%-3L mini)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Bloc combiné : <b>bande de cap</b> en haut, <b>bille</b>, <b>horizon</b> central.</li>
+            <li>Échelles <b>Altitude</b> et <b>Vario</b> verticales.</li>
+            <li><b>Bande de vitesse</b> en bas avec arcs.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/NUMEFS.jpg" alt="NUMEFS — grand bloc">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long sur la bande de cap : saisir le cap à suivre</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long sur la colonne Altitude (à gauche) : saisir l'altitude à suivre (curseur magenta sur l'échelle)</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long sur l'horizon central : <b>Caler l'horizon</b> — confirmer que l'assiette actuelle devient la référence à plat (0/0).</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Bloc combiné : <b>bande de cap</b> en haut, <b>bille</b>, <b>horizon</b> central.</li>
-          <li>Échelles <b>Altitude</b> et <b>Vario</b> verticales.</li>
-          <li><b>Bande de vitesse</b> en bas avec arcs.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long sur la bande de cap : saisir le cap à suivre</div>
-        <div class="gesture"><span class="g">–</span> Appui long sur la colonne Altitude (à gauche) : saisir l'altitude à suivre (curseur magenta sur l'échelle)</div>
-        <div class="gesture"><span class="g">–</span> Appui long sur l'horizon central : <b>Caler l'horizon</b> — confirmer que l'assiette actuelle devient la référence à plat (0/0).</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMEFS.jpg" alt="NUMEFS — grand bloc">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

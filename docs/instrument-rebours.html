@@ -12,40 +12,56 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">⏳</div>
-      <div>
-        <h1>Compte à rebours</h1>
-        <p class="subtitle">Minuteur · barre de progression bleue</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">⏳</div>
+          <div>
+            <h1>Compte à rebours</h1>
+            <p class="subtitle">Minuteur · barre de progression bleue</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLCWN</span>
+        <span class="chip num">NUMCWN</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLCWN · analogique</span>
-      <span class="chip num">NUMCWN · numérique (50%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Valeur par défaut <b>--:--</b> (pas de durée).</li>
+            <li><b>Barre de progression bleue</b>.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLCWN.jpg" alt="ANLCWN — cadran">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMCWN.jpg" alt="NUMCWN — bande">
+          <h3>Gestes supportés</h3>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : start/stop</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : saisir la durée (démarre automatiquement à la validation)</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Valeur par défaut <b>--:--</b> (pas de durée).</li>
-          <li><b>Barre de progression bleue</b>.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">··</span> Double-tap : start/stop</div>
-        <div class="gesture"><span class="g">–</span> Appui long : saisir la durée (démarre automatiquement à la validation)</div>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLCWN.jpg" alt="ANLCWN — cadran">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMCWN.jpg" alt="NUMCWN — bande">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

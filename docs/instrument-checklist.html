@@ -12,42 +12,58 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">✅</div>
-      <div>
-        <h1>Checklist</h1>
-        <p class="subtitle">Exécution d'une checklist de l'appareil, directement dans un cockpit</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">✅</div>
+          <div>
+            <h1>Checklist</h1>
+            <p class="subtitle">Exécution d'une checklist de l'appareil, directement dans un cockpit</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLCLT</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLCLT · analogique</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Jauge ronde affichant le <b>nom de la checklist</b> assignée à la case. Le titre « CHECKLIST » est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
+            <li>Anneau coloré selon l'avancement : <b style="color:#2ECC40">vert</b> (terminée), <b style="color:#ffcc44">orange</b> (en cours), gris (non commencée), avec un indicateur de progression.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLCLT.jpg" alt="ANLCLT — checklist">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : <b>choisir la checklist</b> à associer à cette case (parmi les checklists de l'appareil). Le dialogue propose un bouton <b>« Effacer »</b> pour retirer la checklist assignée et un bouton <b>« Fermer »</b> pour annuler.</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : <b>exécuter</b> la checklist (dialogue plein écran : cases à cocher, barre de progression, boutons « Recommencer » / « Fermer »).</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Chaque case ANLCLT mémorise <b>sa propre</b> checklist et l'état coché, indépendamment des autres.</li>
+            <li>Fermeture automatique peu après avoir coché le dernier item.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Jauge ronde affichant le <b>nom de la checklist</b> assignée à la case. Le titre « CHECKLIST » est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-          <li>Anneau coloré selon l'avancement : <b style="color:#2ECC40">vert</b> (terminée), <b style="color:#ffcc44">orange</b> (en cours), gris (non commencée), avec un indicateur de progression.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : <b>choisir la checklist</b> à associer à cette case (parmi les checklists de l'appareil). Le dialogue propose un bouton <b>« Effacer »</b> pour retirer la checklist assignée et un bouton <b>« Fermer »</b> pour annuler.</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : <b>exécuter</b> la checklist (dialogue plein écran : cases à cocher, barre de progression, boutons « Recommencer » / « Fermer »).</div>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Chaque case ANLCLT mémorise <b>sa propre</b> checklist et l'état coché, indépendamment des autres.</li>
-          <li>Fermeture automatique peu après avoir coché le dernier item.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLCLT.jpg" alt="ANLCLT — checklist">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

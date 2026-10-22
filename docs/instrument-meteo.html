@@ -12,56 +12,77 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🌧</div>
-      <div>
-        <h1>Météo (radar + vent FL20)</h1>
-        <p class="subtitle">Radar de précipitations · vent au FL20 · terrains proches</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🌧</div>
+          <div>
+            <h1>Météo (radar + vent FL20)</h1>
+            <p class="subtitle">Radar de précipitations · vent au FL20 · terrains proches</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLMTO</span>
+        <span class="chip num">NUMMTO</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLMTO · analogique</span>
-      <span class="chip num">NUMMTO · numérique (50%-2L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li><b>Radar de précipitations</b> (RainViewer) centré sur la position.</li>
+            <li><b>METAR</b> : pastilles colorées par catégorie de vol (<b style="color:#2ECC40">VFR</b> / <b style="color:#2196F3">MVFR</b> / <b style="color:#E53935">IFR</b> / <b style="color:#D24DEA">LIFR</b>), cliquables → METAR brut + TAF.</li>
+            <li><b>SIGMET</b> : zones de phénomènes dangereux (orages, turbulence, givrage…) dessinées et cliquables → détail (nature, sommet, texte brut). Sources : AviationWeather.gov.</li>
+            <li><b>Vent au FL20</b> (Open-Meteo) : <b style="color:#e88">flèche orange</b> + direction/vitesse.</li>
+            <li><b>Terrains proches</b>.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLMTO.jpg" alt="ANLMTO — radar">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMMTO.jpg" alt="NUMMTO — radar + vent">
+          <h3>NUMMTO — carte interactive directement dans la case</h3>
+          <ul class="feat">
+            <li>Contrairement à l'ancienne vignette, <b>NUMMTO affiche la carte complète dans la case</b> (fond sombre + radar + METAR + SIGMET), <b>zoom 10 par défaut</b> — plus besoin d'appui long pour l'ouvrir.</li>
+            <li>En-tête soignée : titre <b>METEO</b>, sources, bloc <b>vent FL20</b>, et un bouton <b>calques</b>.</li>
+            <li><b>Calques activables</b> : Radar, METAR/TAF, SIGMET — choix mémorisé.</li>
+            <li>Icône <b>avion</b> orientée selon le cap + <b>trajectoire future</b> en pointillés.</li>
+            <li><b>Pinch-to-zoom</b>, déplacement et boutons <b>+ / −</b> ; <b>tap</b> sur une pastille METAR (détail METAR/TAF) ou une zone SIGMET.</li>
+          </ul>
+
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span><b>ANLMTO</b> — Appui long : ouvrir la carte météo plein écran.</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span><b>NUMMTO</b> — la carte est interactive dans la case : pincer pour zoomer, déplacer, boutons + / −, bouton calques, tap sur une station.</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Nécessite <b>GPS + réseau</b>.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li><b>Radar de précipitations</b> (RainViewer) centré sur la position.</li>
-          <li><b>METAR</b> : pastilles colorées par catégorie de vol (<b style="color:#2ECC40">VFR</b> / <b style="color:#2196F3">MVFR</b> / <b style="color:#E53935">IFR</b> / <b style="color:#D24DEA">LIFR</b>), cliquables → METAR brut + TAF.</li>
-          <li><b>SIGMET</b> : zones de phénomènes dangereux (orages, turbulence, givrage…) dessinées et cliquables → détail (nature, sommet, texte brut). Sources : AviationWeather.gov.</li>
-          <li><b>Vent au FL20</b> (Open-Meteo) : <b style="color:#e88">flèche orange</b> + direction/vitesse.</li>
-          <li><b>Terrains proches</b>.</li>
-        </ul>
-        <h3>NUMMTO — carte interactive directement dans la case</h3>
-        <ul class="feat">
-          <li>Contrairement à l'ancienne vignette, <b>NUMMTO affiche la carte complète dans la case</b> (fond sombre + radar + METAR + SIGMET), <b>zoom 10 par défaut</b> — plus besoin d'appui long pour l'ouvrir.</li>
-          <li>En-tête soignée : titre <b>METEO</b>, sources, bloc <b>vent FL20</b>, et un bouton <b>calques</b>.</li>
-          <li><b>Calques activables</b> : Radar, METAR/TAF, SIGMET — choix mémorisé.</li>
-          <li>Icône <b>avion</b> orientée selon le cap + <b>trajectoire future</b> en pointillés.</li>
-          <li><b>Pinch-to-zoom</b>, déplacement et boutons <b>+ / −</b> ; <b>tap</b> sur une pastille METAR (détail METAR/TAF) ou une zone SIGMET.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> <b>ANLMTO</b> — Appui long : ouvrir la carte météo plein écran.</div>
-        <div class="gesture"><span class="g">–</span> <b>NUMMTO</b> — la carte est interactive dans la case : pincer pour zoomer, déplacer, boutons + / −, bouton calques, tap sur une station.</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Nécessite <b>GPS + réseau</b>.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLMTO.jpg" alt="ANLMTO — radar">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMMTO.jpg" alt="NUMMTO — radar + vent">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

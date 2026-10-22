@@ -12,62 +12,78 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🌙</div>
-      <div>
-        <h1>Nuit aéronautique</h1>
-        <p class="subtitle">Crépuscule civil · temps disponible avant la nuit</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🌙</div>
+          <div>
+            <h1>Nuit aéronautique</h1>
+            <p class="subtitle">Crépuscule civil · temps disponible avant la nuit</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip num">NUMNGT</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip num">NUMNGT · numérique (50%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Visualise le <b>temps disponible avant la nuit VFR</b> sur une barre de progression tricolore inspirée de NUMCRB.</li>
+            <li><b>Barre de progression tricolore</b> ancrée depuis la droite (fin de journée) :
+              <ul>
+                <li><b style="color:#888888">Grise</b> : plus de 90 minutes disponibles</li>
+                <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes disponibles</li>
+                <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes disponibles</li>
+              </ul>
+            </li>
+            <li><b>Curseur de l'heure courante</b> : triangle/curseur <b style="color:#B94DD6">violet (#B94DD6)</b>, plus large, dépassant au-dessus de la barre.</li>
+            <li><b>Repère 12h</b> : trait vertical placé au-dessus de la barre, avec le label "12h".</li>
+            <li><b>Horaires crépuscule civil</b> (aube et crépuscule) affichés en <b style="color:#5588FF">bleu</b>, en heure locale, espacés en dessous de la barre.</li>
+            <li><b>Temps disponible</b> avant la nuit VFR (côté droit) :
+              <ul>
+                <li><b style="color:#35C759">Vert</b> : ≥ 90 minutes</li>
+                <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes</li>
+                <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes</li>
+                <li><b style="color:#888888">Gris / tiret</b> : nuit en cours ou position GPS indisponible</li>
+              </ul>
+            </li>
+            <li>Calcul solaire <b>mis à jour toutes les 30 secondes</b> à partir de la position GPS courante.</li>
+            <li><b>Pastille de titre</b> "NUIT AERO" affichée en haut (masquable via Options ▸ « Masquer le titre »).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/NUMNGT.jpg" alt="NUMNGT — nuit aéronautique">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : —</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Le calcul utilise le <b>crépuscule civil</b> (soleil à −6° sous l'horizon) conformément à la réglementation VFR française.</li>
+            <li>Les horaires affichés sont en <b>heure locale</b> ; les zones de la barre reflètent l'axe temporel de la journée.</li>
+            <li>Sans position GPS, la barre est affichée en gris uniforme et le temps disponible est masqué.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Visualise le <b>temps disponible avant la nuit VFR</b> sur une barre de progression tricolore inspirée de NUMCRB.</li>
-          <li><b>Barre de progression tricolore</b> ancrée depuis la droite (fin de journée) :
-            <ul>
-              <li><b style="color:#888888">Grise</b> : plus de 90 minutes disponibles</li>
-              <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes disponibles</li>
-              <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes disponibles</li>
-            </ul>
-          </li>
-          <li><b>Curseur de l'heure courante</b> : triangle/curseur <b style="color:#B94DD6">violet (#B94DD6)</b>, plus large, dépassant au-dessus de la barre.</li>
-          <li><b>Repère 12h</b> : trait vertical placé au-dessus de la barre, avec le label "12h".</li>
-          <li><b>Horaires crépuscule civil</b> (aube et crépuscule) affichés en <b style="color:#5588FF">bleu</b>, en heure locale, espacés en dessous de la barre.</li>
-          <li><b>Temps disponible</b> avant la nuit VFR (côté droit) :
-            <ul>
-              <li><b style="color:#35C759">Vert</b> : ≥ 90 minutes</li>
-              <li><b style="color:#E8843A">Orange</b> : entre 30 et 90 minutes</li>
-              <li><b style="color:#FF5252">Rouge</b> : moins de 30 minutes</li>
-              <li><b style="color:#888888">Gris / tiret</b> : nuit en cours ou position GPS indisponible</li>
-            </ul>
-          </li>
-          <li>Calcul solaire <b>mis à jour toutes les 30 secondes</b> à partir de la position GPS courante.</li>
-          <li><b>Pastille de titre</b> "NUIT AERO" affichée en haut (masquable via Options ▸ « Masquer le titre »).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : —</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Le calcul utilise le <b>crépuscule civil</b> (soleil à −6° sous l'horizon) conformément à la réglementation VFR française.</li>
-          <li>Les horaires affichés sont en <b>heure locale</b> ; les zones de la barre reflètent l'axe temporel de la journée.</li>
-          <li>Sans position GPS, la barre est affichée en gris uniforme et le temps disponible est masqué.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMNGT.jpg" alt="NUMNGT — nuit aéronautique">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

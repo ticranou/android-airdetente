@@ -12,43 +12,59 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🛬</div>
-      <div>
-        <h1>Toucher de piste</h1>
-        <p class="subtitle">Aide latérale à l'approche : point de toucher projeté sur la piste</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🛬</div>
+          <div>
+            <h1>Toucher de piste</h1>
+            <p class="subtitle">Aide latérale à l'approche : point de toucher projeté sur la piste</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLTCH</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLTCH · analogique</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Vue latérale de l'<b>approche</b> : bande de piste (seuil marqué), icône avion et <b>point de toucher projeté</b> (triangle sur la piste).</li>
+            <li>Couleur selon la qualité d'approche : <b style="color:#2ECC40">vert</b> (zone de toucher correcte), <b style="color:#ffcc44">orange</b> (trop long), <b style="color:#E53935">rouge</b> (trop court).</li>
+            <li>Trois lobes : <b>DIST</b> (distance au seuil), <b>ICAO</b> (terrain), <b>HAUTEUR</b> (hauteur sol).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLTCH.jpg" alt="ANLTCH — toucher de piste">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : choisir / verrouiller le <b>terrain d'approche</b> (liste des terrains à moins de 40 nm ; bouton « Auto » pour revenir à la détection automatique).</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Détection automatique du terrain proche ; hauteur sol via l'élévation du terrain (SRTM). Longueur de piste issue des cartes VAC si disponible.</li>
+            <li>Nécessite une <b>position GPS</b>. <b>En développement</b> — indicatif, non certifié.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Vue latérale de l'<b>approche</b> : bande de piste (seuil marqué), icône avion et <b>point de toucher projeté</b> (triangle sur la piste).</li>
-          <li>Couleur selon la qualité d'approche : <b style="color:#2ECC40">vert</b> (zone de toucher correcte), <b style="color:#ffcc44">orange</b> (trop long), <b style="color:#E53935">rouge</b> (trop court).</li>
-          <li>Trois lobes : <b>DIST</b> (distance au seuil), <b>ICAO</b> (terrain), <b>HAUTEUR</b> (hauteur sol).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : choisir / verrouiller le <b>terrain d'approche</b> (liste des terrains à moins de 40 nm ; bouton « Auto » pour revenir à la détection automatique).</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Détection automatique du terrain proche ; hauteur sol via l'élévation du terrain (SRTM). Longueur de piste issue des cartes VAC si disponible.</li>
-          <li>Nécessite une <b>position GPS</b>. <b>En développement</b> — indicatif, non certifié.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLTCH.jpg" alt="ANLTCH — toucher de piste">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

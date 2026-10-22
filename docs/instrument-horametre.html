@@ -12,42 +12,58 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🕒</div>
-      <div>
-        <h1>Horamètre</h1>
-        <p class="subtitle">Relevés Départ / Arrivée · durée de vol calculée</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🕒</div>
+          <div>
+            <h1>Horamètre</h1>
+            <p class="subtitle">Relevés Départ / Arrivée · durée de vol calculée</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLHRM</span>
+        <span class="chip num">NUMHRM</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLHRM · analogique</span>
-      <span class="chip num">NUMHRM · numérique (100%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Deux relevés (<b>Départ</b> / <b>Arrivée</b>, format NNN.NN).</li>
+            <li>La <b>durée de vol calculée</b> s'affiche (différence × 6 min → minutes et h:mm).</li>
+            <li>Les relevés sont également alimentés automatiquement par les flux <b>ACTION moteur</b> (ANLACT) : le dialogue Horamètre départ s'ouvre lors du démarrage moteur (ENGINE_START, 3e étape) et le dialogue Horamètre arrivée lors de l'arrêt moteur (ENGINE_STOP, 1re étape).</li>
+            <li>Les valeurs renseignées apparaissent dans le <b>Dossier de vol</b> affiché à l'arrêt moteur (et dans le fichier <code>resume.jpg</code> du ZIP exporté par ANLFDR).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLHRM.jpg" alt="ANLHRM — cadran">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMHRM.jpg" alt="NUMHRM — relevés">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long sur une cellule : saisir le relevé</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Deux relevés (<b>Départ</b> / <b>Arrivée</b>, format NNN.NN).</li>
-          <li>La <b>durée de vol calculée</b> s'affiche (différence × 6 min → minutes et h:mm).</li>
-          <li>Les relevés sont également alimentés automatiquement par les flux <b>ACTION moteur</b> (ANLACT) : le dialogue Horamètre départ s'ouvre lors du démarrage moteur (ENGINE_START, 3e étape) et le dialogue Horamètre arrivée lors de l'arrêt moteur (ENGINE_STOP, 1re étape).</li>
-          <li>Les valeurs renseignées apparaissent dans le <b>Dossier de vol</b> affiché à l'arrêt moteur (et dans le fichier <code>resume.jpg</code> du ZIP exporté par ANLFDR).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long sur une cellule : saisir le relevé</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLHRM.jpg" alt="ANLHRM — cadran">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMHRM.jpg" alt="NUMHRM — relevés">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

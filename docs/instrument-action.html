@@ -12,58 +12,75 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🔘</div>
-      <div>
-        <h1>Action</h1>
-        <p class="subtitle">Bascule une action moteur (démarrage / arrêt) et ses effets de session</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🔘</div>
+          <div>
+            <h1>Action</h1>
+            <p class="subtitle">Bascule une action moteur (démarrage / arrêt) et ses effets de session</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLACT</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLACT · analogique</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Jauge ronde avec le <b>libellé de l'action</b> (ex. « Démarrage » / « Arrêt moteur »). Le titre « ACTION » est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
+            <li>Interrupteur basculant : position gauche <b>OFF</b> (gris) / droite <b>DONE</b> (vert).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLACT.jpg" alt="ANLACT — action">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : <b>choisir le type d'action</b> (Démarrage / Arrêt moteur). Le dialogue propose un bouton <b>« Effacer »</b> pour retirer l'action assignée et un bouton <b>« Fermer »</b> pour annuler.</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : <b>basculer</b> DONE ↔ OFF et déclencher les effets de session.</span>
+          </div>
+
+          <h3>Effets au basculement</h3>
+          <ul class="feat">
+            <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — puis ouvre trois dialogues séquentiels :
+              <ol>
+                <li><b>Carburant embarqué</b> — saisie du volume initial.</li>
+                <li><b>Étalonnage altimétrique</b> — calibration de l'altimètre.</li>
+                <li><b>Horamètre départ</b> — saisie du relevé de départ (format NNN.NN), stocké dans les instruments ANLHRM / NUMHRM.</li>
+              </ol>
+            </li>
+            <li><b>Démarrage (OFF)</b> : arrête l'enregistreur et le suivi, efface l'heure de départ.</li>
+            <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b> — puis ouvre deux dialogues séquentiels :
+              <ol>
+                <li><b>Horamètre arrivée</b> — saisie du relevé de fin de vol (format NNN.NN, optionnel — « Annuler » passe à l'étape suivante).</li>
+                <li><b>Dossier de vol</b> — récapitulatif complet de la session (horaires, durée, altitude calée, statistiques FDR, et section Horamètre si au moins un relevé est renseigné).</li>
+              </ol>
+            </li>
+          </ul>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Chaque case ANLACT mémorise son action et son état DONE/OFF. Les horaires alimentent l'instrument <b>Session de vol</b> (CMNFGT).</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Jauge ronde avec le <b>libellé de l'action</b> (ex. « Démarrage » / « Arrêt moteur »). Le titre « ACTION » est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-          <li>Interrupteur basculant : position gauche <b>OFF</b> (gris) / droite <b>DONE</b> (vert).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : <b>choisir le type d'action</b> (Démarrage / Arrêt moteur). Le dialogue propose un bouton <b>« Effacer »</b> pour retirer l'action assignée et un bouton <b>« Fermer »</b> pour annuler.</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : <b>basculer</b> DONE ↔ OFF et déclencher les effets de session.</div>
-        <h3>Effets au basculement</h3>
-        <ul class="feat">
-          <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — puis ouvre trois dialogues séquentiels :
-            <ol>
-              <li><b>Carburant embarqué</b> — saisie du volume initial.</li>
-              <li><b>Étalonnage altimétrique</b> — calibration de l'altimètre.</li>
-              <li><b>Horamètre départ</b> — saisie du relevé de départ (format NNN.NN), stocké dans les instruments ANLHRM / NUMHRM.</li>
-            </ol>
-          </li>
-          <li><b>Démarrage (OFF)</b> : arrête l'enregistreur et le suivi, efface l'heure de départ.</li>
-          <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b> — puis ouvre deux dialogues séquentiels :
-            <ol>
-              <li><b>Horamètre arrivée</b> — saisie du relevé de fin de vol (format NNN.NN, optionnel — « Annuler » passe à l'étape suivante).</li>
-              <li><b>Dossier de vol</b> — récapitulatif complet de la session (horaires, durée, altitude calée, statistiques FDR, et section Horamètre si au moins un relevé est renseigné).</li>
-            </ol>
-          </li>
-        </ul>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Chaque case ANLACT mémorise son action et son état DONE/OFF. Les horaires alimentent l'instrument <b>Session de vol</b> (CMNFGT).</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLACT.jpg" alt="ANLACT — action">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

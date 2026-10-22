@@ -12,57 +12,71 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">⚡</div>
-      <div>
-        <h1>Raccourcis</h1>
-        <p class="subtitle">CMNSCT — 3 accès rapides : instruments ou tableaux de bord</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">⚡</div>
+          <div>
+            <h1>Raccourcis</h1>
+            <p class="subtitle">CMNSCT — 3 accès rapides : instruments ou tableaux de bord</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">CMNSCT</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">CMNSCT · commun · bandeau mince</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Bandeau horizontal de <b>3 slots</b> placé en haut ou en bas d'un tableau de bord.</li>
+            <li>Chaque slot peut pointer vers un <b>instrument</b> (affiché en blanc), un <b>tableau de bord</b> (affiché en bleu) ou une <b>station météo</b> d'un terrain (affichée en <b style="color:#4CAF50">vert</b>).</li>
+            <li>Le label affiche le <b>nom lisible de l'instrument</b>, sans indication de taille (ex. : <q>Altimètre</q> au lieu de <q>Altimètre (100%-3L)</q>).</li>
+            <li><b>Tap</b> sur un slot non vide → ouvre l'instrument / le tableau de bord en plein écran (bouton <b>Fermer</b>), ou le détail <b>METAR/TAF</b> pour une station météo.</li>
+            <li>Le tableau de bord ciblé peut être <b>masqué du cockpit principal</b> (« Afficher dans le Cockpit » décoché) — il reste accessible via le raccourci.</li>
+            <li>Slots vides affichés comme <code>-----</code>.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <div class="shot portrait">Capture CMNSCT<br>(à venir)</div>
+          <h3>Configurer un slot</h3>
+          <ul class="feat">
+            <li>Appui long sur un slot → dialogue de choix du type :<br>
+              <b>Tableau de bord (&gt;&gt;)</b> → naviguer vers un tableau du pager.<br>
+              <b>Tableau de bord (Focus)</b> → ouvrir un tableau en plein écran.<br>
+              <b>Instruments</b> → sélecteur d'instrument habituel (toutes familles).<br>
+              <b>Terrain (Carte VAC)</b> → ouvrir la carte VAC d'un terrain.<br>
+              <b>Terrain (Station Météo)</b> → choisir parmi les terrains disposant d'une station météo ; le tap ouvre le METAR/TAF.
+            </li>
+            <li>La configuration ne touche que le slot pressé ; pas d'avance automatique.</li>
+          </ul>
+
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : configurer le slot</span>
+          </div>
+          <div class="gesture">
+            <span class="g">↗</span>
+            <span>Tap : ouvrir l'instrument / tableau de bord</span>
+          </div>
+
+          <h3>Cas d'usage typiques</h3>
+          <ul class="feat">
+            <li>Tableaux de bord dédiés à des phases de vol (décollage, croisière, approche) accessibles en un tap.</li>
+            <li>Instruments favoris toujours à portée depuis n'importe quel tableau de bord.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Bandeau horizontal de <b>3 slots</b> placé en haut ou en bas d'un tableau de bord.</li>
-          <li>Chaque slot peut pointer vers un <b>instrument</b> (affiché en blanc), un <b>tableau de bord</b> (affiché en bleu) ou une <b>station météo</b> d'un terrain (affichée en <b style="color:#4CAF50">vert</b>).</li>
-          <li>Le label affiche le <b>nom lisible de l'instrument</b>, sans indication de taille (ex. : <q>Altimètre</q> au lieu de <q>Altimètre (100%-3L)</q>).</li>
-          <li><b>Tap</b> sur un slot non vide → ouvre l'instrument / le tableau de bord en plein écran (bouton <b>Fermer</b>), ou le détail <b>METAR/TAF</b> pour une station météo.</li>
-          <li>Le tableau de bord ciblé peut être <b>masqué du cockpit principal</b> (« Afficher dans le Cockpit » décoché) — il reste accessible via le raccourci.</li>
-          <li>Slots vides affichés comme <code>-----</code>.</li>
-        </ul>
-        <h3>Configurer un slot</h3>
-        <ul class="feat">
-          <li>Appui long sur un slot → dialogue de choix du type :<br>
-            <b>Tableau de bord (&gt;&gt;)</b> → naviguer vers un tableau du pager.<br>
-            <b>Tableau de bord (Focus)</b> → ouvrir un tableau en plein écran.<br>
-            <b>Instruments</b> → sélecteur d'instrument habituel (toutes familles).<br>
-            <b>Terrain (Carte VAC)</b> → ouvrir la carte VAC d'un terrain.<br>
-            <b>Terrain (Station Météo)</b> → choisir parmi les terrains disposant d'une station météo ; le tap ouvre le METAR/TAF.
-          </li>
-          <li>La configuration ne touche que le slot pressé ; pas d'avance automatique.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : configurer le slot</div>
-        <div class="gesture"><span class="g tap">↗</span> Tap : ouvrir l'instrument / tableau de bord</div>
-        <h3>Cas d'usage typiques</h3>
-        <ul class="feat">
-          <li>Tableaux de bord dédiés à des phases de vol (décollage, croisière, approche) accessibles en un tap.</li>
-          <li>Instruments favoris toujours à portée depuis n'importe quel tableau de bord.</li>
-        </ul>
+      <div class="instrument-screenshots">
       </div>
     </div>
 
     <div class="footer">
-      Repère en haut à gauche : tiret « – » = appui long (configuration du slot).
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

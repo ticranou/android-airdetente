@@ -12,60 +12,70 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🛰</div>
-      <div>
-        <h1>Enregistreur de vol</h1>
-        <p class="subtitle">Flight Recorder — journal des dernières minutes de vol</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🛰</div>
+          <div>
+            <h1>Enregistreur de vol</h1>
+            <p class="subtitle">Flight Recorder — journal des dernières minutes de vol</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLFDR</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLFDR · analogique</span>
-      <span class="chip">NUMFDR · numérique · 100%-1L</span>
-      <span class="chip num">GPS · Accél. · Gyro · Alti · Baro</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Conserve en continu les <b>dernières minutes de vol</b> dans un buffer glissant : position GPS (1 Hz), accélération et inclinaison (~20 Hz), altitude (1 Hz), baromètre (~5 Hz).</li>
+            <li>Statut affiché : <b style="color:#32C832">Recording</b> (enregistrement) / <b style="color:#E8843A">Paused</b> (en pause).</li>
+            <li>Liste des paramètres avec une pastille <b style="color:#32C832">verte</b> (capteur disponible et enregistré) ou <b style="color:#E8843A">orange</b> (capteur absent sur l'appareil, ex. baromètre).</li>
+            <li>But : servir de <b>journal d'incident</b> pour analyser après coup ce qui s'est passé — socle du futur moteur de détection d'incident / Search &amp; Rescue.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <div class="shot portrait">Capture ANLFDR<br>(à venir)</div>
-        <div style="height:16px"></div>
-        <div class="shot">Capture NUMFDR<br>(à venir)</div>
+          <h3>Réglages (Réglages ▸ Cockpits)</h3>
+          <ul class="feat">
+            <li><b>Durée conservée</b> : longueur du buffer (min 5 min, défaut 10 min).</li>
+            <li><b>Sauvegarde disque</b> : le buffer est écrit sur l'appareil à intervalle régulier (défaut 2 min).</li>
+          </ul>
+
+          <h3>Gestes supportés</h3>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : pause / reprise de l'enregistrement</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : ouvrir le dialogue d'export avec <b>4 boutons icône</b> (icônes blanches) déposant les fichiers dans <b>Téléchargements</b> :
+              <ul>
+                <li><b>KML</b> — trace Google Earth (tout le vol)</li>
+                <li><b>GPX</b> — positions + altitude (tout le vol)</li>
+                <li><b>CSV</b> — log brut de toutes les mesures (X dernières minutes)</li>
+                <li><b>ZIP</b> — archive du vol complet compressée</li>
+              </ul>
+              Récupérable en branchant l'appareil au PC.</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>L'enregistrement tourne <b>en continu tant que le service de vol est actif</b> (notification « vol en cours ») — y compris quand vous passez sur une autre application ou éteignez l'écran. Il s'arrête au <b>« Quitter »</b>.</li>
+            <li>Indicatif et non certifié.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-      <h2>Possibilités</h2>
-      <ul class="feat">
-        <li>Conserve en continu les <b>dernières minutes de vol</b> dans un buffer glissant : position GPS (1 Hz), accélération et inclinaison (~20 Hz), altitude (1 Hz), baromètre (~5 Hz).</li>
-        <li>Statut affiché : <b style="color:#32C832">Recording</b> (enregistrement) / <b style="color:#E8843A">Paused</b> (en pause).</li>
-        <li>Liste des paramètres avec une pastille <b style="color:#32C832">verte</b> (capteur disponible et enregistré) ou <b style="color:#E8843A">orange</b> (capteur absent sur l'appareil, ex. baromètre).</li>
-        <li>But : servir de <b>journal d'incident</b> pour analyser après coup ce qui s'est passé — socle du futur moteur de détection d'incident / Search &amp; Rescue.</li>
-      </ul>
-      <h3>Réglages (Réglages ▸ Cockpits)</h3>
-      <ul class="feat">
-        <li><b>Durée conservée</b> : longueur du buffer (min 5 min, défaut 10 min).</li>
-        <li><b>Sauvegarde disque</b> : le buffer est écrit sur l'appareil à intervalle régulier (défaut 2 min).</li>
-      </ul>
-      <h3>Gestes</h3>
-      <div class="gesture"><span class="g">··</span> Double-tap : pause / reprise de l'enregistrement</div>
-      <div class="gesture"><span class="g">–</span> Appui long : ouvrir le dialogue d'export avec <b>4 boutons icône</b> (icônes blanches) déposant les fichiers dans <b>Téléchargements</b> :
-        <ul>
-          <li><b>KML</b> — trace Google Earth (tout le vol)</li>
-          <li><b>GPX</b> — positions + altitude (tout le vol)</li>
-          <li><b>CSV</b> — log brut de toutes les mesures (X dernières minutes)</li>
-          <li><b>ZIP</b> — archive du vol complet compressée</li>
-        </ul>
-        Récupérable en branchant l'appareil au PC.</div>
-      <h3>Note</h3>
-      <ul class="feat">
-        <li>L'enregistrement tourne <b>en continu tant que le service de vol est actif</b> (notification « vol en cours ») — y compris quand vous passez sur une autre application ou éteignez l'écran. Il s'arrête au <b>« Quitter »</b>.</li>
-        <li>Indicatif et non certifié.</li>
-      </ul>
-    </div>
+      <div class="instrument-screenshots">
+      </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : deux points « ·· » = double-tap (pause / reprise).
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

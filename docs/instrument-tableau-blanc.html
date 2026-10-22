@@ -12,59 +12,75 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">📝</div>
-      <div>
-        <h1>Tableau blanc</h1>
-        <p class="subtitle">CMNWHB — Notes et dessin libre avec historique</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">📝</div>
+          <div>
+            <h1>Tableau blanc</h1>
+            <p class="subtitle">CMNWHB — Notes et dessin libre avec historique</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">CMNWHB</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">CMNWHB · commun · 100%-5L</span>
-      <span class="chip num">Doigt · Stylet</span>
-    </div>
-
-    <div class="grid2">
-      <div>
-        <div class="shot portrait">Capture CMNWHB<br>(à venir)</div>
-      </div>
-
-      <div class="card">
-      <h2>Possibilités</h2>
-      <ul class="feat">
-        <li>Surface de <b>dessin libre</b> au doigt ou au stylet pour notes, croquis, calculs.</li>
-        <li>Fond configurable : <b>blanc</b> (encre noire) ou <b>noir</b> (encre blanche, défaut).</li>
-        <li>Trois épaisseurs de trait : <b>Moyen</b> (2.5 dp), <b>Épais</b> (4.0 dp, défaut), <b>Très épais</b> (6.5 dp).</li>
-        <li>Toolbar bas (hauteur 7.5%) avec boutons :
-          <ul style="margin-top:4px">
-            <li><b>🧹 Effacer</b> (rouge, 42–68 % largeur) : long-press ajoute la note à l'historique et efface la surface.</li>
-            <li><b>🕔</b> (bleu si historique non vide, 71–97 % largeur) : affiche la liste des notes enregistrées avec horodatage.</li>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Surface de <b>dessin libre</b> au doigt ou au stylet pour notes, croquis, calculs.</li>
+            <li>Fond configurable : <b>blanc</b> (encre noire) ou <b>noir</b> (encre blanche, défaut).</li>
+            <li>Trois épaisseurs de trait : <b>Moyen</b> (2.5 dp), <b>Épais</b> (4.0 dp, défaut), <b>Très épais</b> (6.5 dp).</li>
+            <li>Toolbar bas (hauteur 7.5%) avec boutons :
+              <ul style="margin-top:4px">
+                <li><b>🧹 Effacer</b> (rouge, 42–68 % largeur) : long-press ajoute la note à l'historique et efface la surface.</li>
+                <li><b>🕔</b> (bleu si historique non vide, 71–97 % largeur) : affiche la liste des notes enregistrées avec horodatage.</li>
+              </ul>
+            </li>
+            <li>Bouton <b>⚙ réglages</b> (38 dp, circulaire) en haut à droite : configurer fond et épaisseur.</li>
+            <li><b>Mode lecture seule</b> : après restauration d'une note de l'historique, surface verrouillée en lecture seule (pas de dessin nouveau, Effacer long-press inactif). Indicateur « — Lecture seule — » (22 sp, orange) au-dessus de la toolbar et « [lecture seule] » dans la barre de titre. Persiste lors de changements de focus.</li>
+            <li>Historique : <b>max 10 entrées</b>. Restaurer une note ne la supprime pas. Ajouter une nouvelle note déplace les anciennes.</li>
           </ul>
-        </li>
-        <li>Bouton <b>⚙ réglages</b> (38 dp, circulaire) en haut à droite : configurer fond et épaisseur.</li>
-        <li><b>Mode lecture seule</b> : après restauration d'une note de l'historique, surface verrouillée en lecture seule (pas de dessin nouveau, Effacer long-press inactif). Indicateur « — Lecture seule — » (22 sp, orange) au-dessus de la toolbar et « [lecture seule] » dans la barre de titre. Persiste lors de changements de focus.</li>
-        <li>Historique : <b>max 10 entrées</b>. Restaurer une note ne la supprime pas. Ajouter une nouvelle note déplace les anciennes.</li>
-      </ul>
-      <h3>Réglages (Réglages ▸ Cockpits)</h3>
-      <ul class="feat">
-        <li><b>Fond</b> : Blanc / encre noire OR Noir / encre blanche (défaut).</li>
-        <li><b>Épaisseur du trait</b> : Moyen (2.5 dp) / Épais (4.0 dp, défaut) / Très épais (6.5 dp).</li>
-      </ul>
-      <h3>Gestes</h3>
-      <div class="gesture"><span class="g">–</span> Long-press sur Effacer : sauvegarder la note → historique et effacer la surface</div>
-      <div class="gesture"><span class="g">↗</span> Tap sur Historique : afficher la liste des notes (à venir : min/max dates, aperçu)</div>
-      <div class="gesture"><span class="g">⚙</span> Tap sur Réglages : fond et épaisseur du trait</div>
-      <h3>Note</h3>
-      <ul class="feat">
-        <li>Les entrées historiques sont stockées en mémoire (ServiceLocator.instrumentState) et <b>non persistantes</b> à la fermeture de l'app.</li>
-        <li>Mode lecture seule utile pour vérifier une note antérieure sans risque de l'écraser accidentellement.</li>
-      </ul>
-    </div>
+
+          <h3>Réglages (Réglages ▸ Cockpits)</h3>
+          <ul class="feat">
+            <li><b>Fond</b> : Blanc / encre noire OR Noir / encre blanche (défaut).</li>
+            <li><b>Épaisseur du trait</b> : Moyen (2.5 dp) / Épais (4.0 dp, défaut) / Très épais (6.5 dp).</li>
+          </ul>
+
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Long-press sur Effacer : sauvegarder la note → historique et effacer la surface</span>
+          </div>
+          <div class="gesture">
+            <span class="g">↗</span>
+            <span>Tap sur Historique : afficher la liste des notes (à venir : min/max dates, aperçu)</span>
+          </div>
+          <div class="gesture">
+            <span class="g">⚙</span>
+            <span>Tap sur Réglages : fond et épaisseur du trait</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Les entrées historiques sont stockées en mémoire (ServiceLocator.instrumentState) et <b>non persistantes</b> à la fermeture de l'app.</li>
+            <li>Mode lecture seule utile pour vérifier une note antérieure sans risque de l'écraser accidentellement.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="instrument-screenshots">
+      </div>
     </div>
 
     <div class="footer">
-      Repères en bas : tiret « – » = long-press Effacer (ajoute à l'historique).
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

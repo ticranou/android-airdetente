@@ -12,43 +12,59 @@
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🛬</div>
-      <div>
-        <h1>Terrains proches</h1>
-        <p class="subtitle">Les 3 aérodromes les plus proches · triés par proximité</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🛬</div>
+          <div>
+            <h1>Terrains proches</h1>
+            <p class="subtitle">Les 3 aérodromes les plus proches · triés par proximité</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLFLD</span>
+        <span class="chip num">NUMFLD</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLFLD · analogique</span>
-      <span class="chip num">NUMFLD · numérique (100%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Les <b>3 aérodromes les plus proches</b> : code OACI, distance, cap.</li>
+            <li>Triés par <b>proximité</b>.</li>
+            <li><b>Base complète hors-ligne</b> : les terrains proches proviennent de l'ensemble des aérodromes (données OpenAIP embarquées avec la carte), pas seulement de votre liste — utile en voyage. Les héliports, terrains privés/ULM et militaires sont écartés.</li>
+            <li>Un terrain de <b>votre liste</b> proche garde ses infos enrichies (circuit, VAC téléchargée).</li>
+            <li>Pour un aérodrome proche <b>hors de votre liste</b> : ouvrir sa <b>VAC à la demande</b> (SIA) ou l'<b>ajouter à vos terrains</b> depuis la liste complète.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLFLD.jpg" alt="ANLFLD — cadran">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMFLD.jpg" alt="NUMFLD — liste">
+          <h3>Gestes supportés</h3>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap sur un terrain : ouvrir sa carte VAC</span>
+          </div>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : liste complète des terrains</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Les <b>3 aérodromes les plus proches</b> : code OACI, distance, cap.</li>
-          <li>Triés par <b>proximité</b>.</li>
-          <li><b>Base complète hors-ligne</b> : les terrains proches proviennent de l'ensemble des aérodromes (données OpenAIP embarquées avec la carte), pas seulement de votre liste — utile en voyage. Les héliports, terrains privés/ULM et militaires sont écartés.</li>
-          <li>Un terrain de <b>votre liste</b> proche garde ses infos enrichies (circuit, VAC téléchargée).</li>
-          <li>Pour un aérodrome proche <b>hors de votre liste</b> : ouvrir sa <b>VAC à la demande</b> (SIA) ou l'<b>ajouter à vos terrains</b> depuis la liste complète.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">··</span> Double-tap sur un terrain : ouvrir sa carte VAC</div>
-        <div class="gesture"><span class="g">–</span> Appui long : liste complète des terrains</div>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/ANLFLD.jpg" alt="ANLFLD — cadran">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="screenshots/NUMFLD.jpg" alt="NUMFLD — liste">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

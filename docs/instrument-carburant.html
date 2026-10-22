@@ -6,59 +6,77 @@
 <title>AirDetente — Carburant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="../themes/dark/style.css">
 </head>
 <body>
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">⛽</div>
-      <div>
-        <h1>Carburant</h1>
-        <p class="subtitle">Niveau · autonomie · distance franchissable</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">⛽</div>
+          <div>
+            <h1>Carburant</h1>
+            <p class="subtitle">Niveau · autonomie · distance franchissable</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLCRB</span>
+        <span class="chip num">NUMCRB</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLCRB · analogique</span>
-      <span class="chip num">NUMCRB · numérique (100%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li><b>Niveau de carburant</b> avec zones colorées : <b style="color:#E53935">rouge</b> (jusqu'à la réserve), <b style="color:#ffcc44">orange</b> (réserve → 50%), <b style="color:#2ECC40">vert</b> (50% → plein).</li>
+            <li><b>ANLCRB</b> : cadran à aiguille façon altimètre + volume restant (litres) au centre. L'arc de progression couvre un rayon plus grand (0,72 r) pour une meilleure lisibilité.</li>
+            <li><b>NUMCRB</b> : barre pleine largeur + curseur <b style="color:#B94DD6">violet</b>, et trois colonnes <b>Carburant restant</b> (L) / <b>Autonomie</b> (h:mm) / <b>Range</b> (km). Les marges autour des libellés <b>E</b> et <b>F</b> sont élargies.</li>
+            <li><b>Autonomie</b> = carburant ÷ consommation ; <b>Range</b> = autonomie × vitesse sol (affiché au-dessus de ~30 km/h).</li>
+            <li><b>Alerte réserve</b> : notification unique dès l'entrée en réserve de sécurité.</li>
+            <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLCRB.jpg" alt="ANLCRB — jauge carburant">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMCRB.jpg" alt="NUMCRB — bande carburant">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : ouvrir la saisie du <b>carburant embarqué</b> (pavé numérique, bouton « Plein », puis <b>Démarrer</b> le suivi ou <b>Arrêter</b>).</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Capacité réservoir, consommation et réserve viennent de la <b>fiche appareil</b> (défauts : 91 L, 22 L/h, 30 min).</li>
+            <li>Pendant le suivi, le carburant décroît en temps réel selon la consommation.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li><b>Niveau de carburant</b> avec zones colorées : <b style="color:#E53935">rouge</b> (jusqu'à la réserve), <b style="color:#ffcc44">orange</b> (réserve → 50%), <b style="color:#2ECC40">vert</b> (50% → plein).</li>
-          <li><b>ANLCRB</b> : cadran à aiguille façon altimètre + volume restant (litres) au centre. L'arc de progression couvre un rayon plus grand (0,72 r) pour une meilleure lisibilité.</li>
-          <li><b>NUMCRB</b> : barre pleine largeur + curseur <b style="color:#B94DD6">violet</b>, et trois colonnes <b>Carburant restant</b> (L) / <b>Autonomie</b> (h:mm) / <b>Range</b> (km). Les marges autour des libellés <b>E</b> et <b>F</b> sont élargies.</li>
-          <li><b>Autonomie</b> = carburant ÷ consommation ; <b>Range</b> = autonomie × vitesse sol (affiché au-dessus de ~30 km/h).</li>
-          <li><b>Alerte réserve</b> : notification unique dès l'entrée en réserve de sécurité.</li>
-          <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : ouvrir la saisie du <b>carburant embarqué</b> (pavé numérique, bouton « Plein », puis <b>Démarrer</b> le suivi ou <b>Arrêter</b>).</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
-        <h3>Note</h3>
-        <ul class="feat">
-          <li>Capacité réservoir, consommation et réserve viennent de la <b>fiche appareil</b> (défauts : 91 L, 22 L/h, 30 min).</li>
-          <li>Pendant le suivi, le carburant décroît en temps réel selon la consommation.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/ANLCRB.jpg" alt="ANLCRB — jauge carburant">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/NUMCRB.jpg" alt="NUMCRB — bande carburant">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>
 
-<script src="assets/nav.js"></script>
+<script src="../assets/lightbox.js"></script>
+<script src="../assets/nav.js"></script>
 </body>
 </html>

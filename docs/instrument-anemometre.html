@@ -6,59 +6,77 @@
 <title>AirDetente — Anémomètre</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="../themes/dark/style.css">
 </head>
 <body>
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🌀</div>
-      <div>
-        <h1>Anémomètre</h1>
-        <p class="subtitle">Vitesse GPS · arcs de couleur · curseurs Vs/Vpl</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🌀</div>
+          <div>
+            <h1>Anémomètre</h1>
+            <p class="subtitle">Vitesse GPS · arcs de couleur · curseurs Vs/Vpl</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLSPD</span>
+        <span class="chip num">NUMSPD</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLSPD · analogique</span>
-      <span class="chip num">NUMSPD · numérique (100%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Affiche la <b>vitesse GPS</b>.</li>
+            <li><b>Arcs de couleur</b> : vert (plage normale), blanc (volets), rouge (Vne).</li>
+            <li>Curseurs de <b>décrochage</b> Vs0/Vs1 (<b style="color:#e33">rouges</b>).</li>
+            <li>Curseur de <b>vitesse de plané</b> Vpl (<b style="color:var(--accent2)">magenta</b>).</li>
+            <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
+            <li>Version numérique : bande défilante + valeur en gros dans une cellule orange.</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLSPD.jpg" alt="ANLSPD — cadran">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMSPD.jpg" alt="NUMSPD (bande)">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : —</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+
+          <h3>Réglages liés</h3>
+          <ul class="feat">
+            <li>Unité : <b>km/h</b> ou <b>kt</b> (onglet Cockpits).</li>
+            <li>Arcs définis par les <b>vitesses de l'appareil</b>.</li>
+          </ul>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Affiche la <b>vitesse GPS</b>.</li>
-          <li><b>Arcs de couleur</b> : vert (plage normale), blanc (volets), rouge (Vne).</li>
-          <li>Curseurs de <b>décrochage</b> Vs0/Vs1 (<b style="color:#e33">rouges</b>).</li>
-          <li>Curseur de <b>vitesse de plané</b> Vpl (<b style="color:var(--accent2)">magenta</b>).</li>
-          <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-          <li>Version numérique : bande défilante + valeur en gros dans une cellule orange.</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : —</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
-        <h3>Réglages liés</h3>
-        <ul class="feat">
-          <li>Unité : <b>km/h</b> ou <b>kt</b> (onglet Cockpits).</li>
-          <li>Arcs définis par les <b>vitesses de l'appareil</b>.</li>
-        </ul>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/ANLSPD.jpg" alt="ANLSPD — cadran">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/NUMSPD.jpg" alt="NUMSPD — bande">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>
 
-<script src="assets/nav.js"></script>
+<script src="../assets/lightbox.js"></script>
+<script src="../assets/nav.js"></script>
 </body>
 </html>

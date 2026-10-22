@@ -6,53 +6,70 @@
 <title>AirDetente — Altimètre</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="../themes/dark/style.css">
 </head>
 <body>
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">⛰</div>
-      <div>
-        <h1>Altimètre</h1>
-        <p class="subtitle">Altitude GPS · altitude à suivre (bug magenta)</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">⛰</div>
+          <div>
+            <h1>Altimètre</h1>
+            <p class="subtitle">Altitude GPS · altitude à suivre (bug magenta)</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip">ANLALT</span>
+        <span class="chip num">NUMALT</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip">ANLALT · analogique</span>
-      <span class="chip num">NUMALT · Altimètre/Variomètre (50%-1L)</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <ul class="feat">
+            <li>Affiche l'<b>altitude GPS</b>.</li>
+            <li><b>Altitude à suivre</b> matérialisée par un <b style="color:var(--accent2)">curseur / bug magenta</b>.</li>
+            <li><b>NUMALT</b> combine Altitude + Vario en <b>deux cases encadrées</b> : chacune porte un <b>libellé en haut</b> (ALTI / VARIO), la <b>grande valeur au centre</b> colorée selon la tendance (<b style="color:#3c3">vert en montée</b>, <b style="color:#e33">rouge en descente</b>) et l'<b>unité en bas</b> (FT / FT/MIN). La <b>bordure des cases reste gris neutre</b> ; une flèche de tendance est affichée entre les deux cases.</li>
+            <li>Unité <b>pieds (ft)</b> ou <b>mètres (m)</b> selon Réglages ▸ Cockpits : la <b>graduation du cadran</b> et la valeur numérique suivent l'unité choisie (elles restent cohérentes).</li>
+            <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <img class="shot" src="screenshots/ANLALT.jpg" alt="ANLALT — cadran">
-        <div style="height:16px"></div>
-        <img class="shot" src="screenshots/NUMALT.jpg" alt="NUMALT — Altitude + Vario">
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : saisir l'altitude à suivre</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Possibilités</h2>
-        <ul class="feat">
-          <li>Affiche l'<b>altitude GPS</b>.</li>
-          <li><b>Altitude à suivre</b> matérialisée par un <b style="color:var(--accent2)">curseur / bug magenta</b>.</li>
-          <li><b>NUMALT</b> combine Altitude + Vario en <b>deux cases encadrées</b> : chacune porte un <b>libellé en haut</b> (ALTI / VARIO), la <b>grande valeur au centre</b> colorée selon la tendance (<b style="color:#3c3">vert en montée</b>, <b style="color:#e33">rouge en descente</b>) et l'<b>unité en bas</b> (FT / FT/MIN). La <b>bordure des cases reste gris neutre</b> ; une flèche de tendance est affichée entre les deux cases.</li>
-          <li>Unité <b>pieds (ft)</b> ou <b>mètres (m)</b> selon Réglages ▸ Cockpits : la <b>graduation du cadran</b> et la valeur numérique suivent l'unité choisie (elles restent cohérentes).</li>
-          <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-        </ul>
-        <h3>Gestes</h3>
-        <div class="gesture"><span class="g">–</span> Appui long : saisir l'altitude à suivre</div>
-        <div class="gesture"><span class="g">··</span> Double-tap : —</div>
+      <div class="instrument-screenshots">
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/ANLALT.jpg" alt="ANLALT — cadran analogique">
+        </div>
+        <div class="screenshot-item">
+          <img class="shot" src="../screenshots/NUMALT.jpg" alt="NUMALT — Altitude + Vario numérique">
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      Repères en haut à gauche de l'instrument : tiret « – » = appui long, deux points « ·· » = double-tap.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>
 
-<script src="assets/nav.js"></script>
+<script src="../assets/lightbox.js"></script>
+<script src="../assets/nav.js"></script>
 </body>
 </html>

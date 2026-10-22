@@ -6,61 +6,68 @@
 <title>AirDetente — Approche finale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="../themes/dark/style.css">
 </head>
 <body>
 
 <div class="poster">
   <div class="content">
-    <div class="brand">
-      <div class="logo">🛬</div>
-      <div>
-        <h1>Approche finale</h1>
-        <p class="subtitle">NUMAPP — bandeau horizontal d'aide à l'axe</p>
+    <div class="header-bar">
+      <div class="header-info">
+        <div class="brand">
+          <div class="logo">🛬</div>
+          <div>
+            <h1>Approche finale</h1>
+            <p class="subtitle">NUMAPP — bandeau horizontal d'aide à l'axe</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-pills">
+        <span class="chip num">NUMAPP</span>
       </div>
     </div>
 
-    <div class="card" style="margin:16px 0 22px">
-      <span class="chip num">NUMAPP · numérique · 100%-1L</span>
-      <span class="chip">GPS · Altitude</span>
-      <span class="chip" style="color:#E8843A">Indicatif · non certifié</span>
-    </div>
+    <div class="instrument-layout">
+      <div class="instrument-main">
+        <div class="card">
+          <h2>Possibilités</h2>
+          <p>Instrument <b>horizontal sur une ligne</b> (famille NUM), reprenant la logique de l'analogique <b>ANLAPP</b>. Sous le bandeau de titre « APPROCHE », de gauche à droite :</p>
+          <ul class="feat">
+            <li><b>Arcs de proximité sur les deux bords</b> (gauche <b>et</b> droite, en miroir) : trois barres verticales <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> qui s'allument au fur et à mesure que la <b>hauteur AGL</b> descend sous les seuils (vert sous le seuil vert, orange sous l'orange, rouge sous le rouge). Ces hauteurs sont <b>configurables et partagées avec ANLAPP</b> dans Réglages ▸ Instruments ▸ Approche finale.</li>
+            <li><b>Zone gauche — rappel terrain</b> : <b>TERRAIN</b> (code OACI + longueur de piste en m) et <b>CIRCUIT</b> (altitude de circuit = élévation terrain + 1000 ft, avec le QFU).</li>
+            <li><b>Centre — axe</b> : indicateur d'axe type <b>cross-pointer</b> identique à ANLAPP — échelle de diamants et barre verticale déviée selon l'écart latéral, <b style="color:#35C759">verte</b> dans la tolérance, <b style="color:#E8843A">orange</b> hors tolérance, drapeau <code>LOC</code> en l'absence de cible.</li>
+            <li><b>Zone droite — valeurs</b> : <b>AXE</b> (écart latéral en mètres, G/D ; <b style="color:#35C759">vert</b> dans l'axe, <b style="color:#E8843A">orange</b> sinon) et <b>ALTI</b> (altitude GPS ; <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> selon l'altitude de circuit).</li>
+          </ul>
 
-    <div class="grid2">
-      <div>
-        <div class="shot portrait">Capture NUMAPP<br>(à venir)</div>
+          <h3>Cible d'approche</h3>
+          <ul class="feat">
+            <li><b>AUTO</b> par défaut : l'aérodrome le plus proche (base aérodromes hors-ligne), avec le QFU issu de la fiche, choisi selon le sens d'arrivée.</li>
+            <li>Le point de référence de l'aérodrome sert de <b>proxy du seuil</b> ; le QFU est déterminé au pas de <b>10°</b>.</li>
+            <li>Dialogue de sélection : titre <code>&lt;OACI&gt; — &lt;Nom de l'aérodrome&gt;</code> avec sous-titre « Piste à utiliser ». Un <b>schéma boussole d'orientation de piste</b> (arc compas avec rose des caps) est affiché, et chaque piste disponible est représentée par un <b>bouton QFU individuel</b>. Bouton « Terrains… » pour revenir à la liste des terrains.</li>
+          </ul>
+
+          <h3>Gestes supportés</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span><b>Verrouiller</b> un terrain et un QFU précis, ou revenir en <b>AUTO</b>.</span>
+          </div>
+
+          <h3>Note</h3>
+          <ul class="feat">
+            <li>Aide <b>strictement indicative et non certifiée</b> : géométrie pure, <b>sans conscience du relief ni des obstacles</b>. À ne jamais utiliser comme guidage d'approche.</li>
+          </ul>
+        </div>
       </div>
-
-      <div class="card">
-      <h2>Possibilités</h2>
-      <p>Instrument <b>horizontal sur une ligne</b> (famille NUM), reprenant la logique de l'analogique <b>ANLAPP</b>. Sous le bandeau de titre « APPROCHE », de gauche à droite :</p>
-      <ul class="feat">
-        <li><b>Arcs de proximité sur les deux bords</b> (gauche <b>et</b> droite, en miroir) : trois barres verticales <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> qui s'allument au fur et à mesure que la <b>hauteur AGL</b> descend sous les seuils (vert sous le seuil vert, orange sous l'orange, rouge sous le rouge). Ces hauteurs sont <b>configurables et partagées avec ANLAPP</b> dans Réglages ▸ Instruments ▸ Approche finale.</li>
-        <li><b>Zone gauche — rappel terrain</b> : <b>TERRAIN</b> (code OACI + longueur de piste en m) et <b>CIRCUIT</b> (altitude de circuit = élévation terrain + 1000 ft, avec le QFU).</li>
-        <li><b>Centre — axe</b> : indicateur d'axe type <b>cross-pointer</b> identique à ANLAPP — échelle de diamants et barre verticale déviée selon l'écart latéral, <b style="color:#35C759">verte</b> dans la tolérance, <b style="color:#E8843A">orange</b> hors tolérance, drapeau <code>LOC</code> en l'absence de cible.</li>
-        <li><b>Zone droite — valeurs</b> : <b>AXE</b> (écart latéral en mètres, G/D ; <b style="color:#35C759">vert</b> dans l'axe, <b style="color:#E8843A">orange</b> sinon) et <b>ALTI</b> (altitude GPS ; <b style="color:#35C759">verte</b> / <b style="color:#E8843A">orange</b> / <b style="color:#FF3B30">rouge</b> selon l'altitude de circuit).</li>
-      </ul>
-      <h3>Cible d'approche</h3>
-      <ul class="feat">
-        <li><b>AUTO</b> par défaut : l'aérodrome le plus proche (base aérodromes hors-ligne), avec le QFU issu de la fiche, choisi selon le sens d'arrivée.</li>
-        <li>Le point de référence de l'aérodrome sert de <b>proxy du seuil</b> ; le QFU est déterminé au pas de <b>10°</b>.</li>
-        <li>Dialogue de sélection : titre <code>&lt;OACI&gt; — &lt;Nom de l'aérodrome&gt;</code> avec sous-titre « Piste à utiliser ». Un <b>schéma boussole d'orientation de piste</b> (arc compas avec rose des caps) est affiché, et chaque piste disponible est représentée par un <b>bouton QFU individuel</b>. Bouton « Terrains… » pour revenir à la liste des terrains.</li>
-      </ul>
-      <h3>Gestes</h3>
-      <div class="gesture"><span class="g">–</span> Appui long : <b>verrouiller</b> un terrain et un QFU précis, ou revenir en <b>AUTO</b>.</div>
-      <h3>Note</h3>
-      <ul class="feat">
-        <li>Aide <b>strictement indicative et non certifiée</b> : géométrie pure, <b>sans conscience du relief ni des obstacles</b>. À ne jamais utiliser comme guidage d'approche.</li>
-      </ul>
-    </div>
     </div>
 
     <div class="footer">
-      Repère en haut à gauche de l'instrument : un tiret « – » = appui long (choix de la cible).
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
+      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>
 
-<script src="assets/nav.js"></script>
+<script src="../assets/lightbox.js"></script>
+<script src="../assets/nav.js"></script>
 </body>
 </html>

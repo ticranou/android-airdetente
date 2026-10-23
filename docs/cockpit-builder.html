@@ -130,6 +130,15 @@
           <input type="checkbox" id="showTitle">
           <label for="showTitle">Afficher le titre du cockpit</label>
         </div>
+        <div class="inline" style="margin-top:6px">
+          <input type="checkbox" id="showStatusTop" checked>
+          <label for="showStatusTop">Afficher le bandeau de statuts en haut</label>
+        </div>
+        <div class="inline" style="margin-top:6px">
+          <input type="checkbox" id="showStatusBottom">
+          <label for="showStatusBottom">Afficher le bandeau de statuts en bas</label>
+        </div>
+        <p class="hint" style="margin-top:6px">Le bandeau de statuts (7 dp) affiche trois zones colorées : <b>GPS</b> (fix), <b>CALAGE</b> (horizon calibré par appui long) et <b>DONNÉES</b> (cartes &amp; VAC à jour). Vert = OK, rouge = action requise. Indépendant par tableau de bord.</p>
       </div>
 
       <div class="panel">
@@ -2893,6 +2902,8 @@ function buildExport() {
       cells: out,
       showInCockpit: document.getElementById("showInCockpit").checked,
       showTitle: document.getElementById("showTitle").checked,
+      showStatusTop: document.getElementById("showStatusTop").checked,
+      showStatusBottom: document.getElementById("showStatusBottom").checked,
     },
   };
 }
@@ -2984,6 +2995,8 @@ document.getElementById("rows").oninput = (e) => {
 document.getElementById("name").oninput = syncJson;
 document.getElementById("showInCockpit").onchange = syncJson;
 document.getElementById("showTitle").onchange = syncJson;
+document.getElementById("showStatusTop").onchange = syncJson;
+document.getElementById("showStatusBottom").onchange = syncJson;
 
 render();
 </script>

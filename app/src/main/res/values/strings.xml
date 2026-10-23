@@ -202,7 +202,7 @@
     <string name="efis_instr_trf">ANLTRF - Trafic Safesky</string>
     <string name="efis_instr_prx">ANLPRX - Proximité sol</string>
     <string name="efis_instr_clt">ANLCLT - Checklist</string>
-    <string name="efis_instr_act">ANLACT - Action</string>
+    <string name="efis_instr_act">ANLACT - Action moteur</string>
     <string name="efis_instr_sct_dash">ANLSCT - Raccourci</string>
     <string name="efis_instr_cct">ANLCCT - Circuit de piste</string>
     <string name="efis_instr_crb">ANLCRB - Carburant</string>

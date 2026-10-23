@@ -7,24 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="themes/dark/style.css">
-<style>
-  .instr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .instr-table th, .instr-table td {
-    padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left;
-  }
-  .instr-table th {
-    font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-  .instr-table th:nth-child(2), .instr-table th:nth-child(3),
-  .instr-table td:nth-child(2), .instr-table td:nth-child(3) {
-    text-align: center; width: 48px;
-  }
-  .instr-table td { color: var(--ink); }
-  .instr-table td.y { color: var(--ok); font-weight: 700; }
-  .instr-table td.n { color: var(--ink-soft); }
-  .instr-table tbody tr:last-child td { border-bottom: none; }
-</style>
 </head>
 <body>
 
@@ -42,29 +24,37 @@
 
     <div class="grid2">
       <div class="card">
-        <h2>Ce que fait l'application</h2>
+        <h2>Fonctionnalités offertes</h2>
         <ul class="feat">
-          <li><b>Checks</b> — exécution guidée des checklists : cochage dans l'ordre, progression, enchaînement.</li>
-          <li><b>Cockpit EFIS</b> — tableaux de bord configurables (grille 2×N à fusion de cellules), instruments alimentés par les capteurs.</li>
-          <li><b>Raccourcis (CMNSCT)</b> — 3 slots pour accès rapide à vos instruments ou tableaux de bord préférés.</li>
-          <li><b>Tableau blanc (CMNWHB)</b> — notes et dessin libre avec historique et réglages (fond blanc/noir, épaisseur).</li>
-          <li><b>Focus mode</b> — pinch-to-zoom (deux doigts écartés) pour zoomer sur un instrument avec compte à rebours auto-fermeture.</li>
-          <li><b>Terrains / VAC</b> — aérodromes par proximité, cartes VAC, météo METAR/TAF.</li>
-          <li><b>Carte mobile</b> — fond de carte VFR hors-ligne (MapLibre + OpenAIP), trace, route, radar météo, vent au FL20.</li>
-          <li><b>Trafic Safesky (ANLTRF)</b> — radar de trafic aérien en temps réel, 5 nm, niveaux de danger.</li>
-          <li><b>Proximité sol TAWS (ANLPRX)</b> — hauteur AGL calculée sur MNT SRTM (~30 m), alertes CAUTION / WARNING / PULL UP.</li>
-          <li><b>Enregistreur de vol (ANLFDR)</b> — buffer glissant GPS + capteurs, export KML / GPX / CSV.</li>
-          <li><b>Réglages</b> — onglets Application, Cockpits, Instruments, Appareils, Checklists, Terrains, Données, Aide ; import/export.</li>
-          <li><b>Compatibilité matérielle</b> — un test au démarrage vérifie les capteurs (gyroscope, baromètre, GPS) et prévient si certaines fonctions seront indisponibles.</li>
+          <li><b>Instruments</b> — Analogiques et/ou numériques en fonction des besoins, une multitude d'instruments basés sur les capteurs de l'appareil.</li>
+          <li><b>Tableaux de bord</b> — Tableaux configurables (grille 2xN à fusion de cellules), placement des instruments et personnalisation de l'apparence.</li>
+          <li><b>Checklists</b> — Exécution guidée des checklists : cochage dans l'ordre, progression, enchaînement d'items.</li>
+          <li><b>Tableau blanc</b> — Prise de notes et dessin libre avec historique et réglages (fond blanc/noir, épaisseur).</li>
+          <li><b>Raccourcis</b> — Pour accéder rapidement à vos instruments, à un tableau de bord préféré, à une carte VAC, à une station météo, ...</li>
+          <li><b>Mode Focus</b> — Pinch-to-zoom (deux doigts écartés) pour zoomer sur un instrument et se focaliser dessus, avec un compte à rebours d'auto-fermeture.</li>
+          <li><b>Terrains / VAC</b> — Aérodromes, cartes VAC, stations météo (METAR/TAF).</li>
+          <li><b>Moving Map</b> — Fond de carte VFR hors-ligne (MapLibre + OpenAIP), trace, route, radar météo, vent au FL20.</li>
+          <li><b>Prépration de navigation</b> — Composition de branches, calculs auto temps/distances/caps, dossier de vol PDF.</li>
+          <li><b>Proximité sol TAWS</b> — Hauteur AGL calculée sur MNT SRTM (~30 m), alertes de rapprochement CAUTION / WARNING / PULL UP.</li>
+          <li><b>Enregistreur de vol</b> — Buffer glissant GPS + capteurs disponibles sur l'appareil, export de données au format KML/GPX/CSV.</li>
+          <li><b>Réglages</b> — Onglets dédiés à chaque catégorie, recherche parmi les paramètres.</li>
+          <li><b>Import/Export</b> — Mécanisme d'import/export pour sauvegarder et restaurer les données.</li>
+          <li><b>Compatibilité matérielle</b> — Un test au démarrage vérifie les capteurs (gyroscope, baromètre, GPS) et prévient si certaines fonctions seront indisponibles.</li>
         </ul>
         <h3>Familles d'instruments</h3>
-        <span class="chip">ANL · analogiques</span>
-        <span class="chip num">NUM · numériques</span>
+        <span class="chip">ANL · Analogiques</span>
+        <span class="chip num">NUM · Numériques</span>
       </div>
 
       <div class="card">
         <h2>Instruments disponibles</h2>
-        <p class="subtitle" style="margin-bottom:12px">Variantes <b>ANL</b> (analogique, cadran rond) et <b>NUM</b> (numérique, bandeau) par instrument.</p>
+        <p class="subtitle">
+          Versions disponibles par type d'instrument:
+          <ul>
+            <li><b>ANL</b> (Analogique, cadran rond)</li>
+            <li><b>NUM</b> (Numérique, bandeau)</li>
+          </ul>
+        </p>
         <table class="instr-table">
           <thead>
             <tr><th>Instrument</th><th>ANL</th><th>NUM</th></tr>
@@ -102,7 +92,10 @@
             <tr><td>Variomètre</td><td class="y">●</td><td class="y">●*</td></tr>
           </tbody>
         </table>
-        <p class="subtitle" style="margin-top:10px;font-size:12px">* Altimètre et Variomètre partagent le bandeau numérique combiné <b>NUMALT</b>. Utilitaires CMN non listés : Vide, Espaceurs (S / M / L).</p>
+        <p class="subtitle" style="margin-top:10px;font-size:12px">
+          * Altimètre et Variomètre partagent le bandeau numérique combiné <b>NUMALT</b>.
+          Utilitaires CMN non listés : Vide, Espaceurs (S / M / L).
+        </p>
       </div>
     </div>
 

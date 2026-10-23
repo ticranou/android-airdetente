@@ -109,4 +109,12 @@ class VacRepository(
         if (outdated != chart.outdated) upsert(chart.copy(outdated = outdated))
         return outdated
     }
+
+    /** Checks all downloaded charts; returns how many are outdated. */
+    suspend fun countOutdated(cycle: String): Int {
+        val downloaded = charts.value.filter { it.isDownloaded }
+        var count = 0
+        downloaded.forEach { if (checkOutdated(it.id, cycle) == true) count++ }
+        return count
+    }
 }

@@ -85,6 +85,8 @@
     <string name="settings_section_application">Application</string>
     <string name="settings_section_instruments">Instruments</string>
     <string name="settings_section_airports">Terrains</string>
+    <string name="settings_section_auto_check">Vérification automatique</string>
+    <string name="settings_auto_check_updates">Vérifier les mises à jour des données au démarrage</string>
     <string name="settings_section_map_data">Fond de Carte</string>
     <string name="settings_section_vac_data">Cartes VAC</string>
     <string name="settings_section_backup">Sauvegarde / Restauration</string>

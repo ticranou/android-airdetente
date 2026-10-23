@@ -201,6 +201,9 @@ object ServiceLocator {
         updateInstruments { it.copy(fdrPaused = paused) }
     }
 
+    /** Number of VAC charts found outdated during the startup auto-check (0 = none / not checked). */
+    val vacOutdatedCount = MutableStateFlow(0)
+
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     fun init(context: Context) {
@@ -250,8 +253,18 @@ object ServiceLocator {
             mapRepository.load()
             maybeSeed()
             preferences.ensureDashboardsMigrated()
-            // Non-blocking: flag if a newer map release is available.
-            runCatching { mapRepository.checkForUpdate() }
+            // Auto-check for data updates on startup (conditioned on preference).
+            if (preferences.preferences.value.autoCheckUpdates) {
+                runCatching { mapRepository.checkForUpdate() }
+                if (vacRepository.charts.value.any { it.isDownloaded }) {
+                    runCatching {
+                        val count = vacRepository.countOutdated(
+                            preferences.preferences.value.vacAiracCycle,
+                        )
+                        if (count > 0) vacOutdatedCount.value = count
+                    }
+                }
+            }
         }
     }
 

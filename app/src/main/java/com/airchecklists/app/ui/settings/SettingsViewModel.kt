@@ -467,4 +467,8 @@ class SettingsViewModel(
             _messages.send(if (outdated > 0) msgDone(outdated) else msgNone)
         }
     }
+
+    fun setAutoCheckUpdates(enabled: Boolean) {
+        viewModelScope.launch { prefsRepo.setAutoCheckUpdates(enabled) }
+    }
 }

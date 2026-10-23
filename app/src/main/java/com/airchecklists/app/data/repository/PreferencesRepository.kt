@@ -165,6 +165,9 @@ class PreferencesRepository(private val store: SettingsStore) {
         it.copy(focusDurationSec = sec.coerceIn(AppPreferences.FOCUS_DURATION_MIN_SEC, AppPreferences.FOCUS_DURATION_MAX_SEC))
     }
 
+    suspend fun setAutoCheckUpdates(enabled: Boolean) =
+        persist { it.copy(autoCheckUpdates = enabled) }
+
     suspend fun setInstrumentState(state: com.airchecklists.app.data.model.InstrumentPersistState) =
         persist { it.copy(instruments = state) }
 

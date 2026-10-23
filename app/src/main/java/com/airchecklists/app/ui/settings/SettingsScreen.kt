@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenu
@@ -453,6 +454,8 @@ fun SettingsScreen(
                     mapProgress = mapProgress,
                     mapInstalledTag = viewModel.mapInstalledTag(),
                     mapUpdateTag = mapUpdateTag,
+                    autoCheckUpdates = prefs.autoCheckUpdates,
+                    onSetAutoCheckUpdates = viewModel::setAutoCheckUpdates,
                     onDownloadMaps = viewModel::downloadMaps,
                     onCheckMapUpdate = viewModel::checkMapUpdate,
                     onDownloadVac = {
@@ -1403,7 +1406,7 @@ private fun AirportsSection(
     }
 }
 
-/** DATA tab: map download, VAC download, sauvegarde/restauration. */
+/** DATA tab: auto-check toggle, map download, VAC download, sauvegarde/restauration. */
 @Composable
 private fun DataSection(
     anchorOffsets: androidx.compose.runtime.snapshots.SnapshotStateMap<SettingsAnchor, Int>,
@@ -1413,6 +1416,8 @@ private fun DataSection(
     mapProgress: com.airchecklists.app.data.repository.MapDownloadProgress?,
     mapInstalledTag: String?,
     mapUpdateTag: String?,
+    autoCheckUpdates: Boolean,
+    onSetAutoCheckUpdates: (Boolean) -> Unit,
     onDownloadMaps: () -> Unit,
     onCheckMapUpdate: () -> Unit,
     onDownloadVac: () -> Unit,
@@ -1420,6 +1425,22 @@ private fun DataSection(
     onExport: () -> Unit,
     onImport: () -> Unit,
 ) {
+    // ── Vérification automatique ──────────────────────────────────────────────
+    AnchorBox(SettingsAnchor.DATA_AUTO_CHECK, anchorOffsets) {
+    SectionHeader(stringResource(R.string.settings_section_auto_check))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Checkbox(checked = autoCheckUpdates, onCheckedChange = onSetAutoCheckUpdates)
+        Text(
+            stringResource(R.string.settings_auto_check_updates),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 4.dp),
+        )
+    }
+    } // AnchorBox DATA_AUTO_CHECK
+
     // ── Fond de Carte ─────────────────────────────────────────────────────────
     AnchorBox(SettingsAnchor.DATA_MAP, anchorOffsets) {
     SectionHeader(stringResource(R.string.settings_section_map_data))

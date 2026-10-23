@@ -550,6 +550,8 @@ data class AppPreferences(
     val focusDurationSec: Int = 30,
     /** Saved navigation plan (ordered terrain ICAOs + notes). */
     val navPlan: NavPlan = NavPlan(),
+    /** Check for data updates (basemap + VAC) automatically on startup. */
+    val autoCheckUpdates: Boolean = true,
 ) {
     companion object {
         const val MIN_FONT_SCALE = 0.85f

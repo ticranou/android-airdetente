@@ -6,15 +6,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.compact.LocalShowGestureHints
@@ -129,7 +134,7 @@ class MainActivity : ComponentActivity() {
                             }
                             AppPhase.APP -> {
                                 AirDetenteNavHost()
-                                MapUpdateAlert()
+                                DataUpdateAlert()
                             }
                         }
                     }
@@ -169,21 +174,31 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** One-shot alert shown when the startup check found a newer map release. */
-@androidx.compose.runtime.Composable
-private fun MapUpdateAlert() {
-    val updateTag by ServiceLocator.mapRepository.updateTag.collectAsStateWithLifecycle()
+/** One-shot alert shown when the startup check found newer data (map and/or VAC charts). */
+@Composable
+private fun DataUpdateAlert() {
+    val mapTag by ServiceLocator.mapRepository.updateTag.collectAsStateWithLifecycle()
+    val vacCount by ServiceLocator.vacOutdatedCount.collectAsStateWithLifecycle()
     var dismissed by remember { mutableStateOf(false) }
-    val tag = updateTag
-    if (tag != null && !dismissed) {
+    val hasUpdate = mapTag != null || vacCount > 0
+    if (hasUpdate && !dismissed) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { dismissed = true },
-            title = { androidx.compose.material3.Text("Nouvelle carte disponible") },
+            title = { androidx.compose.material3.Text("Mises à jour disponibles") },
             text = {
-                androidx.compose.material3.Text(
-                    "Une carte plus récente ($tag) est disponible. " +
-                        "Ouvrez Réglages ▸ Cartes pour la télécharger.",
-                )
+                Column {
+                    if (mapTag != null)
+                        androidx.compose.material3.Text("• Fond de carte : version $mapTag disponible.")
+                    if (vacCount > 0)
+                        androidx.compose.material3.Text(
+                            "• Cartes VAC : $vacCount carte${if (vacCount > 1) "s" else ""} obsolète${if (vacCount > 1) "s" else ""}.",
+                        )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    androidx.compose.material3.Text(
+                        "Ouvrez Réglages ▸ Données pour télécharger les mises à jour.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             },
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = { dismissed = true }) {

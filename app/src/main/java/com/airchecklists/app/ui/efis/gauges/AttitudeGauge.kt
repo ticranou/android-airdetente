@@ -102,7 +102,7 @@ fun AttitudeGauge(pitchDeg: Float, rollDeg: Float, modifier: Modifier = Modifier
         drawLine(GaugeColors.Accent, Offset(cx - wing, cy), Offset(cx + wing, cy), strokeWidth = stroke)
         drawLine(GaugeColors.Accent, Offset(cx, cy - r * 0.18f), Offset(cx, cy + r * 0.10f), strokeWidth = stroke)
         drawCircle(GaugeColors.Accent, radius = r * 0.09f, center = Offset(cx, cy))
-        drawGaugeTitlePill(tm, "ASSIETTE", cx, cy, r, bezel.hideTitle)
+        drawGaugeTitlePill(tm, "HORIZON", cx, cy, r, bezel.hideTitle)
     }
 
     if (showCalibrate) {

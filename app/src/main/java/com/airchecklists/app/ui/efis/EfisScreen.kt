@@ -305,6 +305,7 @@ internal fun DashboardGrid(
     var focusCellIdx by remember { mutableIntStateOf(-1) }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        if (dashboard.statusBannerTop) StatusBannerStrip()
         // Reserved title band at the top of the cockpit (does not overlap instruments).
         // Left-aligned; the page markers are drawn on the right by the caller. Shown only
         // when enabled per-cockpit in Réglages ▸ Cockpits.
@@ -323,7 +324,6 @@ internal fun DashboardGrid(
                     .padding(start = 64.dp, end = 96.dp, top = 5.dp, bottom = 5.dp),
             )
         }
-        if (dashboard.statusBannerTop) StatusBannerStrip()
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
             val cellW = maxWidth / cols
             val totalH = maxHeight
@@ -468,7 +468,7 @@ private fun StatusBannerStrip(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(14.dp)
+            .height(7.dp)
             .background(Color(0xFF1A1A1A)),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {

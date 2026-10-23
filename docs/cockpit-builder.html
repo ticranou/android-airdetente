@@ -194,13 +194,19 @@
         <h2>Exporter</h2>
 
         <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('qr-tab')">📷 QR Code</button>
-          <button class="tab-btn"        onclick="switchTab('preview-tab')">🖼 Aperçu visuel</button>
+          <button class="tab-btn active" onclick="switchTab('preview-tab')">🖼 Aperçu visuel</button>
+          <button class="tab-btn"        onclick="switchTab('qr-tab')">📷 QR Code</button>
           <button class="tab-btn"        onclick="switchTab('json-tab')">{ } JSON</button>
         </div>
 
+        <!-- Visual preview tab -->
+        <div class="tab-pane active" id="preview-tab">
+          <p class="hint">Aperçu du rendu du cockpit avec les captures d'écran de chaque instrument.</p>
+          <div class="preview-wrap" id="previewWrap"></div>
+        </div>
+
         <!-- QR Code tab -->
-        <div class="tab-pane active" id="qr-tab">
+        <div class="tab-pane" id="qr-tab">
           <p class="hint">Scannez le QR code dans l'application, ou téléchargez le fichier <code>.json</code>. Le QR se met à jour automatiquement à chaque modification.</p>
           <div id="qr"></div>
           <div id="qrNote" class="msg"></div>
@@ -209,12 +215,6 @@
             <button id="btnCopy">⧉ Copier le JSON</button>
           </div>
           <div id="exportMsg"></div>
-        </div>
-
-        <!-- Visual preview tab -->
-        <div class="tab-pane" id="preview-tab">
-          <p class="hint">Aperçu du rendu du cockpit avec les captures d'écran de chaque instrument.</p>
-          <div class="preview-wrap" id="previewWrap"></div>
         </div>
 
         <!-- JSON tab -->
@@ -2994,7 +2994,7 @@ function switchTab(id) {
   document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  const idx = ["qr-tab","preview-tab","json-tab"].indexOf(id);
+  const idx = ["preview-tab","qr-tab","json-tab"].indexOf(id);
   document.querySelectorAll(".tab-btn")[idx].classList.add("active");
 }
 

@@ -319,6 +319,8 @@ data class Dashboard(
     val cells: List<DashboardCell> = emptyList(),
     val showInCockpit: Boolean = true,
     val showTitle: Boolean = false,
+    val statusBannerTop: Boolean = true,
+    val statusBannerBottom: Boolean = false,
     // ---- legacy (migration only) ----
     val cols: Int = 2,
     val slots: List<EfisInstrument> = emptyList(),

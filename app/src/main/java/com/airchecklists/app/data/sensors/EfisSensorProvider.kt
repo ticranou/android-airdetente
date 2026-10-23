@@ -43,6 +43,7 @@ data class EfisState(
     val headingDriftDeg: Float = 0f,          // current median drift absolute (degrees)
     val headingDriftSignedDeg: Float = 0f,    // signed delta GPS − MAG (-180..+180)
     val headingOffsetDeg: Float = 0f,         // session compensation offset applied to MAG heading
+    val horizonCalibrated: Boolean = false,   // true once the user has set a pitch/roll offset
 )
 
 /**
@@ -226,12 +227,14 @@ class EfisSensorProvider(
     fun calibrate() {
         pitchOffset = lastRawPitch
         rollOffset = lastRawRoll
+        _state.value = _state.value.copy(horizonCalibrated = true)
     }
 
     /** Clear the attitude calibration (back to raw device attitude). */
     fun resetCalibration() {
         pitchOffset = 0f
         rollOffset = 0f
+        _state.value = _state.value.copy(horizonCalibrated = false)
     }
 
     /** Exponential smoothing toward [target], using the responsiveness factor. */

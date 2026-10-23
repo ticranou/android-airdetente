@@ -123,6 +123,22 @@ fun DashboardEditScreen(
                 Text(stringResource(R.string.settings_dashboard_show_title))
             }
 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = dash.statusBannerTop,
+                    onCheckedChange = { viewModel.setDashboardStatusBannerTop(dash.id, it) },
+                )
+                Text(stringResource(R.string.settings_dashboard_status_banner_top))
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = dash.statusBannerBottom,
+                    onCheckedChange = { viewModel.setDashboardStatusBannerBottom(dash.id, it) },
+                )
+                Text(stringResource(R.string.settings_dashboard_status_banner_bottom))
+            }
+
             Text(
                 stringResource(R.string.dashboard_grid_size),
                 style = MaterialTheme.typography.titleSmall,

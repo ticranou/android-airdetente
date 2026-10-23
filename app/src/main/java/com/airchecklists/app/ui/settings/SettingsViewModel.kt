@@ -216,6 +216,14 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardShowTitle(id, show) }
     }
 
+    fun setDashboardStatusBannerTop(id: String, show: Boolean) {
+        viewModelScope.launch { prefsRepo.setDashboardStatusBannerTop(id, show) }
+    }
+
+    fun setDashboardStatusBannerBottom(id: String, show: Boolean) {
+        viewModelScope.launch { prefsRepo.setDashboardStatusBannerBottom(id, show) }
+    }
+
     fun setDashboardRows(id: String, rows: Int) {
         viewModelScope.launch { prefsRepo.setDashboardRows(id, rows) }
     }

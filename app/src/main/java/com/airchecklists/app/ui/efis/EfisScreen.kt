@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.layout.RowScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -322,6 +323,7 @@ internal fun DashboardGrid(
                     .padding(start = 64.dp, end = 96.dp, top = 5.dp, bottom = 5.dp),
             )
         }
+        if (dashboard.statusBannerTop) StatusBannerStrip()
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
             val cellW = maxWidth / cols
             val totalH = maxHeight
@@ -431,6 +433,7 @@ internal fun DashboardGrid(
                 }
             }
         }
+        if (dashboard.statusBannerBottom) StatusBannerStrip()
     }
 
     // Focus mode dialog.
@@ -452,6 +455,45 @@ internal fun DashboardGrid(
                 onDismiss = { focusCellIdx = -1 },
             )
         }
+    }
+}
+
+/** Thin status strip shown at the top/bottom of a cockpit dashboard. */
+@Composable
+private fun StatusBannerStrip(modifier: Modifier = Modifier) {
+    val efisState by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
+    val mapTag by ServiceLocator.mapRepository.updateTag.collectAsStateWithLifecycle()
+    val vacCount by ServiceLocator.vacOutdatedCount.collectAsStateWithLifecycle()
+    val dataOk = mapTag == null && vacCount == 0
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(14.dp)
+            .background(Color(0xFF1A1A1A)),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        BannerZone("GPS", efisState.hasFix)
+        BannerZone("CALAGE", efisState.horizonCalibrated)
+        BannerZone("DONNÉES", dataOk)
+    }
+}
+
+@Composable
+private fun RowScope.BannerZone(label: String, ok: Boolean) {
+    Box(
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .background(if (ok) Color(0xFF1B5E20) else Color(0xFF7F0000)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            fontSize = 7.sp,
+            color = Color.White,
+            maxLines = 1,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

@@ -408,6 +408,14 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(showTitle = show) else it })
     }
 
+    suspend fun setDashboardStatusBannerTop(id: String, show: Boolean) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(statusBannerTop = show) else it })
+    }
+
+    suspend fun setDashboardStatusBannerBottom(id: String, show: Boolean) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(statusBannerBottom = show) else it })
+    }
+
     /** Reorder dashboards to match the given id order (unknown ids keep their tail order). */
     suspend fun reorderDashboards(orderedIds: List<String>) = persist { prefs ->
         val byId = prefs.effectiveDashboards.associateBy { it.id }

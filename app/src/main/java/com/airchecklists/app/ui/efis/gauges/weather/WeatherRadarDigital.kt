@@ -140,7 +140,7 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
             if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
 
             if (!hasPos) {
-                if (headerH > 0f) compactText(tm, "RADAR METEO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+                if (headerH > 0f) compactText(tm, "METEO", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
                 compactText(tm, "position GPS ?", w / 2f, headerH + (h - headerH) / 2f, sizeSp = 12f, color = CompactStyle.Dim)
                 if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
                 return@Canvas
@@ -170,7 +170,7 @@ fun WeatherRadarDigital(modifier: Modifier = Modifier) {
             if (radar == null) compactText(tm, "radar…", cx, cy, sizeSp = 11f, color = CompactStyle.Dim)
 
             if (headerH > 0f) {
-                compactText(tm, "RADAR METEO", cx, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
+                compactText(tm, "METEO", cx, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)
             }
             if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         }

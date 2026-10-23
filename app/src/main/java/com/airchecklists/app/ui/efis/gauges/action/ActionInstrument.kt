@@ -151,7 +151,7 @@ fun ActionInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 color = if (isDone) Color.White else Color(0xFF909090),
             )
         }
-        drawGaugeTitlePill(tm, "ACTION", cx, cy, r, bezel.hideTitle)
+        drawGaugeTitlePill(tm, "ACTION MOTEUR", cx, cy, r, bezel.hideTitle)
     }
 
     if (showPicker) {

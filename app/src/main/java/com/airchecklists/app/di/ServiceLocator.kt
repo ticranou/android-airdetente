@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /**
  * Manual dependency container (no Hilt for v1). Initialized from
@@ -170,6 +171,20 @@ object ServiceLocator {
     /** Terrain/piste verrouillé manuellement pour ANLAPP, NUMAPP, ANLCCT, NUMCCT.
      *  null = AUTO (terrain le plus proche). */
     val lockedApproachTarget = MutableStateFlow<ApproachTarget?>(null)
+
+    /** Verrouille une cible d'approche et positionne automatiquement le bug de cap
+     *  sur le QFU correspondant (arrondi au dizième de degré le plus proche).
+     *  [target] = null → déverrouille (AUTO) et efface le bug de cap. */
+    fun lockApproachTarget(target: ApproachTarget?) {
+        lockedApproachTarget.value = target
+        if (target != null) {
+            val qfu = target.qfuTrueDeg
+            if (!qfu.isNaN()) {
+                val bug = ((qfu.roundToInt() % 360) + 360) % 360
+                targetHeading.value = bug
+            }
+        }
+    }
 
     fun currentAircraft(): Aircraft? =
         currentAircraftId.value?.let { repository.getById(it) }

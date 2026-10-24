@@ -91,7 +91,7 @@ fun TouchdownAnalogInstrument(
             terrains = terrains,
             onDismiss = { showDialog = false },
             onAuto = { ServiceLocator.lockedApproachTarget.value = null },
-            onLock = { ServiceLocator.lockedApproachTarget.value = it },
+            onLock = { ServiceLocator.lockApproachTarget(it) },
         )
     }
 }

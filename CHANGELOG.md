@@ -5,6 +5,28 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 
 ---
 
+## [2026-10-24] — Nouvel instrument NUMCCT (Circuit de piste compact)
+
+### Ajouté
+
+- **NUMCCT — Circuit de piste compact (220 dp, 100%-2L)** : nouvel instrument
+  double-hauteur dédié à la conscience de situation en circuit de piste VFR.
+  Il se compose de trois zones verticales :
+  - **Zone localizer** (≈ 54 % en haut) : bande de piste rotative calée sur le
+    QFU + barre de localizer (verte dans l'axe, orange sinon) + marqueurs losange
+    + anneau de référence ; pastille ICAO + longueur de piste à gauche ; pastille
+    QFU + altitude de circuit à droite ; arcs de proximité sol (vert / orange /
+    rouge) sur les deux bords.
+  - **Zone infos** (≈ 30 % au milieu) : DISTANCE / AXE (coloré) / ANGLE.
+  - **Pied altimétrique** (≈ 16 % en bas) : barre inversée (altitude circuit à
+    gauche, sol à droite) avec segments colorés et curseur triangulaire mobile.
+- **Cible partagée ANLAPP / NUMAPP / ANLCCT / NUMCCT** : un appui long sur l'un
+  quelconque de ces quatre instruments ouvre le dialogue `ApproachTargetDialog`.
+  Le terrain + QFU sélectionné est partagé entre les quatre instruments via
+  `ServiceLocator.lockedApproachTarget`.
+
+---
+
 ## [2026-10-21] — Harmonisation de l'affichage des instruments & doc HTML
 
 ### Corrigé

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AirDetente — Action</title>
+<title>AirDetente — Action moteur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="themes/dark/style.css">
@@ -18,7 +18,7 @@
           <div class="logo">🔘</div>
           <div>
             <h1>Action</h1>
-            <p class="subtitle">Bascule une action moteur (démarrage / arrêt), avec ses effets sur la session de vol</p>
+            <p class="subtitle">Interrupteur virtuel d'action moteur (démarrage / arrêt), avec ses effets sur la session de vol</p>
           </div>
         </div>
       </div>
@@ -29,42 +29,40 @@
         <div class="card">
           <h2>Possibilités</h2>
           <ul class="feat">
-            <li>Jauge ronde avec le <b>libellé de l'action</b> (ex. « Démarrage » / « Arrêt moteur »). Le titre « ACTION MOTEUR » est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
-            <li>Interrupteur basculant : position gauche <b>OFF</b> (gris) / droite <b>DONE</b> (vert).</li>
+            <li>Jauge ronde affichant le <b>libellé de l'action</b> ("Démarrage" / "Arrêt moteur"). Le titre  "ACTION MOTEUR" est rendu par la <b>pastille de titre</b> standard en haut du cadran (masquable via Options ▸ "Masquer le titre" dans la case du cockpit)</li>
+            <li>Interrupteur basculant : position gauche <b>OFF</b> (gris) / droite <b>DONE</b> (vert)</li>
           </ul>
 
           <h3>Gestes supportés</h3>
           <div class="gesture long-press">
             <span class="g"></span>
-            <span>Appui long : <b>choisir le type d'action</b> (Démarrage / Arrêt moteur). Le dialogue propose un bouton <b>« Effacer »</b> pour retirer l'action assignée et un bouton <b>« Fermer »</b> pour annuler.</span>
+            <span><u>Appui long</u> : Choix du type d'action. La dialogue propose également un bouton "Effacer" pour retirer l'action assignée et un bouton "Fermer" pour annuler</span>
           </div>
           <div class="gesture double-tap">
             <span class="g"></span>
-            <span>Double-tap : <b>basculer</b> DONE ↔ OFF et déclencher les effets de session.</span>
+            <span><u>Double-tap</u> : Basculement DONE ↔ OFF, ce qui déclenche les effets sur la session de vol</span>
           </div>
 
-          <h3>Effets au basculement</h3>
+          <h3>Effets au basculement de l'interrupteur</h3>
           <ul class="feat">
-            <li><b>Démarrage (DONE)</b> : lance l'enregistreur de vol, cale l'horizon (EFIS), démarre le suivi carburant, horodate le <b>départ</b> — puis ouvre trois dialogues séquentiels :
+            <li><u>Démarrage / DONE</u> : Lance l'enregistreur de vol, cale l'horizon (EFIS, horizons), démarre le suivi carburant, horodate le départ, puis ouvre trois dialogues séquentiels :
               <ol>
-                <li><b>Carburant embarqué</b> — saisie du volume initial.</li>
-                <li><b>Étalonnage altimétrique</b> — calibration de l'altimètre.</li>
-                <li><b>Horamètre départ</b> — saisie du relevé de départ (format NNN.NN), stocké dans les instruments ANLHRM / NUMHRM.</li>
+                <li>Carburant embarqué — Saisie du volume initial</li>
+                <li>Étalonnage altimétrique — Calibration de l'altimètre</li>
+                <li>Horamètre départ — Saisie du relevé de départ (format NNN.NN), stocké dans les instruments ANLHRM / NUMHRM</li>
               </ol>
             </li>
-            <li><b>Démarrage (OFF)</b> : arrête l'enregistreur et le suivi, efface l'heure de départ.</li>
-            <li><b>Arrêt moteur (DONE)</b> : arrête l'enregistreur, horodate l'<b>arrivée</b> — puis ouvre deux dialogues séquentiels :
+            <li><u>Démarrage / OFF</u> : Arrête l'enregistreur et le suivi, efface l'heure de départ</li>
+            <li><u>Arrêt / DONE</u> : Arrête l'enregistreur, horodate l'arrivée, puis ouvre deux dialogues séquentiels :
               <ol>
-                <li><b>Horamètre arrivée</b> — saisie du relevé de fin de vol (format NNN.NN, optionnel — « Annuler » passe à l'étape suivante).</li>
-                <li><b>Dossier de vol</b> — récapitulatif complet de la session (horaires, durée, altitude calée, statistiques FDR, et section Horamètre si au moins un relevé est renseigné).</li>
+                <li>Horamètre arrivée — Saisie du relevé de fin de vol (format NNN.NN, optionnel — "Annuler" passe à l'étape suivante)</li>
+                <li>Dossier de vol — Récapitulatif complet de la session (horaires, durée, altitude calée, statistiques FDR, et section Horamètre si au moins un relevé est renseigné)</li>
               </ol>
             </li>
           </ul>
 
           <h3>Note</h3>
-          <ul class="feat">
-            <li>Chaque case ANLACT mémorise son action et son état DONE/OFF. Les horaires alimentent l'instrument <b>Session de vol</b> (NUMFGT).</li>
-          </ul>
+          Chaque case ANLACT mémorise son action et son état DONE/OFF. Les horaires alimentent l'instrument <b>Session de vol</b> (NUMFGT).
         </div>
       </div>
 
@@ -79,8 +77,8 @@
     </div>
 
     <div class="footer">
-      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et
-      ne sont pas garanties. Ne remplace pas les instruments de bord ni le jugement du pilote.
+      Aide non certifiée — les informations affichées dépendent des capteurs de l'appareil et ne sont pas garanties.<br>
+      Ne remplace pas les instruments de bord ni le jugement du pilote.
     </div>
   </div>
 </div>

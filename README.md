@@ -22,7 +22,7 @@ mobile** (moving map) hors-ligne.
   - **Numériques** (rectangulaires, tailles normalisées 50/100 % × 1/2/3/5 lignes) :
     Conservateur, Anémomètre, Altimètre/Variomètre, Bille, Horizon, Chronomètre,
     Compte à rebours, Horamètre, Terrains proches, Radar météo, **Montre**, EFIS
-    (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes), **Carburant (NUMCRB)** — niveau + autonomie, **Enregistreur de vol (NUMFDR)** — durée + paramètres, **Nuit aéronautique (NUMNGT)** — crépuscule civil + temps disponible.
+    (bloc 3 lignes), Moving Map (bloc 5 lignes), Approche (3 lignes), **Carburant (NUMCRB)** — niveau + autonomie, **Enregistreur de vol (NUMFDR)** — durée + paramètres, **Nuit aéronautique (NUMNGT)** — crépuscule civil + temps disponible, **Circuit de piste compact (NUMCCT)** — localizer + axe + pied altimétrique, double-hauteur 220 dp.
   - **Commun (CMN)** : **Raccourcis (CMNSCT)** — 4 slots configurables pour accès rapide. Chaque slot supporte 4 types de cibles : navigation tableau de bord (>> : double-tap), tableau de bord Focus (tap), instrument Focus (tap), ou VAC chart Terrain (tap). Long-press configure un slot. **Espaceurs (S/M/L)** — éléments vides (16/32/64 dp) pour espacer les rangées de la grille. **Session de vol (CMNFGT)** — affichage numérique de la durée de vol. **Tableau blanc (CMNWHB)** — notes et dessin libre avec historique et réglages.
   - **Pastille de titre** : chaque instrument analogique affiche un libellé arrondi
     au sommet du cadran (rendu au premier plan). L'option **« Masquer le titre »** dans
@@ -80,7 +80,9 @@ Un appareil complet (caractéristiques + checklists + éléments) est stocké da
 
 ## Instruments analogiques
 
-**ANLCCT — Circuit de piste** : Cadran spécialisé pour le VFR circuit. Affiche le cap à suivre (conservateur centré, rose des caps), l'altitude courante (lobe central, colorée ALT_OK/WARN/LOW) et l'altitude circuit prévue (lobe droit, grisée). Rectangle de piste centré sur l'instrument (gris, longueur r×0.52).
+**ANLCCT — Circuit de piste** : Cadran spécialisé pour le VFR circuit. Affiche le cap à suivre (conservateur centré, rose des caps), l'altitude courante (lobe central, colorée ALT_OK/WARN/LOW) et l'altitude circuit prévue (lobe droit, grisée). Rectangle de piste centré sur l'instrument (gris, longueur r×0.52). Long-press ouvre le dialogue de sélection du terrain cible et du QFU (cible partagée avec NUMCCT, ANLAPP et NUMAPP).
+
+**NUMCCT — Circuit de piste compact** : Instrument double-hauteur (220 dp, 100%-2L) pour la conscience de situation en circuit. Trois zones verticales : (1) zone localizer avec bande de piste rotative + barre d'axe (verte = dans l'axe, orange = hors axe) + arcs de proximité (vert/orange/rouge) sur les deux bords + pastilles ICAO et QFU ; (2) zone infos DISTANCE / AXE / ANGLE ; (3) pied altimétrique — barre inversée (altitude circuit à gauche, sol à droite), segments colorés et curseur triangulaire. Long-press = dialogue de sélection terrain/QFU partagé avec ANLCCT, ANLAPP et NUMAPP.
 
 **ANLAPP — Approche ILS** : Révisé en approche VFR simplifié. Échelle localizer vertical centré au cœur de l'instrument, à la vrai position (cx, cy). Trois rings de proximité sol (vert < 900 ft AGL, orange < 500 ft, rouge < 300 ft) au bord de l'instrument, s'activant cumulativement. Affichage numérique : lobe central ICAO + altitude courante (colorée), lobe droit CIRC (altitude circuit, grisée). Long-press pour cible d'approche. Le dialogue de sélection de piste affiche le titre `<OACI> — <Nom>` avec un **schéma boussole d'orientation de piste** et un bouton individuel par QFU ; bouton « Terrains… » pour revenir à la liste.
 

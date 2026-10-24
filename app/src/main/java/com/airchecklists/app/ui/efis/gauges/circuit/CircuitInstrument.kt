@@ -1,12 +1,16 @@
 package com.airchecklists.app.ui.efis.gauges.circuit
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +20,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.data.model.VacChart
@@ -31,6 +36,7 @@ import com.airchecklists.app.ui.efis.gauges.gaugeText
 import com.airchecklists.app.ui.efis.gauges.drawGaugeTitlePill
 import com.airchecklists.app.ui.efis.gauges.gaugeFace
 import com.airchecklists.app.ui.efis.gauges.polar
+import com.airchecklists.app.ui.efis.gauges.approach.ApproachTargetDialog
 import com.airchecklists.app.ui.terrain.QfuParser
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -63,6 +69,8 @@ fun CircuitInstrument(
     val bezel = LocalGaugeBezel.current
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
+    val lockedTarget by ServiceLocator.lockedApproachTarget.collectAsStateWithLifecycle()
+    var showDialog by remember { mutableStateOf(false) }
 
     // Resolve nearest aerodrome off-UI-thread; recompute every ~550 m of movement.
     val latKey = (state.latitude * 200).roundToInt()
@@ -112,12 +120,19 @@ fun CircuitInstrument(
         }
     }
 
-    val circuitAltFt: Int? = target?.elevationFt?.let { it + 1000 }
+    // Si un verrou global existe, on l'utilise pour QFU et elevation ; sinon AUTO.
+    val effectiveQfuDeg: Float? = lockedTarget?.qfuTrueDeg?.takeIf { !it.isNaN() }
+        ?: target?.qfuDeg?.takeIf { it?.isNaN() == false }
+    val effectiveElevFt: Int? = lockedTarget?.fieldElevFt ?: target?.elevationFt
+    val effectiveIcao: String? = lockedTarget?.icao ?: target?.icao
+    val circuitAltFt: Int? = effectiveElevFt?.let { it + 1000 }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         val badgeOffsetDp = if (showValue) (maxHeight * 0.15f) else 0.dp
 
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            detectTapGestures(onLongPress = { showDialog = true })
+        }) {
         val (cx, cy, r) = gaugeFace(bezel)
 
         // ── Compass card (rotates so current heading sits under top index) ──
@@ -146,7 +161,7 @@ fun CircuitInstrument(
             }
 
             // QFU runway indicator — grey rectangle traversing the compass centre.
-            target?.qfuDeg?.let { qfu ->
+            effectiveQfuDeg?.let { qfu ->
                 val rwyLen = r * 0.52f
                 val rwyW   = r * 0.040f
                 rotate(degrees = qfu, pivot = Offset(cx, cy)) {
@@ -190,9 +205,9 @@ fun CircuitInstrument(
             tm, cx, cy, r,
             left = GaugeLobe("CAP", capTxt, GaugeColors.Mark),
             centre = GaugeLobeCentre(
-                primary = target?.icao ?: "—",
+                primary = effectiveIcao ?: "—",
                 sub = altTxt,
-                primaryColor = if (target != null) GaugeColors.Accent else GaugeColors.MarkDim,
+                primaryColor = if (effectiveIcao != null) GaugeColors.Accent else GaugeColors.MarkDim,
                 subColor = altColor,
             ),
             right = GaugeLobe("CIRC", circAltiTxt, GaugeColors.MarkDim),
@@ -206,6 +221,20 @@ fun CircuitInstrument(
                 .offset(y = badgeOffsetDp),
         )
     } // BoxWithConstraints
+
+    if (showDialog) {
+        val terrains by produceState(initialValue = charts, charts, state.hasPosition, latKey, lonKey) {
+            value = AerodromeDirectory.nearbyCharts(
+                state.latitude, state.longitude, state.hasPosition, charts, 40,
+            )
+        }
+        ApproachTargetDialog(
+            terrains = terrains,
+            onDismiss = { showDialog = false },
+            onAuto = { ServiceLocator.lockedApproachTarget.value = null },
+            onLock = { ServiceLocator.lockedApproachTarget.value = it },
+        )
+    }
 }
 
 /** Pick the primary QFU using bearing from ship to ARP when no circuit text available. */

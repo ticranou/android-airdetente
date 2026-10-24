@@ -18,6 +18,7 @@ import com.airchecklists.app.data.repository.AircraftRepositoryImpl
 import com.airchecklists.app.data.repository.PreferencesRepository
 import com.airchecklists.app.data.repository.VacRepository
 import com.airchecklists.app.data.saf.SafIo
+import com.airchecklists.app.ui.efis.gauges.approach.ApproachTarget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -165,6 +166,10 @@ object ServiceLocator {
 
     /** Request to navigate to a specific dashboard by id. Consumed by EfisScreen. */
     val requestedDashboardId = MutableStateFlow<String?>(null)
+
+    /** Terrain/piste verrouillé manuellement pour ANLAPP, NUMAPP, ANLCCT, NUMCCT.
+     *  null = AUTO (terrain le plus proche). */
+    val lockedApproachTarget = MutableStateFlow<ApproachTarget?>(null)
 
     fun currentAircraft(): Aircraft? =
         currentAircraftId.value?.let { repository.getById(it) }

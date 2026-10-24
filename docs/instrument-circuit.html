@@ -27,7 +27,7 @@
     <div class="instrument-layout">
       <div class="instrument-main">
         <div class="card">
-          <h2>Possibilités</h2>
+          <h2>ANLCCT — Analogique</h2>
           <ul class="feat">
             <li><b>Conservateur de cap</b> : rose des caps rotative (graduations tous les 10°, cardinaux N/E/S/W), curseur fixe en haut, silhouette avion au centre.</li>
             <li><b>Curseur jaune</b> (triangle) à l'index du haut : repère fixe du cap courant.</li>
@@ -37,7 +37,7 @@
             <li><b>Pastille de titre</b> affichée en haut du cadran (masquable via Options ▸ « Masquer le titre »).</li>
           </ul>
 
-          <h3>Gestes supportés</h3>
+          <h3>Gestes (ANLCCT)</h3>
           <div class="gesture long-press">
             <span class="g"></span>
             <span>Appui long : —</span>
@@ -46,8 +46,31 @@
             <span class="g"></span>
             <span>Double-tap : —</span>
           </div>
+        </div>
 
-          <h3>Note</h3>
+        <div class="card">
+          <h2>NUMCCT — Numérique (100%-1L)</h2>
+          <ul class="feat">
+            <li><b>Gauche</b> : numéro de piste QFU (ex. "22") dans un cercle jaune, ICAO du terrain et altitude de circuit en dessous.</li>
+            <li><b>Centre</b> : rectangle de piste orienté selon le QFU, qui <b>tourne avec le cap</b> (comme ANLCCT) — permet de visualiser l'alignement instantanément.</li>
+            <li><b>Droite</b> : <b>ANGLE</b> = écart entre le cap actuel et l'axe de piste (en degrés), <b>DIST</b> = distance horizontale au terrain (en mètres ou km) — les deux en jaune.</li>
+            <li>Hauteur fixe 110 dp — peut être superposé à NUMAPP dans un même tableau de bord.</li>
+            <li>Titre "CIRCUIT" en haut (masquable via Options ▸ « Masquer le titre »).</li>
+          </ul>
+
+          <h3>Gestes (NUMCCT)</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : —</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : —</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Note commune</h3>
           <ul class="feat">
             <li>Terrain le plus proche résolu dans un rayon d'environ 15 km (annuaire + vos terrains géolocalisés), recalculé tous les ~550 m.</li>
             <li>Nécessite une <b>position GPS</b>. <b>Indicatif</b>, non certifié.</li>
@@ -61,6 +84,12 @@
             <span class="chip">ANLCCT</span>
           </div>
           <img class="shot" src="screenshots/ANLCCT.jpg" alt="ANLCCT — circuit de piste">
+        </div>
+        <div class="screenshot-item">
+          <div class="screenshot-pills">
+            <span class="chip">NUMCCT</span>
+          </div>
+          <img class="shot" src="screenshots/NUMCCT.jpg" alt="NUMCCT — circuit de piste numérique">
         </div>
       </div>
     </div>

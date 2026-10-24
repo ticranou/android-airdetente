@@ -77,7 +77,7 @@ fun ApproachGaugeAnalog(
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
-    var locked by remember { mutableStateOf<ApproachTarget?>(null) }
+    val locked by ServiceLocator.lockedApproachTarget.collectAsStateWithLifecycle()
 
     val latKey = (state.latitude * 50).roundToInt()
     val lonKey = (state.longitude * 50).roundToInt()
@@ -119,8 +119,8 @@ fun ApproachGaugeAnalog(
         ApproachTargetDialog(
             terrains = terrains,
             onDismiss = { showDialog = false },
-            onAuto = { locked = null },
-            onLock = { locked = it },
+            onAuto = { ServiceLocator.lockedApproachTarget.value = null },
+            onLock = { ServiceLocator.lockedApproachTarget.value = it },
         )
     }
 }

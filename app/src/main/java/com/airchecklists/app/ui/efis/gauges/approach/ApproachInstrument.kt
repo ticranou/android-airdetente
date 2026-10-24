@@ -74,8 +74,7 @@ fun ApproachInstrument(
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
-    // Transient manual override (session only): non-null → resolver uses it; null → AUTO.
-    var locked by remember { mutableStateOf<ApproachTarget?>(null) }
+    val locked by ServiceLocator.lockedApproachTarget.collectAsStateWithLifecycle()
 
     // Resolve the AUTO target off the UI thread; recompute only every ~1-2 km (rounded
     // position key) or when charts change. When a manual lock is set, AUTO is bypassed.
@@ -120,8 +119,8 @@ fun ApproachInstrument(
         ApproachTargetDialog(
             terrains = terrains,
             onDismiss = { showDialog = false },
-            onAuto = { locked = null },
-            onLock = { locked = it },
+            onAuto = { ServiceLocator.lockedApproachTarget.value = null },
+            onLock = { ServiceLocator.lockedApproachTarget.value = it },
         )
     }
 }

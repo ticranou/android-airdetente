@@ -125,6 +125,7 @@ fun InstrumentSlot(
             EfisInstrument.ANLACT -> com.airchecklists.app.ui.efis.gauges.action.ActionInstrument(cellIdx, round)
             EfisInstrument.ANLSCT -> com.airchecklists.app.ui.efis.gauges.shortcutdash.DashboardShortcutInstrument(cellIdx, round)
             EfisInstrument.ANLCCT -> com.airchecklists.app.ui.efis.gauges.circuit.CircuitInstrument(state.headingDeg, state.gpsAltitudeFt, showValues, round)
+            EfisInstrument.NUMCCT -> com.airchecklists.app.ui.efis.gauges.circuit.CircuitDigital(state, slotFill)
             EfisInstrument.ANLCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelAnalogInstrument(round)
             EfisInstrument.ANLNGT -> com.airchecklists.app.ui.efis.gauges.compact.NightAnalogInstrument(state, round)
             EfisInstrument.NUMCRB -> com.airchecklists.app.ui.efis.gauges.fuel.FuelDigital(slotFill)

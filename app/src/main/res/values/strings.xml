@@ -205,6 +205,7 @@
     <string name="efis_instr_act">ANLACT - Action moteur</string>
     <string name="efis_instr_sct_dash">ANLSCT - Raccourci</string>
     <string name="efis_instr_cct">ANLCCT - Circuit de piste</string>
+    <string name="efis_instr_cct_c">NUMCCT - Circuit de piste (100%-1L)</string>
     <string name="efis_instr_crb">ANLCRB - Carburant</string>
     <string name="efis_instr_ngt_anl">ANLNGT - Nuit aéronautique</string>
     <string name="efis_instr_crb_c">NUMCRB - Carburant (100%-1L)</string>

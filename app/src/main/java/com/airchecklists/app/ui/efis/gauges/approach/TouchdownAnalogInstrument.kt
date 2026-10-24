@@ -57,7 +57,7 @@ fun TouchdownAnalogInstrument(
     val bezel = LocalGaugeBezel.current
     val charts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
-    var locked by remember { mutableStateOf<ApproachTarget?>(null) }
+    val locked by ServiceLocator.lockedApproachTarget.collectAsStateWithLifecycle()
     val iconPainter = rememberVectorPainter(Icons.Outlined.FlightLand)
 
     val latKey = (state.latitude * 50).roundToInt()
@@ -90,8 +90,8 @@ fun TouchdownAnalogInstrument(
         ApproachTargetDialog(
             terrains = terrains,
             onDismiss = { showDialog = false },
-            onAuto = { locked = null },
-            onLock = { locked = it },
+            onAuto = { ServiceLocator.lockedApproachTarget.value = null },
+            onLock = { ServiceLocator.lockedApproachTarget.value = it },
         )
     }
 }

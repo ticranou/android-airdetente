@@ -73,6 +73,7 @@ enum class EfisInstrument {
     ANLACT,              // Action (jauge ronde — toggle moteur démarrage/arrêt)
     ANLSCT,              // Raccourci tableau de bord (jauge ronde — double-tap navigue vers le tableau)
     ANLCCT,              // Circuit de piste (jauge ronde — conservateur de cap + alti circuit)
+    NUMCCT,              // Circuit de piste numérique (bandeau horizontal, 100%-1L)
     ANLTCH,              // Toucher de piste (jauge ronde — approche latérale)
     ANLCRB,              // Carburant (jauge ronde — niveau + autonomie + range)
     ANLNGT,              // Nuit aéronautique (jauge ronde — crépuscule civil + temps dispo)
@@ -94,7 +95,7 @@ enum class EfisInstrument {
             CHRONO, CHRONO_COMPACT, COUNTDOWN_ANALOG, COUNTDOWN_COMPACT,
             HORAMETER, HORAMETER_COMPACT, WEATHER_RADAR, WEATHER_RADAR_COMPACT,
             TERRAINS, TERRAINS_COMPACT, WATCH, WATCH_COMPACT, NAV_PLANNER, NUMFDR,
-            NUMAPP, CMNSCT, CMNFGT, CMNWHB, NUMCRB, NUMNGT, NUMTRM, SPACER_S, SPACER_M, SPACER_L,
+            NUMAPP, NUMCCT, CMNSCT, CMNFGT, CMNWHB, NUMCRB, NUMNGT, NUMTRM, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** True for the round "analog" gauges (the only ones honouring the
@@ -111,7 +112,7 @@ enum class EfisInstrument {
         get() = this in setOf(
             HEADING_COMPACT, AIRSPEED_COMPACT, ALTVARIO_COMPACT, BALL_COMPACT,
             CHRONO_COMPACT, COUNTDOWN_COMPACT, HORAMETER_COMPACT, TERRAINS_COMPACT,
-            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, NUMTRM, NUMAPP, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
+            WATCH_COMPACT, NUMFDR, NUMCRB, NUMNGT, NUMTRM, NUMAPP, NUMCCT, CMNSCT, CMNFGT, SPACER_S, SPACER_M, SPACER_L,
         )
 
     /** Natural (capped) height in dp for a single-line instrument. Content-dense
@@ -126,6 +127,7 @@ enum class EfisInstrument {
             NUMFDR -> 96
             NUMCRB -> 120
             NUMAPP -> 110
+            NUMCCT -> 220
             CMNSCT -> 52
             CMNFGT -> 120
             SPACER_S -> 16

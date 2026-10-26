@@ -518,12 +518,12 @@ class EfisSensorProvider(
     /**
      * Demo 2 — final approach toward the nearest aerodrome. The aircraft starts ~5 km out
      * at circuit height on the extended runway axis and flies a descending final while
-     * wandering left/right of the axis and above/below the 3° plane, so the NUMAPP tunnel,
+     * wandering left/right of the axis and above/below the 3° plane, so the ANLAPP/NUMCCT tunnel,
      * the AXE (lateral) and PLAN (glide) deviations all move clearly. Loops.
      *
      * Geometry is self-contained (integrates its own lat/lon) and anchored near LFRK so
-     * the NUMAPP AUTO resolver locks onto that field. Approach axis QFU ≈ 040° (arbitrary
-     * plausible runway); the NUMAPP instrument derives its own QFU from the field, but the
+     * the AUTO resolver locks onto that field. Approach axis QFU ≈ 040° (arbitrary
+     * plausible runway); the instrument derives its own QFU from the field, but the
      * lateral/vertical wander is what makes AXE/PLAN swing.
      */
     private suspend fun runApproachDemo() {

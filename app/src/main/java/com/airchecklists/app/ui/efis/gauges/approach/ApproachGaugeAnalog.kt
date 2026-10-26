@@ -61,7 +61,7 @@ private val ALT_LOW  = Color(0xFFE53935)
  *
  * Two dots per side mark the tolerance scale (1st dot = ±15 m / ±60 ft, 2nd = double).
  * Bars are green inside both tolerances, red when below the plane, orange otherwise —
- * mirroring the NUMAPP colour rule. When no target/QFU is available the bars park at
+ * mirroring the NUMCCT colour rule. When no target/QFU is available the bars park at
  * centre and red LOC / GS flags appear. Mini numeric readouts (AXE / PLAN / QFU) sit on
  * the lower face. Double-tap cycles the demo; long-press locks a terrain + QFU.
  *

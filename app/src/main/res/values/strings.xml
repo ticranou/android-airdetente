@@ -196,7 +196,6 @@
     <string name="efis_instr_nav">CMNNAV - Prépa Navigation (100%-6L)</string>
     <string name="efis_instr_fdr">ANLFDR - Enregistreur de vol</string>
     <string name="efis_instr_fdr_c">NUMFDR - Enregistreur de vol (100%-1L)</string>
-    <string name="efis_instr_approach">NUMAPP - Approche finale (100%-1L)</string>
     <string name="efis_instr_approach_anl">ANLAPP - Approche finale</string>
     <string name="efis_instr_tch">ANLTCH - Toucher de piste</string>
     <string name="efis_instr_trf">ANLTRF - Trafic Safesky</string>
@@ -220,7 +219,7 @@
     <string name="settings_safesky_hint">Clé API Safesky pour l\'instrument de trafic ANLTRF. Obtenez votre clé sur safesky.app. La clé est stockée localement et n\'est jamais partagée.</string>
     <string name="settings_safesky_key_label">Clé API Safesky</string>
     <string name="settings_approach">Approche finale</string>
-    <string name="settings_approach_hint">Hauteurs (ft AGL) auxquelles s\'allument les arcs de proximité des instruments d\'approche ANLAPP et NUMAPP. L\'ordre vert ≥ orange ≥ rouge est garanti automatiquement.</string>
+    <string name="settings_approach_hint">Hauteurs (ft AGL) auxquelles s\'allument les arcs de proximité des instruments d\'approche ANLAPP, ANLCCT et NUMCCT. L\'ordre vert ≥ orange ≥ rouge est garanti automatiquement.</string>
     <string name="settings_approach_green">Arc vert</string>
     <string name="settings_approach_orange">Arc orange</string>
     <string name="settings_approach_red">Arc rouge</string>

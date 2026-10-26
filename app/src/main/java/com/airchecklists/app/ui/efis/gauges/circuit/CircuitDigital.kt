@@ -143,10 +143,12 @@ fun CircuitDigital(
         val footerTop = infosTop + infosH
 
         // Arc zones — présentes sur les zones localizer + infos uniquement.
+        // Gauche : rouge intérieur → vert extérieur (mirror=true)
+        // Droite : vert intérieur → rouge extérieur (mirror=false)
         val arcZoneW = w * 0.055f
-        val arcH     = locH + infosH   // hauteur couverte par les arcs
-        drawEdgeArcs(0f,          arcZoneW, locTop, arcH, outerColor, midColor, innerColor)
-        drawEdgeArcs(w - arcZoneW, arcZoneW, locTop, arcH, outerColor, midColor, innerColor)
+        val arcH     = locH + infosH
+        drawEdgeArcs(0f,           arcZoneW, locTop, arcH, outerColor, midColor, innerColor, mirror = true)
+        drawEdgeArcs(w - arcZoneW, arcZoneW, locTop, arcH, outerColor, midColor, innerColor, mirror = false)
 
         // Contenu entre les arcs.
         val cx = arcZoneW
@@ -223,7 +225,7 @@ private fun DrawScope.drawLocalizerZone(
     drawPillWithText(tm, icaoCx, cy - height * 0.10f, pillW, pillH,
         icao ?: "—", 21f, if (icao != null) CompactStyle.Accent else CompactStyle.Dim)
     runwayLengthM?.let {
-        compactText(tm, "$it m", icaoCx, cy + height * 0.26f, sizeSp = 13f, color = CompactStyle.Dim)
+        compactText(tm, "$it m", icaoCx, cy + height * 0.22f, sizeSp = 14f, color = CompactStyle.Dim)
     }
 
     // — Pill QFU.
@@ -235,7 +237,7 @@ private fun DrawScope.drawLocalizerZone(
     drawPillWithText(tm, qfuCx, cy - height * 0.10f, pillW, pillH,
         qfuNum, 24f, CompactStyle.Accent)
     circuitAltFt?.let {
-        compactText(tm, "$it ft", qfuCx, cy + height * 0.26f, sizeSp = 13f, color = CompactStyle.Dim)
+        compactText(tm, "$it ft", qfuCx, cy + height * 0.22f, sizeSp = 14f, color = CompactStyle.Dim)
     }
 
     // — Localizer central.
@@ -261,7 +263,7 @@ private fun DrawScope.drawLocalizerZone(
         val rwyStroke = height * 0.14f
         clipRect(locX, top, locR, top + height) {
             rotate(degrees = qfuDeg - headingDeg, pivot = Offset(locCx, cy)) {
-                drawLine(Color(0xFFCCCCCC),
+                drawLine(Color(0xFF777777),
                     start = Offset(locCx, cy - rwyLen / 2f),
                     end   = Offset(locCx, cy + rwyLen / 2f),
                     strokeWidth = rwyStroke, cap = StrokeCap.Round)
@@ -343,8 +345,8 @@ private fun DrawScope.drawAltFooter(
     hasTarget: Boolean,
 ) {
     val pillW  = w * 0.11f
-    val pillH  = height * 0.52f
-    val pad    = pillW + w * 0.01f      // barre commence après le pill gauche
+    val pillH  = height * 0.26f           // moitié de la hauteur précédente
+    val pad    = pillW + w * 0.01f
     val barTop = top + (height - pillH) / 2f
     val barH   = pillH
     val barL   = pad
@@ -382,9 +384,9 @@ private fun DrawScope.drawAltFooter(
         altFt < greenFt  -> ALT_OK
         else             -> RING_DIM
     }
-    val triH   = barH * 0.70f
-    val triW   = barH * 0.55f
-    val triBot = barTop - height * 0.04f
+    val triH   = height * 0.38f          // curseur grand, indépendant de barH
+    val triW   = height * 0.22f
+    val triBot = barTop - height * 0.03f
     val tri = Path().apply {
         moveTo(curX, triBot)
         lineTo(curX - triW / 2f, triBot - triH)
@@ -422,12 +424,16 @@ private fun DrawScope.drawAltFooter(
 private fun DrawScope.drawEdgeArcs(
     x: Float, zoneW: Float, top: Float, height: Float,
     green: Color, orange: Color, red: Color,
+    mirror: Boolean = false,
 ) {
     val gap  = zoneW * 0.12f
     val barW = (zoneW - 4f * gap) / 3f
     val barTop = top + height * 0.04f
     val barH   = height * 0.92f
-    listOf(green, orange, red).forEachIndexed { i, c ->
+    // Ordre normal (gauche→droite) : vert, orange, rouge.
+    // Ordre miroir (côté gauche de l'instrument) : rouge, orange, vert.
+    val colors = if (mirror) listOf(red, orange, green) else listOf(green, orange, red)
+    colors.forEachIndexed { i, c ->
         val bx = x + gap + i * (barW + gap)
         drawRoundRect(c,
             topLeft = Offset(bx, barTop), size = Size(barW, barH),

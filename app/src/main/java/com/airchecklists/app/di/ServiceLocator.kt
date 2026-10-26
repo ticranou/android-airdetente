@@ -168,7 +168,7 @@ object ServiceLocator {
     /** Request to navigate to a specific dashboard by id. Consumed by EfisScreen. */
     val requestedDashboardId = MutableStateFlow<String?>(null)
 
-    /** Terrain/piste verrouillé manuellement pour ANLAPP, NUMAPP, ANLCCT, NUMCCT.
+    /** Terrain/piste verrouillé manuellement pour ANLAPP, ANLCCT, NUMCCT.
      *  null = AUTO (terrain le plus proche). */
     val lockedApproachTarget = MutableStateFlow<ApproachTarget?>(null)
 

@@ -69,7 +69,6 @@ fun efisInstrumentLabel(instrument: EfisInstrument): String = stringResource(
         EfisInstrument.NAV_PLANNER -> R.string.efis_instr_nav
         EfisInstrument.ANLFDR -> R.string.efis_instr_fdr
         EfisInstrument.NUMFDR -> R.string.efis_instr_fdr_c
-        EfisInstrument.NUMAPP -> R.string.efis_instr_approach
         EfisInstrument.ANLAPP -> R.string.efis_instr_approach_anl
         EfisInstrument.ANLTCH -> R.string.efis_instr_tch
         EfisInstrument.ANLTRF -> R.string.efis_instr_trf

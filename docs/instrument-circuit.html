@@ -85,11 +85,48 @@
         </div>
 
         <div class="card">
+          <h2>NUMVAC — Carte VAC (100%-2L)</h2>
+          <p>Instrument compact double-hauteur (220 dp, 100%-2L) qui affiche le PDF de la carte d'approche visuelle (VAC) du terrain cible directement dans le cockpit EFIS.</p>
+          <ul class="feat">
+            <li><b>Rendu PDF natif</b> : le PDF est rendu dans l'instrument avec supports de pan (drag) et pinch-to-zoom. Double-tap réinitialise la vue au zoom/position d'origine.</li>
+            <li><b>Navigation multi-pages</b> : si le PDF comporte plusieurs pages, un pied de page affiche la navigation (◀ 1/2 ▶) pour feuilleter.</li>
+            <li><b>Cible partagée</b> : utilise le terrain cible sélectionné via les instruments ANLAPP, ANLCCT ou NUMCCT. Appui long sur NUMVAC = ouvrir le dialogue de sélection du terrain cible et du QFU.</li>
+            <li><b>États</b> :
+              <ul>
+                <li>« Aucun terrain — appui long » : pas de cible verrouillée ; le terrain le plus proche n'a pas de VAC téléchargée.</li>
+                <li>« VAC non disponible — XXXX » : cible sélectionnée (XXXX = code OACI), mais son PDF n'est pas téléchargé. Téléchargez-le via Réglages ▸ Données ▸ Cartes VAC.</li>
+                <li>Spinner : PDF en cours de rendu.</li>
+              </ul>
+            </li>
+            <li>Hauteur fixe <b>220 dp</b> (équivaut à deux lignes standard).</li>
+          </ul>
+
+          <h3>Gestes (NUMVAC)</h3>
+          <div class="gesture long-press">
+            <span class="g"></span>
+            <span>Appui long : ouvrir le dialogue de sélection du terrain cible et du QFU (cible partagée avec ANLAPP / ANLCCT / NUMCCT).</span>
+          </div>
+          <div class="gesture drag">
+            <span class="g"></span>
+            <span>Drag : déplacer (pan) le PDF dans le viewport.</span>
+          </div>
+          <div class="gesture pinch">
+            <span class="g"></span>
+            <span>Pinch : zoomer / dézoomer.</span>
+          </div>
+          <div class="gesture double-tap">
+            <span class="g"></span>
+            <span>Double-tap : réinitialiser la vue (zoom et position d'origine).</span>
+          </div>
+        </div>
+
+        <div class="card">
           <h3>Note commune</h3>
           <ul class="feat">
             <li>Terrain automatique (sans cible verrouillée) résolu dans un rayon d'environ 15 km (annuaire + vos terrains géolocalisés), recalculé tous les ~550 m.</li>
             <li>Nécessite une <b>position GPS</b>. <b>Indicatif</b>, non certifié.</li>
             <li>Les seuils des arcs de proximité sol de NUMCCT et ANLCCT sont partagés avec ANLAPP et configurables dans <b>Réglages ▸ Instruments ▸ Approche finale</b>.</li>
+            <li><b>Cible partagée</b> (ANLAPP / ANLCCT / NUMCCT / NUMVAC) : un appui long sur n'importe lequel de ces instruments ouvre le dialogue de sélection du terrain cible et du QFU. La cible choisie s'applique à tous les quatre.</li>
           </ul>
         </div>
       </div>
@@ -106,6 +143,12 @@
             <span class="chip">NUMCCT</span>
           </div>
           <img class="shot" src="screenshots/NUMCCT.jpg" alt="NUMCCT — circuit de piste numérique">
+        </div>
+        <div class="screenshot-item">
+          <div class="screenshot-pills">
+            <span class="chip">NUMVAC</span>
+          </div>
+          <img class="shot" src="screenshots/NUMVAC.jpg" alt="NUMVAC — carte VAC intégrée">
         </div>
       </div>
     </div>

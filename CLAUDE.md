@@ -40,11 +40,14 @@ Use the `android-deploy` subagent for:
 - deploying the application to the connected Android device using ADB
 - verifying that the APK was successfully installed
 
+The `android-deploy` subagent runs on **Haiku** (mechanical task, cost-efficient).
+
 
 ## Documentation
 
 Documentation is handled by the `documentation` subagent.
 The documentation subagent must follow the rules defined in `.claude/agents/documentation.md`.
+The `documentation` subagent runs on **Haiku** (mechanical task, cost-efficient).
 
 Use the documentation subagent when:
 
@@ -61,6 +64,7 @@ The documentation subagent must not modify application code.
 ## Git
 
 Git operations are handled by the `git` subagent.
+The `git` subagent runs on **Haiku** (mechanical task, cost-efficient).
 
 Use the git subagent when:
 

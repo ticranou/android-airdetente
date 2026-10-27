@@ -250,6 +250,12 @@ enum class DashboardBackgroundStyle {
     NONE,
     CARBON,
     BRUSHED_METAL,
+    HONEYCOMB,
+    RIVETED_METAL,
+    CARBON_RED,
+    CARBON_BLUE,
+    MIDNIGHT,
+    GRID,
 }
 
 /** Which OpenAIP overlays are shown on the moving map (default: all visible). */

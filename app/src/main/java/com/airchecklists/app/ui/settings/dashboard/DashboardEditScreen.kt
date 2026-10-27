@@ -1,5 +1,6 @@
 package com.airchecklists.app.ui.settings.dashboard
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,13 +11,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +44,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -50,20 +57,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airchecklists.app.R
 import com.airchecklists.app.data.model.AppPreferences
+import com.airchecklists.app.data.model.DashboardBackgroundStyle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.EfisSlotSelector
+import com.airchecklists.app.ui.efis.drawDashboardBackground
 import com.airchecklists.app.ui.repoViewModelFactory
 import com.airchecklists.app.ui.settings.SettingsViewModel
 
 /** Dedicated editor for one dashboard: name, Cockpit visibility, grid + slots. */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardEditScreen(
     dashboardId: String,
@@ -144,25 +156,66 @@ fun DashboardEditScreen(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(
-                    com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE to "Aucun",
-                    com.airchecklists.app.data.model.DashboardBackgroundStyle.CARBON to "Carbone",
-                    com.airchecklists.app.data.model.DashboardBackgroundStyle.BRUSHED_METAL to "Métal brossé",
-                ).forEach { (style, label) ->
-                    androidx.compose.material3.FilterChip(
-                        selected = dash.backgroundStyle == style,
-                        onClick = { viewModel.setDashboardBackgroundStyle(dash.id, style) },
-                        label = { Text(label) },
-                    )
+            val bgStyleLabels = mapOf(
+                DashboardBackgroundStyle.NONE to "Aucun",
+                DashboardBackgroundStyle.CARBON to "Carbone",
+                DashboardBackgroundStyle.BRUSHED_METAL to "Métal",
+                DashboardBackgroundStyle.HONEYCOMB to "Nid d'abeille",
+                DashboardBackgroundStyle.RIVETED_METAL to "Rivets",
+                DashboardBackgroundStyle.CARBON_RED to "Carbone rouge",
+                DashboardBackgroundStyle.CARBON_BLUE to "Carbone bleu",
+                DashboardBackgroundStyle.MIDNIGHT to "Minuit",
+                DashboardBackgroundStyle.GRID to "Grille HUD",
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = 440.dp),
+                userScrollEnabled = false,
+            ) {
+                items(DashboardBackgroundStyle.entries) { style ->
+                    val selected = dash.backgroundStyle == style
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .border(
+                                width = if (selected) 2.dp else 0.5.dp,
+                                color = if (selected) MaterialTheme.colorScheme.primary else Color(0xFF3A3A3A),
+                                shape = RoundedCornerShape(8.dp),
+                            )
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { viewModel.setDashboardBackgroundStyle(dash.id, style) }
+                            .padding(4.dp),
+                    ) {
+                        Canvas(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f),
+                        ) {
+                            if (style == DashboardBackgroundStyle.NONE) {
+                                drawRect(androidx.compose.ui.graphics.Color(0xFF1A1A1A))
+                            } else {
+                                drawDashboardBackground(style)
+                            }
+                        }
+                        Text(
+                            bgStyleLabels[style] ?: style.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+                        )
+                    }
                 }
             }
-            if (dash.backgroundStyle != com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE) {
+            if (dash.backgroundStyle != DashboardBackgroundStyle.NONE) {
                 Text(
                     "Opacité : ${(dash.backgroundOpacity * 100).toInt()} %",
                     style = MaterialTheme.typography.labelMedium,
                 )
-                androidx.compose.material3.Slider(
+                Slider(
                     value = dash.backgroundOpacity,
                     onValueChange = { viewModel.setDashboardBackgroundOpacity(dash.id, it) },
                     valueRange = 0.05f..1f,

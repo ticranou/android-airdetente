@@ -63,7 +63,7 @@ import com.airchecklists.app.ui.repoViewModelFactory
 import com.airchecklists.app.ui.settings.SettingsViewModel
 
 /** Dedicated editor for one dashboard: name, Cockpit visibility, grid + slots. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DashboardEditScreen(
     dashboardId: String,
@@ -137,6 +137,37 @@ fun DashboardEditScreen(
                     onCheckedChange = { viewModel.setDashboardStatusBannerBottom(dash.id, it) },
                 )
                 Text(stringResource(R.string.settings_dashboard_status_banner_bottom))
+            }
+
+            Text(
+                "Fond du cockpit",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE to "Aucun",
+                    com.airchecklists.app.data.model.DashboardBackgroundStyle.CARBON to "Carbone",
+                    com.airchecklists.app.data.model.DashboardBackgroundStyle.BRUSHED_METAL to "Métal brossé",
+                ).forEach { (style, label) ->
+                    androidx.compose.material3.FilterChip(
+                        selected = dash.backgroundStyle == style,
+                        onClick = { viewModel.setDashboardBackgroundStyle(dash.id, style) },
+                        label = { Text(label) },
+                    )
+                }
+            }
+            if (dash.backgroundStyle != com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE) {
+                Text(
+                    "Opacité : ${(dash.backgroundOpacity * 100).toInt()} %",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                androidx.compose.material3.Slider(
+                    value = dash.backgroundOpacity,
+                    onValueChange = { viewModel.setDashboardBackgroundOpacity(dash.id, it) },
+                    valueRange = 0.05f..1f,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             Text(

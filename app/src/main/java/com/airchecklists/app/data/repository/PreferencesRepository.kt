@@ -416,6 +416,14 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(statusBannerBottom = show) else it })
     }
 
+    suspend fun setDashboardBackgroundStyle(id: String, style: com.airchecklists.app.data.model.DashboardBackgroundStyle) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(backgroundStyle = style) else it })
+    }
+
+    suspend fun setDashboardBackgroundOpacity(id: String, opacity: Float) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(backgroundOpacity = opacity.coerceIn(0.05f, 1f)) else it })
+    }
+
     /** Reorder dashboards to match the given id order (unknown ids keep their tail order). */
     suspend fun reorderDashboards(orderedIds: List<String>) = persist { prefs ->
         val byId = prefs.effectiveDashboards.associateBy { it.id }

@@ -244,6 +244,14 @@ enum class GaugeBezelStyle {
     BRUSHED,  // brushed-metal radial gradient
 }
 
+/** Background texture style of a dashboard's cockpit view. */
+@Serializable
+enum class DashboardBackgroundStyle {
+    NONE,
+    CARBON,
+    BRUSHED_METAL,
+}
+
 /** Which OpenAIP overlays are shown on the moving map (default: all visible). */
 @Serializable
 data class MapLayerPrefs(
@@ -323,6 +331,8 @@ data class Dashboard(
     val showTitle: Boolean = false,
     val statusBannerTop: Boolean = true,
     val statusBannerBottom: Boolean = false,
+    val backgroundStyle: DashboardBackgroundStyle = DashboardBackgroundStyle.NONE,
+    val backgroundOpacity: Float = 1.0f,
     // ---- legacy (migration only) ----
     val cols: Int = 2,
     val slots: List<EfisInstrument> = emptyList(),

@@ -224,6 +224,14 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardStatusBannerBottom(id, show) }
     }
 
+    fun setDashboardBackgroundStyle(id: String, style: com.airchecklists.app.data.model.DashboardBackgroundStyle) {
+        viewModelScope.launch { prefsRepo.setDashboardBackgroundStyle(id, style) }
+    }
+
+    fun setDashboardBackgroundOpacity(id: String, opacity: Float) {
+        viewModelScope.launch { prefsRepo.setDashboardBackgroundOpacity(id, opacity) }
+    }
+
     fun setDashboardRows(id: String, rows: Int) {
         viewModelScope.launch { prefsRepo.setDashboardRows(id, rows) }
     }

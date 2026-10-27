@@ -46,7 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -411,6 +413,52 @@ internal fun DashboardGrid(
                 }
             }
             val rowOffsets = FloatArray(rows) { r -> rowHeights.take(r).sum() }
+
+            // Background texture (behind instruments)
+            if (dashboard.backgroundStyle != com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE) {
+                androidx.compose.foundation.Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(dashboard.backgroundOpacity),
+                ) {
+                    when (dashboard.backgroundStyle) {
+                        com.airchecklists.app.data.model.DashboardBackgroundStyle.CARBON -> {
+                            drawRect(Color(0xFF141414), size = size)
+                            val cell = (size.minDimension * 0.02f).coerceIn(6f, 14f)
+                            var trow = 0; var yy = 0f
+                            while (yy < size.height) {
+                                var tcol = 0; var xx = 0f
+                                while (xx < size.width) {
+                                    val dark = (trow + tcol) % 2 == 0
+                                    drawRect(
+                                        if (dark) Color(0xFF1E1E1E) else Color(0xFF2C2C2C),
+                                        topLeft = Offset(xx, yy),
+                                        size = androidx.compose.ui.geometry.Size(cell, cell),
+                                    )
+                                    drawLine(Color(0x18FFFFFF), Offset(xx, yy + cell), Offset(xx + cell, yy), strokeWidth = 1.2f)
+                                    xx += cell; tcol++
+                                }
+                                yy += cell; trow++
+                            }
+                        }
+                        com.airchecklists.app.data.model.DashboardBackgroundStyle.BRUSHED_METAL -> {
+                            drawRect(
+                                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                    0f to Color(0xFFBFC3C7), 0.55f to Color(0xFF6E7276), 1f to Color(0xFF303336),
+                                    startY = 0f, endY = size.height,
+                                ),
+                                size = size,
+                            )
+                            var x = 0f
+                            while (x < size.width) {
+                                drawLine(Color(0x22FFFFFF), Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
+                                x += 5f
+                            }
+                        }
+                        else -> Unit
+                    }
+                }
+            }
 
             cells.forEachIndexed { i, cell ->
                 if (cell.covered || cell.instrument == EfisInstrument.NONE) return@forEachIndexed

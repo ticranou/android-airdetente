@@ -244,22 +244,36 @@ enum class GaugeBezelStyle {
     BRUSHED,  // brushed-metal radial gradient
 }
 
-/** Background texture style of a dashboard's cockpit view. */
+/** Background texture style of a dashboard's cockpit view.
+ *  IMPORTANT: legacy values (marked below) must never be removed — they may be
+ *  present in serialised settings.json and removing them would corrupt user data.
+ *  They are mapped to NONE at render time. */
 @Serializable
 enum class DashboardBackgroundStyle {
     NONE,
     CARBON,
     BRUSHED_METAL,
+    HONEYCOMB,          // legacy — rendered as NONE
     RIVETED_METAL,
     CARBON_RED,
     CARBON_BLUE,
+    MIDNIGHT,           // legacy — rendered as NONE
+    GRID,               // legacy — rendered as NONE
     WOVEN_CARBON,
+    CIRCUIT_BOARD,      // legacy — rendered as NONE
     TOPOGRAPHIC,
+    LEATHER_STITCH,     // legacy — rendered as NONE
+    CARBON_GOLD,        // legacy — rendered as NONE
+    RADAR_SWEEP,        // legacy — rendered as NONE
+    BRUSHED_COPPER,     // legacy — rendered as NONE
     TITANIUM,
     ANODIZED_DARK,
+    DIAGONAL_WEAVE,     // legacy — rendered as NONE
+    SCALE_ARMOR,        // legacy — rendered as NONE
     DIAMOND_PLATE,
     STARFIELD,
     DEEP_OCEAN,
+    EMBER,              // legacy — rendered as NONE
 }
 
 /** Which OpenAIP overlays are shown on the moving map (default: all visible). */

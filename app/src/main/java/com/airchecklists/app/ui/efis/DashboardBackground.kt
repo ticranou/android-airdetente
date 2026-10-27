@@ -280,6 +280,9 @@ fun DrawScope.drawDashboardBackground(style: DashboardBackgroundStyle) {
                 size = size,
             )
         }
+
+        // Legacy values kept for serialization compatibility — render as no background.
+        else -> Unit
     }
 }
 

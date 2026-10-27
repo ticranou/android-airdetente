@@ -178,7 +178,22 @@ fun DashboardEditScreen(
                 modifier = Modifier.fillMaxWidth().heightIn(max = 440.dp),
                 userScrollEnabled = false,
             ) {
-                items(DashboardBackgroundStyle.entries) { style ->
+                val activeStyles = listOf(
+                    DashboardBackgroundStyle.NONE,
+                    DashboardBackgroundStyle.CARBON,
+                    DashboardBackgroundStyle.BRUSHED_METAL,
+                    DashboardBackgroundStyle.RIVETED_METAL,
+                    DashboardBackgroundStyle.CARBON_RED,
+                    DashboardBackgroundStyle.CARBON_BLUE,
+                    DashboardBackgroundStyle.WOVEN_CARBON,
+                    DashboardBackgroundStyle.TOPOGRAPHIC,
+                    DashboardBackgroundStyle.TITANIUM,
+                    DashboardBackgroundStyle.ANODIZED_DARK,
+                    DashboardBackgroundStyle.DIAMOND_PLATE,
+                    DashboardBackgroundStyle.STARFIELD,
+                    DashboardBackgroundStyle.DEEP_OCEAN,
+                )
+                items(activeStyles) { style ->
                     val selected = dash.backgroundStyle == style
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

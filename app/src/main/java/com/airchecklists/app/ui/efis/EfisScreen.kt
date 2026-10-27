@@ -417,7 +417,8 @@ internal fun DashboardGrid(
                 val row = i / cols
                 val col = i % cols
                 val canFocus = cell.instrument != EfisInstrument.NAV_PLANNER &&
-                              cell.instrument != EfisInstrument.MOVING_MAP
+                              cell.instrument != EfisInstrument.MOVING_MAP &&
+                              cell.instrument != EfisInstrument.NUMVAC
                 val cellH = with(densityObj) { rowHeights[row].toDp() }
                 val offsetY = with(densityObj) { rowOffsets[row].toDp() }
                 Box(

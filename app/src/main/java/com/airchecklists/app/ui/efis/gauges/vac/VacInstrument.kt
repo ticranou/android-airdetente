@@ -4,12 +4,20 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -17,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,26 +39,23 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.airchecklists.app.data.repository.AerodromeDirectory
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
-import com.airchecklists.app.ui.efis.gauges.approach.ApproachTargetDialog
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import kotlin.math.roundToInt
 
 /**
  * NUMVAC — Carte VAC intégrée (330 dp).
  *
  * Affiche la carte VAC PDF du terrain cible partagé (lockedApproachTarget / AUTO).
  * Pinch-to-zoom, pan, double-tap pour réinitialiser. Navigation entre pages en bas.
- * Long-press → ApproachTargetDialog (cible partagée avec NUMCCT/ANLCCT/ANLAPP).
+ * Bouton Lock/Unlock (coin bas-droit) pour figer la carte.
  */
 @Composable
 fun VacInstrument(modifier: Modifier = Modifier) {
@@ -136,53 +140,53 @@ fun VacInstrument(modifier: Modifier = Modifier) {
     var scale by remember(pdfFile) { mutableFloatStateOf(1f) }
     var offset by remember(pdfFile) { mutableStateOf(Offset.Zero) }
 
-    // Dialog terrain.
-    var showDialog by remember { mutableStateOf(false) }
-    val latKey = (efisState.latitude * 50).roundToInt()
-    val lonKey = (efisState.longitude * 50).roundToInt()
+    // Verrouillage du zoom/pan.
+    var locked by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(pdfFile) {
-                    // Intercept pinch/pan with Initial pass so events are consumed before
-                    // the parent cockpit cell sees them (it uses Initial pass too for Focus
-                    // mode, but without consuming — we consume here to block that trigger).
-                    awaitPointerEventScope {
-                        var prevDist = -1f
-                        var prevMid = Offset.Zero
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                            val pressed = event.changes.filter { it.pressed }
-                            when {
-                                pressed.size >= 2 -> {
-                                    // Consume all 2-finger events so the parent never sees them.
-                                    event.changes.forEach { it.consume() }
-                                    val p1 = pressed[0].position
-                                    val p2 = pressed[1].position
-                                    val mid = Offset((p1.x + p2.x) / 2f, (p1.y + p2.y) / 2f)
-                                    val dist = (p2 - p1).getDistance().coerceAtLeast(1f)
-                                    if (prevDist > 0f) {
-                                        val zoomDelta = dist / prevDist
-                                        scale = (scale * zoomDelta).coerceIn(0.3f, 10f)
-                                        offset += (mid - prevMid)
-                                    }
-                                    prevDist = dist
-                                    prevMid = mid
+    // Le pointerInput consommateur est sur le Box extérieur (même niveau hiérarchique
+    // que le pointerInput Focus du cockpit parent) pour que consume() soit effectif
+    // avec PointerEventPass.Initial avant que le parent ne mesure la distance.
+    Box(modifier = modifier.fillMaxSize()
+        .pointerInput(pdfFile, locked) {
+            awaitPointerEventScope {
+                var prevDist = -1f
+                var prevMid = Offset.Zero
+                while (true) {
+                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                    val pressed = event.changes.filter { it.pressed }
+                    when {
+                        pressed.size >= 2 -> {
+                            // Consume always — blocks parent Focus mode trigger.
+                            event.changes.forEach { it.consume() }
+                            if (!locked) {
+                                val p1 = pressed[0].position
+                                val p2 = pressed[1].position
+                                val mid = Offset((p1.x + p2.x) / 2f, (p1.y + p2.y) / 2f)
+                                val dist = (p2 - p1).getDistance().coerceAtLeast(1f)
+                                if (prevDist > 0f) {
+                                    val zoomDelta = dist / prevDist
+                                    scale = (scale * zoomDelta).coerceIn(0.3f, 10f)
+                                    offset += (mid - prevMid)
                                 }
-                                else -> {
-                                    prevDist = -1f
-                                    prevMid = Offset.Zero
-                                }
+                                prevDist = dist
+                                prevMid = mid
                             }
+                        }
+                        else -> {
+                            prevDist = -1f
+                            prevMid = Offset.Zero
                         }
                     }
                 }
+            }
+        }
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
                 .pointerInput(currentPage, pageCount) {
                     detectTapGestures(
-                        onDoubleTap = { scale = 1f; offset = Offset.Zero },
-                        onLongPress = { showDialog = true },
+                        onDoubleTap = { if (!locked) { scale = 1f; offset = Offset.Zero } },
                         onTap = { tap ->
                             if (pageCount > 1) {
                                 val footerTop = size.height - 24.dp.roundToPx()
@@ -264,20 +268,25 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                 strokeWidth = 2.dp,
             )
         }
-    }
 
-    // Dialog de sélection de terrain.
-    if (showDialog) {
-        val nearbyCharts by produceState(initialValue = charts, charts, efisState.hasPosition, latKey, lonKey) {
-            value = AerodromeDirectory.nearbyCharts(
-                efisState.latitude, efisState.longitude, efisState.hasPosition, charts, 40,
+        // Bouton Lock/Unlock — coin bas-droit, au-dessus de la bande de navigation.
+        val lockBtnSize = 28.dp
+        val lockBtnPad = 4.dp
+        val extraBottom = if (pageCount > 1) 24.dp else 0.dp
+        IconButton(
+            onClick = { locked = !locked },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = lockBtnPad, bottom = lockBtnPad + extraBottom)
+                .size(lockBtnSize)
+                .background(Color(0xAA000000), CircleShape),
+        ) {
+            Icon(
+                imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
+                tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
+                modifier = Modifier.size(20.dp),
             )
         }
-        ApproachTargetDialog(
-            terrains = nearbyCharts,
-            onDismiss = { showDialog = false },
-            onAuto = { ServiceLocator.lockedApproachTarget.value = null },
-            onLock = { ServiceLocator.lockApproachTarget(it) },
-        )
     }
 }

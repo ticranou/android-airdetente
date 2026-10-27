@@ -6,6 +6,7 @@ import com.airchecklists.app.data.local.SettingsStore
 import com.airchecklists.app.data.local.VacStore
 import com.airchecklists.app.data.model.Aircraft
 import com.airchecklists.app.data.model.AircraftIcon
+import com.airchecklists.app.data.model.Dashboard
 import com.airchecklists.app.data.model.Characteristic
 import com.airchecklists.app.data.model.Checklist
 import com.airchecklists.app.data.model.ChecklistItem
@@ -167,6 +168,9 @@ object ServiceLocator {
 
     /** Request to navigate to a specific dashboard by id. Consumed by EfisScreen. */
     val requestedDashboardId = MutableStateFlow<String?>(null)
+
+    /** Dashboard à afficher en mode focus (swap animé dans EfisScreen). Null = cockpit normal. */
+    val focusDashboard = MutableStateFlow<Dashboard?>(null)
 
     /** Terrain/piste verrouillé manuellement pour ANLAPP, ANLCCT, NUMCCT.
      *  null = AUTO (terrain le plus proche). */

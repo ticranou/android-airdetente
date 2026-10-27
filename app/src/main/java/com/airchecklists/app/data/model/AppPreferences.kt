@@ -73,7 +73,7 @@ enum class EfisInstrument {
     ANLSCT,              // Raccourci tableau de bord (jauge ronde — double-tap navigue vers le tableau)
     ANLCCT,              // Circuit de piste (jauge ronde — conservateur de cap + alti circuit)
     NUMCCT,              // Circuit de piste numérique (bandeau horizontal, 100%-1L)
-    NUMVAC,              // Carte VAC intégrée (PDF avec zoom/pan, 100%-2L)
+    NUMVAC,              // Carte VAC intégrée (PDF avec zoom/pan, 100%-3L)
     ANLTCH,              // Toucher de piste (jauge ronde — approche latérale)
     ANLCRB,              // Carburant (jauge ronde — niveau + autonomie + range)
     ANLNGT,              // Nuit aéronautique (jauge ronde — crépuscule civil + temps dispo)
@@ -127,7 +127,7 @@ enum class EfisInstrument {
             NUMFDR -> 96
             NUMCRB -> 120
             NUMCCT -> 220
-            NUMVAC -> 220
+            NUMVAC -> 330
             CMNSCT -> 52
             CMNFGT -> 120
             SPACER_S -> 16

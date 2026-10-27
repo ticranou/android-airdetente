@@ -7,14 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +55,6 @@ import com.airchecklists.app.data.net.PdfOpener
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.InstrumentPickerDialog
 import com.airchecklists.app.ui.components.efisInstrumentLabel
-import com.airchecklists.app.ui.efis.DashboardGrid
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
@@ -201,19 +195,8 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             }
             is ShortcutTarget.Dashboard -> {
                 val dash = allDashboards.firstOrNull { it.id == target.dashboardId }
-                if (dash != null) {
-                    DashboardFullScreenDialog(
-                        dashboard = dash,
-                        state = state,
-                        speedUnit = speedUnit,
-                        altUnit = altUnit,
-                        speedArcs = speedArcs,
-                        prefs = prefs.value,
-                        onDismiss = { openIdx = -1 },
-                    )
-                } else {
-                    openIdx = -1
-                }
+                if (dash != null) ServiceLocator.focusDashboard.value = dash
+                openIdx = -1
             }
             is ShortcutTarget.DashboardNavigate -> {
                 ServiceLocator.requestedDashboardId.value = target.dashboardId
@@ -375,6 +358,8 @@ private fun applyImmersiveDialog(dialogView: android.view.View) {
         systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         hide(WindowInsetsCompat.Type.systemBars())
     }
+    // Force the dialog content to re-measure after the window is resized to MATCH_PARENT.
+    dialogView.requestLayout()
 }
 
 @Composable
@@ -410,55 +395,6 @@ private fun InstrumentFullScreenDialog(
                     .padding(8.dp)
                     .align(Alignment.TopCenter),
             )
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-            ) {
-                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun DashboardFullScreenDialog(
-    dashboard: com.airchecklists.app.data.model.Dashboard,
-    state: com.airchecklists.app.data.sensors.EfisState,
-    speedUnit: com.airchecklists.app.data.model.EfisSpeedUnit,
-    altUnit: com.airchecklists.app.data.model.AltitudeUnit,
-    speedArcs: com.airchecklists.app.data.model.SpeedArcs?,
-    prefs: com.airchecklists.app.data.model.AppPreferences,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnClickOutside = true,
-            decorFitsSystemWindows = false,
-        ),
-    ) {
-        val dialogView = LocalView.current
-        DisposableEffect(dialogView) { applyImmersiveDialog(dialogView); onDispose {} }
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            Box(modifier = Modifier.fillMaxSize().padding(bottom = 64.dp)) {
-                DashboardGrid(
-                    dashboard = dashboard,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = prefs.efisShowValues,
-                    speedArcs = speedArcs,
-                    trail = emptyList(),
-                    mapOrientation = prefs.mapOrientation,
-                    altUnit = altUnit,
-                    focusDurationSec = prefs.focusDurationSec,
-                    onOpenMap = {},
-                )
-            }
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),

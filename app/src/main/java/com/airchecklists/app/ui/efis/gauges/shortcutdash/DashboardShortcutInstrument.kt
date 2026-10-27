@@ -1,33 +1,24 @@
 package com.airchecklists.app.ui.efis.gauges.shortcutdash
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -35,32 +26,17 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.airchecklists.app.data.model.AppPreferences
-import com.airchecklists.app.data.model.AltitudeUnit
 import com.airchecklists.app.data.model.Dashboard
 import com.airchecklists.app.data.model.EfisInstrument
-import com.airchecklists.app.data.model.EfisSpeedUnit
 import com.airchecklists.app.data.model.ShortcutTarget
-import com.airchecklists.app.data.model.SpeedArcs
 import com.airchecklists.app.data.model.VacChart
 import com.airchecklists.app.data.net.PdfOpener
-import com.airchecklists.app.data.sensors.EfisState
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.components.efisInstrumentLabel
-import com.airchecklists.app.ui.efis.DashboardGrid
 import com.airchecklists.app.ui.efis.gauges.GaugeColors
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
@@ -85,11 +61,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val allDashboards = prefs.effectiveDashboards
     val allCharts by ServiceLocator.vacRepository.charts.collectAsStateWithLifecycle()
-    val state by ServiceLocator.efisProvider.state.collectAsStateWithLifecycle()
-    val speedArcs = remember(ServiceLocator.currentAircraft()) {
-        ServiceLocator.currentAircraft()
-            ?.let { SpeedArcs.from(it).takeIf { a -> a.hasAny } }
-    }
 
     // Migrate from old dashboardShortcutSlots if no anlsctTarget set yet
     val target: ShortcutTarget? = prefs.instruments.anlsctTargets[cellIdx]
@@ -105,7 +76,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
 
     var showPicker by remember { mutableStateOf(false) }
     var step by remember { mutableStateOf(AanlsctStep.CHOOSE_TYPE) }
-    var showFocusDashboard by remember { mutableStateOf(false) }
     var showWxDialog by remember { mutableStateOf(false) }
 
     Canvas(
@@ -119,7 +89,10 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
                 },
                 onTap = {
                     when (target) {
-                        is ShortcutTarget.Dashboard  -> showFocusDashboard = true
+                        is ShortcutTarget.Dashboard -> {
+                            val dash = allDashboards.firstOrNull { it.id == target.dashboardId }
+                            if (dash != null) ServiceLocator.focusDashboard.value = dash
+                        }
                         is ShortcutTarget.TerrainVac -> {
                             val chart = allCharts.firstOrNull { it.id == target.vacId }
                                 ?: VacChart(id = target.vacId, icao = target.icao, airfieldName = target.icao)
@@ -193,23 +166,6 @@ fun DashboardShortcutInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             compactText(tm, subLabel, cx, cy + r * 0.72f, sizeSp = 11f, color = CompactStyle.Dim)
         }
         drawGaugeTitlePill(tm, "RACCOURCI", cx, cy, r, bezel.hideTitle)
-    }
-
-    // ── Focus dialogs ─────────────────────────────────────────────────────────
-
-    if (showFocusDashboard && target is ShortcutTarget.Dashboard) {
-        val dash = allDashboards.firstOrNull { it.id == target.dashboardId }
-        if (dash != null) {
-            AnlsctDashboardFocusDialog(
-                dashboard = dash,
-                state = state,
-                speedUnit = prefs.efisSpeedUnit,
-                altUnit = prefs.altitudeUnit,
-                speedArcs = speedArcs,
-                prefs = prefs,
-                onDismiss = { showFocusDashboard = false },
-            )
-        }
     }
 
     if (showWxDialog && target is ShortcutTarget.WeatherStation) {
@@ -350,76 +306,3 @@ private fun TerrainListDialog(
     )
 }
 
-private fun applyImmersiveDialog(dialogView: android.view.View) {
-    val dialogWindow = (dialogView.parent as? DialogWindowProvider)?.window ?: return
-    dialogWindow.addFlags(
-        android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-        android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
-    )
-    WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
-    dialogWindow.setLayout(
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-    )
-    dialogWindow.setBackgroundDrawable(
-        android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK))
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-        dialogWindow.attributes = dialogWindow.attributes.also {
-            it.layoutInDisplayCutoutMode =
-                android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        }
-    }
-    WindowInsetsControllerCompat(dialogWindow, dialogView).apply {
-        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        hide(WindowInsetsCompat.Type.systemBars())
-    }
-}
-
-@Composable
-private fun AnlsctDashboardFocusDialog(
-    dashboard: Dashboard,
-    state: EfisState,
-    speedUnit: EfisSpeedUnit,
-    altUnit: AltitudeUnit,
-    speedArcs: SpeedArcs?,
-    prefs: AppPreferences,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnClickOutside = true,
-            decorFitsSystemWindows = false,
-        ),
-    ) {
-        val dialogView = LocalView.current
-        DisposableEffect(dialogView) { applyImmersiveDialog(dialogView); onDispose {} }
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            Box(modifier = Modifier.fillMaxSize().padding(bottom = 64.dp)) {
-                DashboardGrid(
-                    dashboard = dashboard,
-                    state = state,
-                    speedUnit = speedUnit,
-                    showValues = prefs.efisShowValues,
-                    speedArcs = speedArcs,
-                    trail = emptyList(),
-                    mapOrientation = prefs.mapOrientation,
-                    altUnit = altUnit,
-                    focusDurationSec = prefs.focusDurationSec,
-                    onOpenMap = {},
-                )
-            }
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-            ) {
-                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}

@@ -3,6 +3,10 @@ package com.airchecklists.app.ui.efis
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -158,19 +162,66 @@ fun EfisScreen(contentPadding: PaddingValues, onOpenMap: () -> Unit = {}) {
             if (idx >= 0) pagerState.animateScrollToPage(idx)
             ServiceLocator.requestedDashboardId.value = null
         }
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            DashboardGrid(
-                dashboard = cockpitDashboards[page],
-                state = state,
-                speedUnit = prefs.efisSpeedUnit,
-                showValues = prefs.efisShowValues,
-                speedArcs = viewModel.speedArcs,
-                trail = trail,
-                mapOrientation = prefs.mapOrientation,
-                altUnit = prefs.altitudeUnit,
-                focusDurationSec = prefs.focusDurationSec,
-                onOpenMap = onOpenMap,
-            )
+
+        // Focus dashboard (swap animé depuis raccourci CMNSCT/ANLSCT).
+        val focusDashboard by ServiceLocator.focusDashboard.collectAsStateWithLifecycle()
+
+        AnimatedContent(
+            targetState = focusDashboard,
+            transitionSpec = {
+                if (targetState != null) {
+                    slideInVertically { it } togetherWith slideOutVertically { -it }
+                } else {
+                    slideInVertically { -it } togetherWith slideOutVertically { it }
+                }
+            },
+            label = "focus_dashboard",
+            modifier = Modifier.fillMaxSize(),
+        ) { dash ->
+            if (dash == null) {
+                HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                    DashboardGrid(
+                        dashboard = cockpitDashboards[page],
+                        state = state,
+                        speedUnit = prefs.efisSpeedUnit,
+                        showValues = prefs.efisShowValues,
+                        speedArcs = viewModel.speedArcs,
+                        trail = trail,
+                        mapOrientation = prefs.mapOrientation,
+                        altUnit = prefs.altitudeUnit,
+                        focusDurationSec = prefs.focusDurationSec,
+                        onOpenMap = onOpenMap,
+                    )
+                }
+            } else {
+                DashboardGrid(
+                    dashboard = dash,
+                    state = state,
+                    speedUnit = prefs.efisSpeedUnit,
+                    showValues = prefs.efisShowValues,
+                    speedArcs = viewModel.speedArcs,
+                    trail = emptyList(),
+                    mapOrientation = prefs.mapOrientation,
+                    altUnit = prefs.altitudeUnit,
+                    focusDurationSec = prefs.focusDurationSec,
+                    onOpenMap = {},
+                )
+            }
+        }
+
+        // Overlay Fermer — visible uniquement en mode focus dashboard.
+        if (focusDashboard != null) {
+            Button(
+                onClick = { ServiceLocator.focusDashboard.value = null },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF222222)),
+            ) {
+                Text("Fermer", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         // Page indicator (only when several dashboards). Style + position are

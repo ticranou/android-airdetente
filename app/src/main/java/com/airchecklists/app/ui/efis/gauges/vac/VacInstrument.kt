@@ -5,7 +5,7 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -47,7 +47,7 @@ import java.io.File
 import kotlin.math.roundToInt
 
 /**
- * NUMVAC — Carte VAC intégrée (220 dp).
+ * NUMVAC — Carte VAC intégrée (330 dp).
  *
  * Affiche la carte VAC PDF du terrain cible partagé (lockedApproachTarget / AUTO).
  * Pinch-to-zoom, pan, double-tap pour réinitialiser. Navigation entre pages en bas.
@@ -146,9 +146,37 @@ fun VacInstrument(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(pdfFile) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(0.3f, 10f)
-                        offset += pan
+                    // Intercept pinch/pan with Initial pass so events are consumed before
+                    // the parent cockpit cell sees them (it uses Initial pass too for Focus
+                    // mode, but without consuming — we consume here to block that trigger).
+                    awaitPointerEventScope {
+                        var prevDist = -1f
+                        var prevMid = Offset.Zero
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val pressed = event.changes.filter { it.pressed }
+                            when {
+                                pressed.size >= 2 -> {
+                                    // Consume all 2-finger events so the parent never sees them.
+                                    event.changes.forEach { it.consume() }
+                                    val p1 = pressed[0].position
+                                    val p2 = pressed[1].position
+                                    val mid = Offset((p1.x + p2.x) / 2f, (p1.y + p2.y) / 2f)
+                                    val dist = (p2 - p1).getDistance().coerceAtLeast(1f)
+                                    if (prevDist > 0f) {
+                                        val zoomDelta = dist / prevDist
+                                        scale = (scale * zoomDelta).coerceIn(0.3f, 10f)
+                                        offset += (mid - prevMid)
+                                    }
+                                    prevDist = dist
+                                    prevMid = mid
+                                }
+                                else -> {
+                                    prevDist = -1f
+                                    prevMid = Offset.Zero
+                                }
+                            }
+                        }
                     }
                 }
                 .pointerInput(currentPage, pageCount) {

@@ -159,13 +159,17 @@ fun DashboardEditScreen(
             val bgStyleLabels = mapOf(
                 DashboardBackgroundStyle.NONE to "Aucun",
                 DashboardBackgroundStyle.CARBON to "Carbone",
-                DashboardBackgroundStyle.BRUSHED_METAL to "Métal",
-                DashboardBackgroundStyle.HONEYCOMB to "Nid d'abeille",
+                DashboardBackgroundStyle.BRUSHED_METAL to "Métal brossé",
                 DashboardBackgroundStyle.RIVETED_METAL to "Rivets",
                 DashboardBackgroundStyle.CARBON_RED to "Carbone rouge",
                 DashboardBackgroundStyle.CARBON_BLUE to "Carbone bleu",
-                DashboardBackgroundStyle.MIDNIGHT to "Minuit",
-                DashboardBackgroundStyle.GRID to "Grille HUD",
+                DashboardBackgroundStyle.WOVEN_CARBON to "Carbone tissé",
+                DashboardBackgroundStyle.TOPOGRAPHIC to "Topographie",
+                DashboardBackgroundStyle.TITANIUM to "Titane",
+                DashboardBackgroundStyle.ANODIZED_DARK to "Anodisé",
+                DashboardBackgroundStyle.DIAMOND_PLATE to "Larmé",
+                DashboardBackgroundStyle.STARFIELD to "Étoiles",
+                DashboardBackgroundStyle.DEEP_OCEAN to "Océan",
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
@@ -142,6 +145,17 @@ fun VacInstrument(modifier: Modifier = Modifier) {
 
     // Verrouillage du zoom/pan.
     var locked by remember { mutableStateOf(false) }
+    // Mode négatif (inversion des couleurs pour la nuit).
+    var negative by remember { mutableStateOf(false) }
+
+    val invertFilter = remember {
+        ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+            -1f,  0f,  0f, 0f, 255f,
+             0f, -1f,  0f, 0f, 255f,
+             0f,  0f, -1f, 0f, 255f,
+             0f,  0f,  0f, 1f,   0f,
+        )))
+    }
 
     // Le pointerInput consommateur est sur le Box extérieur (même niveau hiérarchique
     // que le pointerInput Focus du cockpit parent) pour que consume() soit effectif
@@ -223,6 +237,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                             drawImage(
                                 bmp.asImageBitmap(),
                                 topLeft = Offset(-bmpW / 2f, -bmpH / 2f),
+                                colorFilter = if (negative) invertFilter else null,
                             )
                         }
                     }
@@ -269,10 +284,29 @@ fun VacInstrument(modifier: Modifier = Modifier) {
             )
         }
 
-        // Bouton Lock/Unlock — coin bas-droit, au-dessus de la bande de navigation.
+        // Boutons Lock/Unlock et Négatif — coin bas-droit, au-dessus de la bande de navigation.
         val lockBtnSize = 28.dp
         val lockBtnPad = 4.dp
         val extraBottom = if (pageCount > 1) 24.dp else 0.dp
+
+        // Bouton Négatif (à gauche du cadenas)
+        IconButton(
+            onClick = { negative = !negative },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = lockBtnPad + lockBtnSize + lockBtnPad, bottom = lockBtnPad + extraBottom)
+                .size(lockBtnSize)
+                .background(Color(0xAA000000), CircleShape),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.InvertColors,
+                contentDescription = if (negative) "Mode normal" else "Mode négatif",
+                tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+
+        // Bouton Lock/Unlock
         IconButton(
             onClick = { locked = !locked },
             modifier = Modifier

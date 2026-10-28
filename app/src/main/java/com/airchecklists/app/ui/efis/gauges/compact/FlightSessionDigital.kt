@@ -10,12 +10,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airchecklists.app.di.ServiceLocator
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -43,6 +47,7 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
     val hideCellBorder = LocalHideBorder.current
+    val cellBg = LocalCellBackground.current
     val prefs by ServiceLocator.preferences.preferences.collectAsStateWithLifecycle()
     val fdrStatus by ServiceLocator.flightRecorder.status.collectAsStateWithLifecycle()
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
@@ -94,7 +99,7 @@ fun FlightSessionDigital(modifier: Modifier = Modifier) {
         // Paint the instrument background ONLY over the active area, so the bottom
         // margin stays transparent (shows the page background, separating this
         // instrument from the ones below).
-        drawRect(CompactStyle.Bg, topLeft = Offset.Zero, size = Size(w, contentH))
+        clipRect(0f, 0f, w, contentH) { drawCellBackground(cellBg) }
         // Title bar background: same bezel style as all other NUM instruments.
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)

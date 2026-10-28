@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
+import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.CellBackground
 import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
 import com.airchecklists.app.ui.efis.gauges.drawCellBackground
@@ -70,6 +71,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
     val tm = rememberTextMeasurer()
     val bezel = LocalGaugeBezel.current
     val hideCellBorder = LocalHideBorder.current
+    val hideTitle = LocalHideTitle.current
 
     @Suppress("UNCHECKED_CAST")
     val strokes = remember {
@@ -106,7 +108,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
     val cellBg = LocalCellBackground.current
 
     // Hauteur du bandeau titre en dp (doit correspondre à la valeur Canvas)
-    val headerDp = 20.dp
+    val headerDp = if (hideTitle) 0.dp else 20.dp
 
     val bgColor = if (darkMode.value) Color.Black else Color.White
     val inkColor = if (darkMode.value) Color.White else Color.Black
@@ -121,7 +123,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
                         val down = awaitFirstDown()
                         val w = size.width.toFloat()
                         val h = size.height.toFloat()
-                        val headerH = (20f * density).coerceAtMost(h * 0.08f)
+                        val headerH = if (hideTitle) 0f else (20f * density).coerceAtMost(h * 0.08f)
                         val barTop  = h * 0.925f
 
                         val clearLeft  = w * 0.42f
@@ -186,7 +188,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
         ) {
             val w = size.width
             val h = size.height
-            val headerH = 20.dp.toPx().coerceAtMost(h * 0.08f)
+            val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.08f)
             val barH    = h * 0.075f
             val barTop  = h - barH
             val drawH   = barTop - headerH
@@ -196,8 +198,10 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
             if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
             drawNumTitleBar(bezel, w, headerH)
-            val titleText = if (readOnly.value) "NOTES  [lecture seule]" else "NOTES"
-            compactText(tm, titleText, w / 2f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
+            if (headerH > 0f) {
+                val titleText = if (readOnly.value) "NOTES  [lecture seule]" else "NOTES"
+                compactText(tm, titleText, w / 2f, headerH / 2f, sizeSp = 11f, color = CompactStyle.Dim)
+            }
 
             val strokeStyle = Stroke(width = strokeW.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
             for (stroke in strokes.value) {

@@ -244,52 +244,40 @@
 <!-- Options dialog (mirrors the Android CellOptionsDialog) -->
 <div class="overlay" id="optsOverlay">
   <div class="dialog">
-    <h3>Options</h3>
-    <div class="seclabel">Couleur</div>
-    <div class="chips" id="styleChips"></div>
-    <div class="swatches" id="swatches"></div>
-    <div class="divider"></div>
+    <h3 id="optsTitle">Options</h3>
+    <div id="manageWrap">
+      <div class="seclabel">Cellule</div>
+      <div class="chips" id="manageChips"></div>
+      <div class="divider"></div>
+    </div>
     <div class="seclabel">Aspect du titre</div>
     <div class="chips" id="titleStyleChips"></div>
     <div id="titleColorWrap" style="display:none">
-      <div class="swatches thumb-row" id="titleSwatches" style="display:flex;align-items:center;gap:8px"></div>
+      <div class="swatches thumb-row" id="titleSwatches" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
     </div>
     <div id="titleTextureWrap" style="display:none">
-      <div class="swatches thumb-row" id="titleTextureGrid" style="display:flex;align-items:center;gap:8px"></div>
-    </div>
-    <div id="titleOpacityWrap" style="display:none;margin-top:8px">
-      <label for="titleOpacity">Opacité: <span id="titleOpacityValue">100%</span></label>
-      <input type="range" id="titleOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
+      <div class="swatches thumb-row" id="titleTextureGrid" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
     </div>
     <div class="divider"></div>
     <div class="seclabel">Fond de l'instrument</div>
     <div class="chips" id="bodyStyleChips"></div>
     <div id="bodyColorWrap" style="display:none">
-      <div class="swatches thumb-row" id="bodySwatches" style="display:flex;align-items:center;gap:8px"></div>
+      <div class="swatches thumb-row" id="bodySwatches" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
     </div>
     <div id="bodyTextureWrap" style="display:none">
-      <div class="swatches thumb-row" id="bodyTextureGrid" style="display:flex;align-items:center;gap:8px"></div>
-    </div>
-    <div id="bodyOpacityWrap" style="display:none;margin-top:8px">
-      <label for="bodyOpacity">Opacité: <span id="bodyOpacityValue">100%</span></label>
-      <input type="range" id="bodyOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
-    </div>
-    <div id="manageWrap">
-      <div class="divider"></div>
-      <div class="seclabel">Cellule</div>
-      <div class="chips" id="manageChips"></div>
+      <div class="swatches thumb-row" id="bodyTextureGrid" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
     </div>
     <div class="divider"></div>
     <div class="inline">
       <input type="checkbox" id="optHideTitle">
-      <label for="optHideTitle">Masquer le titre <span class="hint" style="font-weight:normal">(barre pour les instruments numériques, pastille pour les instruments analogiques)</span></label>
+      <label for="optHideTitle">Masquer le titre</label>
     </div>
     <div class="inline">
       <input type="checkbox" id="optHideBorder">
       <label for="optHideBorder">Masquer la bordure de l'instrument</label>
     </div>
     <div class="foot">
-      <button class="primary" id="optSave">Enregistrer</button>
+      <button class="primary" id="optSave">Fermer</button>
     </div>
   </div>
 </div>
@@ -2698,12 +2686,7 @@ const DARK_ACCENTS = [
   0xFF000000, 0xFF141414, 0xFF2A2A2A, 0xFF0A1830, 0xFF13294B,
   0xFF1A0B2E, 0xFF2A1348, 0xFF5A2E00, 0xFF123A1E, 0xFF4A3B00,
 ];
-// Bezel textures offered as chips (Carbone / Métal). "Métal" is the BRUSHED enum.
-const STYLE_CHIPS = [
-  { key: "DEFAULT", label: "Défaut (réglages)" },
-  { key: "CARBON",  label: "Carbone" },
-  { key: "BRUSHED", label: "Métal" },
-];
+
 
 const BACKGROUND_STYLES = [
   { key: "NONE",          label: "Aucun" },
@@ -2973,70 +2956,56 @@ function renderOptions() {
   const c = cells[optsIndex];
   const row = Math.floor(optsIndex / COLS), col = optsIndex % COLS;
 
-  // Style chips: Défaut / Carbone / Métal.
-  const styleEl = document.getElementById("styleChips");
-  styleEl.innerHTML = "";
-  for (const s of STYLE_CHIPS) {
-    const chip = document.createElement("div");
-    chip.className = "chip";
-    const sel = (s.key === "DEFAULT" && c.accentColor === null && c.bezelStyle === null) ||
-                (s.key !== "DEFAULT" && c.bezelStyle === s.key && c.accentColor === null);
-    if (sel) chip.classList.add("sel");
-    chip.textContent = s.label;
-    chip.onclick = () => {
-      if (s.key === "DEFAULT") { c.accentColor = null; c.bezelStyle = null; }
-      else { c.bezelStyle = s.key; c.accentColor = null; }
-      renderOptions(); syncJson();
-    };
-    styleEl.appendChild(chip);
+  // Dialog title = instrument name
+  const INSTRUMENT_LABELS = { NUMFLD: "Vario numérique", ANLALT: "Altimètre", ANLSPD: "Anémomètre", ANLATT: "Horizon", ANLHDG: "Cap", ANLBALL: "Bille", ANLVSI: "Vario analogique", ANLEFIS: "EFIS", NUMCCT: "Circuit de piste", NUMFGT: "Session de vol" };
+  document.getElementById("optsTitle").textContent = (c.instrument && INSTRUMENT_LABELS[c.instrument]) ? INSTRUMENT_LABELS[c.instrument] : (c.instrument || "Options");
+
+  // Cellule: Fusionner → / ↓ / Séparer (affiché uniquement si applicable).
+  const mr = canMergeRight(optsIndex, row, col, c);
+  const md = canMergeDown(optsIndex, row, col, c);
+  const merged = c.colSpan > 1 || c.rowSpan > 1;
+  const manageWrap = document.getElementById("manageWrap");
+  const manageEl = document.getElementById("manageChips");
+  manageEl.innerHTML = "";
+  if (mr || md || merged) {
+    manageWrap.style.display = "";
+    if (mr) manageEl.appendChild(mkChip("→ Fusionner →", () => { c.colSpan = 2; closeOptions(); render(); }));
+    if (md) manageEl.appendChild(mkChip("↓ Fusionner ↓", () => { c.rowSpan += 1; closeOptions(); render(); }));
+    if (merged) manageEl.appendChild(mkChip("⤬ Séparer", () => { c.colSpan = 1; c.rowSpan = 1; closeOptions(); render(); }));
+  } else {
+    manageWrap.style.display = "none";
   }
 
-  // Colour palette: picking a swatch implies SOLID.
-  const sw = document.getElementById("swatches");
-  sw.innerHTML = "";
-  for (const col2 of DARK_ACCENTS) {
-    const d = document.createElement("div");
-    d.className = "swatch";
-    d.style.background = argbToCss(col2);
-    if (c.accentColor === col2 && c.bezelStyle === "SOLID") d.classList.add("sel");
-    d.onclick = () => { c.accentColor = col2; c.bezelStyle = "SOLID"; renderOptions(); syncJson(); };
-    sw.appendChild(d);
-  }
-
-  // Aspect du titre
+  // Aspect du titre : Défaut | Couleur | Texture | Carbone | Métal
   const titleMode = c.titleBackgroundTexture ? 2
-    : (c.accentColor !== null && c.accentColor !== undefined && c.bezelStyle === "SOLID") ? 1 : 0;
+    : (c.accentColor !== null && c.accentColor !== undefined && c.bezelStyle === "SOLID") ? 1
+    : (c.bezelStyle === "CARBON") ? 3
+    : (c.bezelStyle === "BRUSHED") ? 4
+    : 0;
   const titleChips = document.getElementById("titleStyleChips");
   titleChips.innerHTML = "";
-  ["Défaut", "Couleur", "Texture"].forEach((lbl, i) => {
+  [
+    { label: "Défaut",   fn: () => { c.accentColor = null; c.bezelStyle = null; c.titleBackgroundTexture = null; } },
+    { label: "Couleur",  fn: () => { c.titleBackgroundTexture = null; if (!c.accentColor) c.accentColor = DARK_ACCENTS[0]; c.bezelStyle = "SOLID"; } },
+    { label: "Texture",  fn: () => { c.accentColor = null; c.bezelStyle = null; if (!c.titleBackgroundTexture) c.titleBackgroundTexture = "CARBON"; } },
+    { label: "Carbone",  fn: () => { c.accentColor = null; c.titleBackgroundTexture = null; c.bezelStyle = "CARBON"; } },
+    { label: "Métal",    fn: () => { c.accentColor = null; c.titleBackgroundTexture = null; c.bezelStyle = "BRUSHED"; } },
+  ].forEach(({ label, fn }, i) => {
     const chip = document.createElement("div");
     chip.className = "chip" + (titleMode === i ? " sel" : "");
-    chip.textContent = lbl;
-    chip.onclick = () => {
-      if (i === 0) { c.accentColor = null; c.bezelStyle = null; c.titleBackgroundTexture = null; }
-      else if (i === 1) {
-        c.titleBackgroundTexture = null;
-        if (!c.accentColor) c.accentColor = DARK_ACCENTS[0];
-        c.bezelStyle = "SOLID";
-      } else {
-        c.accentColor = null; c.bezelStyle = null;
-        if (!c.titleBackgroundTexture) c.titleBackgroundTexture = "CARBON";
-      }
-      renderOptions(); syncJson();
-    };
+    chip.textContent = label;
+    chip.onclick = () => { fn(); renderOptions(); syncJson(); };
     titleChips.appendChild(chip);
   });
 
   const titleColorWrap = document.getElementById("titleColorWrap");
   const titleTextureWrap = document.getElementById("titleTextureWrap");
-  const titleOpacityWrap = document.getElementById("titleOpacityWrap");
   titleColorWrap.style.display = titleMode === 1 ? "" : "none";
   titleTextureWrap.style.display = titleMode === 2 ? "" : "none";
-  titleOpacityWrap.style.display = "none"; // opacity handled in pickers
 
   if (titleMode === 1) {
-    const row = titleColorWrap.querySelector(".swatches");
-    renderThumb(row, { type: "color", color: c.accentColor, opacity: c.titleBackgroundOpacity || 1.0 });
+    const thumbRow = titleColorWrap.querySelector(".swatches");
+    renderThumb(thumbRow, { type: "color", color: c.accentColor, opacity: c.titleBackgroundOpacity || 1.0 });
     let btn = titleColorWrap.querySelector("button");
     if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; titleColorWrap.appendChild(btn); }
     btn.onclick = () => openColorPicker({
@@ -3044,27 +3013,19 @@ function renderOptions() {
       palette: DARK_ACCENTS,
       color: c.accentColor,
       opacity: c.titleBackgroundOpacity || 1.0,
-      onSelect: (col, op) => {
-        c.accentColor = col; c.bezelStyle = "SOLID";
-        c.titleBackgroundOpacity = op; c.titleBackgroundTexture = null;
-        renderOptions(); syncJson();
-      },
+      onSelect: (col, op) => { c.accentColor = col; c.bezelStyle = "SOLID"; c.titleBackgroundOpacity = op; c.titleBackgroundTexture = null; renderOptions(); syncJson(); },
     });
   }
   if (titleMode === 2) {
-    const row = titleTextureWrap.querySelector(".swatches");
-    renderThumb(row, { type: "texture", key: c.titleBackgroundTexture, opacity: c.titleBackgroundOpacity || 1.0 });
+    const thumbRow = titleTextureWrap.querySelector(".swatches");
+    renderThumb(thumbRow, { type: "texture", key: c.titleBackgroundTexture, opacity: c.titleBackgroundOpacity || 1.0 });
     let btn = titleTextureWrap.querySelector("button");
     if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; titleTextureWrap.appendChild(btn); }
     btn.onclick = () => openTexturePicker({
       title: "Aspect du titre",
       selected: c.titleBackgroundTexture,
       opacity: c.titleBackgroundOpacity || 1.0,
-      onSelect: (key, op) => {
-        c.titleBackgroundTexture = key; c.titleBackgroundOpacity = op;
-        c.accentColor = null; c.bezelStyle = null;
-        renderOptions(); syncJson();
-      },
+      onSelect: (key, op) => { c.titleBackgroundTexture = key; c.titleBackgroundOpacity = op; c.accentColor = null; c.bezelStyle = null; renderOptions(); syncJson(); },
     });
   }
 
@@ -3131,22 +3092,6 @@ function renderOptions() {
         renderOptions(); syncJson();
       },
     });
-  }
-
-  // Cellule: Large / Haut / Séparer (shown only when applicable).
-  const mr = canMergeRight(optsIndex, row, col, c);
-  const md = canMergeDown(optsIndex, row, col, c);
-  const merged = c.colSpan > 1 || c.rowSpan > 1;
-  const manageWrap = document.getElementById("manageWrap");
-  const manageEl = document.getElementById("manageChips");
-  manageEl.innerHTML = "";
-  if (mr || md || merged) {
-    manageWrap.style.display = "";
-    if (mr) manageEl.appendChild(mkChip("→ Large", () => { c.colSpan = 2; closeOptions(); render(); }));
-    if (md) manageEl.appendChild(mkChip("↓ Haut", () => { c.rowSpan += 1; closeOptions(); render(); }));
-    if (merged) manageEl.appendChild(mkChip("⤬ Séparer", () => { c.colSpan = 1; c.rowSpan = 1; closeOptions(); render(); }));
-  } else {
-    manageWrap.style.display = "none";
   }
 
   // Hide-title checkbox.

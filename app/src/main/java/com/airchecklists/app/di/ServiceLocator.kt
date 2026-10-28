@@ -2,6 +2,7 @@ package com.airchecklists.app.di
 
 import android.content.Context
 import com.airchecklists.app.data.local.JsonStore
+import com.airchecklists.app.data.local.SettingsBackupManager
 import com.airchecklists.app.data.local.SettingsStore
 import com.airchecklists.app.data.local.VacStore
 import com.airchecklists.app.data.model.Aircraft
@@ -238,6 +239,7 @@ object ServiceLocator {
         val safIo = SafIo(appContext)
         repository = AircraftRepositoryImpl(store, safIo)
         preferences = PreferencesRepository(SettingsStore(appContext))
+        SettingsBackupManager(appContext).backupNow()
 
         // Restore durable instrument state + heading/altitude targets from disk.
         instrumentPersist = preferences.preferences.value.instruments

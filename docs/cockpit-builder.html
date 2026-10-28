@@ -3055,10 +3055,8 @@ function renderOptions() {
 
   const bodyColorWrap = document.getElementById("bodyColorWrap");
   const bodyTextureWrap = document.getElementById("bodyTextureWrap");
-  const bodyOpacityWrap = document.getElementById("bodyOpacityWrap");
   bodyColorWrap.style.display = bodyMode === 1 ? "" : "none";
   bodyTextureWrap.style.display = bodyMode === 2 ? "" : "none";
-  bodyOpacityWrap.style.display = "none";
 
   if (bodyMode === 1) {
     const row = bodyColorWrap.querySelector(".swatches");

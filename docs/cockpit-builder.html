@@ -295,7 +295,7 @@
 </div>
 
 <!-- Color picker dialog -->
-<div class="overlay" id="colorPickerOverlay" style="display:none">
+<div class="overlay" id="colorPickerOverlay">
   <div class="dialog">
     <h3 id="colorPickerTitle">Choisir une couleur</h3>
     <div class="swatches" id="colorPickerSwatches"></div>
@@ -315,7 +315,7 @@
 </div>
 
 <!-- Texture picker dialog -->
-<div class="overlay" id="texturePickerOverlay" style="display:none">
+<div class="overlay" id="texturePickerOverlay">
   <div class="dialog" style="max-width:340px">
     <h3 id="texturePickerTitle">Choisir une texture</h3>
     <div id="texturePickerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:320px;overflow-y:auto"></div>
@@ -3379,15 +3379,15 @@ function openColorPicker({ title, palette, color, opacity, onSelect }) {
   };
 
   document.getElementById("colorPickerCancel").onclick = () => {
-    document.getElementById("colorPickerOverlay").style.display = "none";
+    document.getElementById("colorPickerOverlay").classList.remove("open");
   };
   document.getElementById("colorPickerOk").onclick = () => {
-    document.getElementById("colorPickerOverlay").style.display = "none";
+    document.getElementById("colorPickerOverlay").classList.remove("open");
     if (_colorPickerCb) _colorPickerCb(_colorPickerCurrent, _colorPickerOpacity);
   };
 
   updateColorPickerPreview();
-  document.getElementById("colorPickerOverlay").style.display = "";
+  document.getElementById("colorPickerOverlay").classList.add("open");
 }
 
 function updateColorPickerPreview() {
@@ -3442,14 +3442,14 @@ function openTexturePicker({ title, selected, opacity, onSelect }) {
   };
 
   document.getElementById("texturePickerCancel").onclick = () => {
-    document.getElementById("texturePickerOverlay").style.display = "none";
+    document.getElementById("texturePickerOverlay").classList.remove("open");
   };
   document.getElementById("texturePickerOk").onclick = () => {
-    document.getElementById("texturePickerOverlay").style.display = "none";
+    document.getElementById("texturePickerOverlay").classList.remove("open");
     if (_texturePickerCb) _texturePickerCb(_texturePickerSelected, _texturePickerOpacity);
   };
 
-  document.getElementById("texturePickerOverlay").style.display = "";
+  document.getElementById("texturePickerOverlay").classList.add("open");
 }
 
 function updateTexturePickerGrid() {

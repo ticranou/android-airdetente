@@ -722,7 +722,7 @@ private fun TexturePickerDialog(
     onDismiss: () -> Unit,
 ) {
     var currentSelected by remember { mutableStateOf(selected) }
-    var currentOpacity by remember { mutableStateOf(opacity.coerceIn(0.05f, 1.0f)) }
+    var currentOpacity by remember { mutableStateOf(opacity.coerceIn(0f, 1.0f)) }
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
@@ -776,7 +776,7 @@ private fun TexturePickerDialog(
                     Slider(
                         value = currentOpacity,
                         onValueChange = { currentOpacity = it },
-                        valueRange = 0.05f..1f,
+                        valueRange = 0f..1f,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -873,7 +873,7 @@ private fun ColorPickerDialog(
     onDismiss: () -> Unit,
 ) {
     var currentColor by remember { mutableStateOf(selectedColor ?: palette.first()) }
-    var currentOpacity by remember { mutableStateOf(opacity.coerceIn(0.05f, 1.0f)) }
+    var currentOpacity by remember { mutableStateOf(opacity.coerceIn(0f, 1.0f)) }
     var hexInput by remember { mutableStateOf("#%06X".format((currentColor and 0xFFFFFFL).toInt())) }
     var hexError by remember { mutableStateOf(false) }
 
@@ -937,7 +937,7 @@ private fun ColorPickerDialog(
                 Slider(
                     value = currentOpacity,
                     onValueChange = { currentOpacity = it },
-                    valueRange = 0.05f..1f,
+                    valueRange = 0f..1f,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

@@ -326,7 +326,7 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
             val cells = d.normalizedCells.toMutableList()
             if (index in cells.indices && !cells[index].covered) {
-                cells[index] = cells[index].copy(titleBackgroundOpacity = opacity.coerceIn(0.05f, 1f))
+                cells[index] = cells[index].copy(titleBackgroundOpacity = opacity.coerceIn(0f, 1f))
             }
             d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
         })
@@ -337,7 +337,7 @@ class PreferencesRepository(private val store: SettingsStore) {
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
             val cells = d.normalizedCells.toMutableList()
             if (index in cells.indices && !cells[index].covered) {
-                cells[index] = cells[index].copy(cellBackgroundOpacity = opacity.coerceIn(0.05f, 1f))
+                cells[index] = cells[index].copy(cellBackgroundOpacity = opacity.coerceIn(0f, 1f))
             }
             d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
         })

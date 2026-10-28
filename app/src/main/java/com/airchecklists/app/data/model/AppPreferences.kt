@@ -322,6 +322,12 @@ data class DashboardCell(
     val hideTitle: Boolean = false,
     /** When true the instrument's cell border is hidden. */
     val hideBorder: Boolean = false,
+    /** Texture of the NUM title bar (null = use SOLID/CARBON/BRUSHED bezel style). */
+    val titleBackgroundTexture: DashboardBackgroundStyle? = null,
+    /** Semi-transparent fill colour (ARGB) behind the instrument body (null = opaque default). */
+    val cellBackgroundColor: Long? = null,
+    /** Texture drawn behind the instrument body (null = opaque default). */
+    val cellBackgroundTexture: DashboardBackgroundStyle? = null,
 )
 
 /** Dark accent colours offered for gauge bezels / NUM title bars. */

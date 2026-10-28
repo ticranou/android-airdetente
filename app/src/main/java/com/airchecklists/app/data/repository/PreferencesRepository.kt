@@ -288,6 +288,39 @@ class PreferencesRepository(private val store: SettingsStore) {
         })
     }
 
+    /** Set the per-cell title bar texture ([texture] = null → use bezel SOLID/CARBON/BRUSHED style). */
+    suspend fun setDashboardCellTitleTexture(id: String, index: Int, texture: com.airchecklists.app.data.model.DashboardBackgroundStyle?) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(titleBackgroundTexture = texture)
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
+    /** Set the per-cell background colour ([color] = null → opaque default). */
+    suspend fun setDashboardCellBgColor(id: String, index: Int, color: Long?) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(cellBackgroundColor = color)
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
+    /** Set the per-cell background texture ([texture] = null → opaque default). */
+    suspend fun setDashboardCellBgTexture(id: String, index: Int, texture: com.airchecklists.app.data.model.DashboardBackgroundStyle?) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(cellBackgroundTexture = texture)
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
     /** Merge the master cell at [index] with its RIGHT or DOWN neighbour(s). */
     suspend fun mergeDashboardCell(id: String, index: Int, dir: MergeDir) = persist { prefs ->
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->

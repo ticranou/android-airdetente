@@ -74,6 +74,38 @@ import com.airchecklists.app.ui.efis.drawDashboardBackground
 import com.airchecklists.app.ui.repoViewModelFactory
 import com.airchecklists.app.ui.settings.SettingsViewModel
 
+private val ACTIVE_BACKGROUND_STYLES = listOf(
+    DashboardBackgroundStyle.NONE,
+    DashboardBackgroundStyle.CARBON,
+    DashboardBackgroundStyle.BRUSHED_METAL,
+    DashboardBackgroundStyle.RIVETED_METAL,
+    DashboardBackgroundStyle.CARBON_RED,
+    DashboardBackgroundStyle.CARBON_BLUE,
+    DashboardBackgroundStyle.WOVEN_CARBON,
+    DashboardBackgroundStyle.TOPOGRAPHIC,
+    DashboardBackgroundStyle.TITANIUM,
+    DashboardBackgroundStyle.ANODIZED_DARK,
+    DashboardBackgroundStyle.DIAMOND_PLATE,
+    DashboardBackgroundStyle.STARFIELD,
+    DashboardBackgroundStyle.DEEP_OCEAN,
+)
+
+private val BG_STYLE_LABELS = mapOf(
+    DashboardBackgroundStyle.NONE to "Aucun",
+    DashboardBackgroundStyle.CARBON to "Carbone",
+    DashboardBackgroundStyle.BRUSHED_METAL to "Métal brossé",
+    DashboardBackgroundStyle.RIVETED_METAL to "Rivets",
+    DashboardBackgroundStyle.CARBON_RED to "Carbone rouge",
+    DashboardBackgroundStyle.CARBON_BLUE to "Carbone bleu",
+    DashboardBackgroundStyle.WOVEN_CARBON to "Carbone tissé",
+    DashboardBackgroundStyle.TOPOGRAPHIC to "Topographie",
+    DashboardBackgroundStyle.TITANIUM to "Titane",
+    DashboardBackgroundStyle.ANODIZED_DARK to "Anodisé",
+    DashboardBackgroundStyle.DIAMOND_PLATE to "Larmé",
+    DashboardBackgroundStyle.STARFIELD to "Étoiles",
+    DashboardBackgroundStyle.DEEP_OCEAN to "Océan",
+)
+
 /** Dedicated editor for one dashboard: name, Cockpit visibility, grid + slots. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,21 +188,6 @@ fun DashboardEditScreen(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            val bgStyleLabels = mapOf(
-                DashboardBackgroundStyle.NONE to "Aucun",
-                DashboardBackgroundStyle.CARBON to "Carbone",
-                DashboardBackgroundStyle.BRUSHED_METAL to "Métal brossé",
-                DashboardBackgroundStyle.RIVETED_METAL to "Rivets",
-                DashboardBackgroundStyle.CARBON_RED to "Carbone rouge",
-                DashboardBackgroundStyle.CARBON_BLUE to "Carbone bleu",
-                DashboardBackgroundStyle.WOVEN_CARBON to "Carbone tissé",
-                DashboardBackgroundStyle.TOPOGRAPHIC to "Topographie",
-                DashboardBackgroundStyle.TITANIUM to "Titane",
-                DashboardBackgroundStyle.ANODIZED_DARK to "Anodisé",
-                DashboardBackgroundStyle.DIAMOND_PLATE to "Larmé",
-                DashboardBackgroundStyle.STARFIELD to "Étoiles",
-                DashboardBackgroundStyle.DEEP_OCEAN to "Océan",
-            )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -178,22 +195,7 @@ fun DashboardEditScreen(
                 modifier = Modifier.fillMaxWidth().heightIn(max = 440.dp),
                 userScrollEnabled = false,
             ) {
-                val activeStyles = listOf(
-                    DashboardBackgroundStyle.NONE,
-                    DashboardBackgroundStyle.CARBON,
-                    DashboardBackgroundStyle.BRUSHED_METAL,
-                    DashboardBackgroundStyle.RIVETED_METAL,
-                    DashboardBackgroundStyle.CARBON_RED,
-                    DashboardBackgroundStyle.CARBON_BLUE,
-                    DashboardBackgroundStyle.WOVEN_CARBON,
-                    DashboardBackgroundStyle.TOPOGRAPHIC,
-                    DashboardBackgroundStyle.TITANIUM,
-                    DashboardBackgroundStyle.ANODIZED_DARK,
-                    DashboardBackgroundStyle.DIAMOND_PLATE,
-                    DashboardBackgroundStyle.STARFIELD,
-                    DashboardBackgroundStyle.DEEP_OCEAN,
-                )
-                items(activeStyles) { style ->
+                items(ACTIVE_BACKGROUND_STYLES) { style ->
                     val selected = dash.backgroundStyle == style
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -219,7 +221,7 @@ fun DashboardEditScreen(
                             }
                         }
                         Text(
-                            bgStyleLabels[style] ?: style.name,
+                            BG_STYLE_LABELS[style] ?: style.name,
                             style = MaterialTheme.typography.labelSmall,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
@@ -397,6 +399,9 @@ private fun DashboardCellEditor(
                 onStyle = { viewModel.setDashboardCellBezelStyle(dash.id, index, it) },
                 onHideTitle = { viewModel.setDashboardCellHideTitle(dash.id, index, it) },
                 onHideBorder = { viewModel.setDashboardCellHideBorder(dash.id, index, it) },
+                onTitleTexture = { viewModel.setDashboardCellTitleTexture(dash.id, index, it) },
+                onCellBgColor = { viewModel.setDashboardCellBgColor(dash.id, index, it) },
+                onCellBgTexture = { viewModel.setDashboardCellBgTexture(dash.id, index, it) },
                 onMergeRight = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.RIGHT) },
                 onMergeDown = { viewModel.mergeDashboardCell(dash.id, index, com.airchecklists.app.data.repository.MergeDir.DOWN) },
                 onUnmerge = { viewModel.unmergeDashboardCell(dash.id, index) },
@@ -443,9 +448,8 @@ private fun AccentDot(color: Long?, selected: Boolean, onClick: () -> Unit, size
     }
 }
 
-/** Cell options dialog: bezel style (Défaut/Couleur/Carbone/Métal) + colour palette
- *  (when Couleur) + cell management (Large / Haut / Séparer). */
-@OptIn(ExperimentalLayoutApi::class)
+/** Cell options dialog: cell management + title style + instrument background + visibility. */
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun CellOptionsDialog(
     cell: com.airchecklists.app.data.model.DashboardCell,
@@ -456,90 +460,270 @@ private fun CellOptionsDialog(
     onStyle: (com.airchecklists.app.data.model.GaugeBezelStyle?) -> Unit,
     onHideTitle: (Boolean) -> Unit,
     onHideBorder: (Boolean) -> Unit,
+    onTitleTexture: (DashboardBackgroundStyle?) -> Unit,
+    onCellBgColor: (Long?) -> Unit,
+    onCellBgTexture: (DashboardBackgroundStyle?) -> Unit,
     onMergeRight: () -> Unit,
     onMergeDown: () -> Unit,
     onUnmerge: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // Which "mode" is active: Défaut (both null), Couleur (color set), or a texture.
+    // Which title "mode" is active:
+    //   Défaut = accentColor==null && bezelStyle==null && titleBackgroundTexture==null
+    //   Couleur = bezelStyle==SOLID && accentColor!=null
+    //   Texture = titleBackgroundTexture!=null
+    val titleMode = when {
+        cell.titleBackgroundTexture != null -> 2
+        cell.accentColor != null && cell.bezelStyle == com.airchecklists.app.data.model.GaugeBezelStyle.SOLID -> 1
+        else -> 0
+    }
+    // Which cell-bg "mode" is active:
+    //   Défaut = both null, Couleur = color!=null, Texture = texture!=null
+    val bgMode = when {
+        cell.cellBackgroundTexture != null -> 2
+        cell.cellBackgroundColor != null -> 1
+        else -> 0
+    }
+    var showTitleTexturePicker by remember { mutableStateOf(false) }
+    var showBgTexturePicker by remember { mutableStateOf(false) }
+
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dashboard_cell_options)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.dashboard_cell_color), style = MaterialTheme.typography.labelLarge)
-                // Style modes: "Défaut" on its own line, then Carbone + Métal on the next.
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.FilterChip(
-                        selected = cell.accentColor == null && cell.bezelStyle == null,
-                        onClick = { onColor(null); onStyle(null) },
-                        label = { Text(stringResource(R.string.dashboard_cell_color_default)) },
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.FilterChip(
-                        selected = cell.bezelStyle == com.airchecklists.app.data.model.GaugeBezelStyle.CARBON,
-                        onClick = { onStyle(com.airchecklists.app.data.model.GaugeBezelStyle.CARBON); onColor(null) },
-                        label = { Text(stringResource(R.string.settings_bezel_carbon)) },
-                    )
-                    androidx.compose.material3.FilterChip(
-                        selected = cell.bezelStyle == com.airchecklists.app.data.model.GaugeBezelStyle.BRUSHED,
-                        onClick = { onStyle(com.airchecklists.app.data.model.GaugeBezelStyle.BRUSHED); onColor(null) },
-                        label = { Text(stringResource(R.string.settings_bezel_brushed)) },
-                    )
-                }
-                // Colour palette (choosing a colour implies SOLID style override).
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    com.airchecklists.app.data.model.DARK_ACCENTS.forEach { col ->
-                        AccentDot(
-                            color = col,
-                            selected = cell.accentColor == col && cell.bezelStyle == com.airchecklists.app.data.model.GaugeBezelStyle.SOLID,
-                            onClick = { onColor(col); onStyle(com.airchecklists.app.data.model.GaugeBezelStyle.SOLID) },
-                            size = 36.dp,
-                        )
-                    }
-                }
-                // Cell management. Same chip style as the colour section for consistency.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
+                // ── Section 1: Cellule (merge / unmerge) ─────────────────────────
                 if (canMergeRight || canMergeDown || isMerged) {
-                    androidx.compose.material3.HorizontalDivider()
                     Text(stringResource(R.string.dashboard_cell_manage), style = MaterialTheme.typography.labelLarge)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (canMergeRight) CellActionChip(Icons.AutoMirrored.Filled.ArrowForward, stringResource(R.string.dashboard_merge_right)) { onMergeRight(); onDismiss() }
                         if (canMergeDown) CellActionChip(Icons.Filled.ArrowDownward, stringResource(R.string.dashboard_merge_down)) { onMergeDown(); onDismiss() }
                         if (isMerged) CellActionChip(Icons.Filled.Close, stringResource(R.string.dashboard_unmerge)) { onUnmerge(); onDismiss() }
                     }
+                    androidx.compose.material3.HorizontalDivider()
                 }
-                // Title visibility toggle.
+
+                // ── Section 2: Aspect du titre ────────────────────────────────────
+                Text(stringResource(R.string.dashboard_cell_title_aspect), style = MaterialTheme.typography.labelLarge)
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        selected = titleMode == 0,
+                        onClick = { onColor(null); onStyle(null); onTitleTexture(null) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_default)) }
+                    SegmentedButton(
+                        selected = titleMode == 1,
+                        onClick = {
+                            onTitleTexture(null)
+                            if (cell.accentColor == null) onColor(com.airchecklists.app.data.model.DARK_ACCENTS.first())
+                            onStyle(com.airchecklists.app.data.model.GaugeBezelStyle.SOLID)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_color)) }
+                    SegmentedButton(
+                        selected = titleMode == 2,
+                        onClick = {
+                            onColor(null); onStyle(null)
+                            if (cell.titleBackgroundTexture == null) onTitleTexture(DashboardBackgroundStyle.CARBON)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_texture)) }
+                }
+                when (titleMode) {
+                    1 -> {
+                        // Colour palette
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            com.airchecklists.app.data.model.DARK_ACCENTS.forEach { col ->
+                                AccentDot(
+                                    color = col,
+                                    selected = cell.accentColor == col,
+                                    onClick = { onColor(col); onStyle(com.airchecklists.app.data.model.GaugeBezelStyle.SOLID) },
+                                    size = 36.dp,
+                                )
+                            }
+                        }
+                    }
+                    2 -> {
+                        // Texture thumbnail + pick button
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextureThumbnail(cell.titleBackgroundTexture, 48.dp)
+                            TextButton(onClick = { showTitleTexturePicker = true }) {
+                                Text(stringResource(R.string.dashboard_cell_pick_texture))
+                            }
+                        }
+                    }
+                }
+
                 androidx.compose.material3.HorizontalDivider()
+
+                // ── Section 3: Fond de l'instrument ──────────────────────────────
+                Text(stringResource(R.string.dashboard_cell_bg), style = MaterialTheme.typography.labelLarge)
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        selected = bgMode == 0,
+                        onClick = { onCellBgColor(null); onCellBgTexture(null) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_default)) }
+                    SegmentedButton(
+                        selected = bgMode == 1,
+                        onClick = {
+                            onCellBgTexture(null)
+                            if (cell.cellBackgroundColor == null) onCellBgColor(0x88000000L)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_color)) }
+                    SegmentedButton(
+                        selected = bgMode == 2,
+                        onClick = {
+                            onCellBgColor(null)
+                            if (cell.cellBackgroundTexture == null) onCellBgTexture(DashboardBackgroundStyle.CARBON)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                    ) { Text(stringResource(R.string.dashboard_cell_mode_texture)) }
+                }
+                when (bgMode) {
+                    1 -> {
+                        // Semi-transparent colour palette
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            BG_COLOR_PALETTE.forEach { col ->
+                                AccentDot(
+                                    color = col,
+                                    selected = cell.cellBackgroundColor == col,
+                                    onClick = { onCellBgColor(col) },
+                                    size = 36.dp,
+                                )
+                            }
+                        }
+                    }
+                    2 -> {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextureThumbnail(cell.cellBackgroundTexture, 48.dp)
+                            TextButton(onClick = { showBgTexturePicker = true }) {
+                                Text(stringResource(R.string.dashboard_cell_pick_texture))
+                            }
+                        }
+                    }
+                }
+
+                androidx.compose.material3.HorizontalDivider()
+
+                // ── Title / border visibility ─────────────────────────────────────
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onHideTitle(!cell.hideTitle) }
-                        .padding(vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { onHideTitle(!cell.hideTitle) }.padding(vertical = 4.dp),
                 ) {
-                    androidx.compose.material3.Checkbox(
-                        checked = cell.hideTitle,
-                        onCheckedChange = { onHideTitle(it) },
-                    )
+                    androidx.compose.material3.Checkbox(checked = cell.hideTitle, onCheckedChange = { onHideTitle(it) })
                     Text(stringResource(R.string.dashboard_cell_hide_title), style = MaterialTheme.typography.bodyMedium)
                 }
-                // Border visibility toggle.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onHideBorder(!cell.hideBorder) }
-                        .padding(vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { onHideBorder(!cell.hideBorder) }.padding(vertical = 4.dp),
                 ) {
-                    androidx.compose.material3.Checkbox(
-                        checked = cell.hideBorder,
-                        onCheckedChange = { onHideBorder(it) },
-                    )
+                    androidx.compose.material3.Checkbox(checked = cell.hideBorder, onCheckedChange = { onHideBorder(it) })
                     Text(stringResource(R.string.dashboard_cell_hide_border), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_save)) } },
     )
+
+    if (showTitleTexturePicker) {
+        TexturePickerDialog(
+            title = stringResource(R.string.dashboard_cell_title_aspect),
+            selected = cell.titleBackgroundTexture,
+            onSelect = { onTitleTexture(it); showTitleTexturePicker = false },
+            onDismiss = { showTitleTexturePicker = false },
+        )
+    }
+    if (showBgTexturePicker) {
+        TexturePickerDialog(
+            title = stringResource(R.string.dashboard_cell_bg),
+            selected = cell.cellBackgroundTexture,
+            onSelect = { onCellBgTexture(it); showBgTexturePicker = false },
+            onDismiss = { showBgTexturePicker = false },
+        )
+    }
+}
+
+/** Semi-transparent background colour palette. */
+private val BG_COLOR_PALETTE: List<Long> = listOf(
+    0x88000000L, // noir semi-transparent
+    0xAA000000L, // noir opaque-ish
+    0x550A1830L, // bleu foncé semi-transparent
+    0x55141414L, // gris foncé semi-transparent
+    0x55123A1EL, // vert foncé semi-transparent
+    0x551A0B2EL, // violet semi-transparent
+)
+
+/** Reusable texture picker dialog (full-screen grid of 16:9 texture vignettes). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TexturePickerDialog(
+    title: String,
+    selected: DashboardBackgroundStyle?,
+    onSelect: (DashboardBackgroundStyle?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+            ) {
+                items(ACTIVE_BACKGROUND_STYLES) { style ->
+                    val isSelected = selected == style
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .border(
+                                width = if (isSelected) 2.dp else 0.5.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFF3A3A3A),
+                                shape = RoundedCornerShape(8.dp),
+                            )
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onSelect(style) }
+                            .padding(4.dp),
+                    ) {
+                        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
+                            if (style == DashboardBackgroundStyle.NONE) drawRect(androidx.compose.ui.graphics.Color(0xFF1A1A1A))
+                            else drawDashboardBackground(style)
+                        }
+                        Text(
+                            BG_STYLE_LABELS[style] ?: style.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_save)) } },
+    )
+}
+
+/** Small texture preview thumbnail. */
+@Composable
+private fun TextureThumbnail(style: DashboardBackgroundStyle?, size: androidx.compose.ui.unit.Dp) {
+    Canvas(
+        modifier = Modifier
+            .size(size)
+            .clip(RoundedCornerShape(4.dp))
+            .border(0.5.dp, Color(0xFF3A3A3A), RoundedCornerShape(4.dp)),
+    ) {
+        if (style == null || style == DashboardBackgroundStyle.NONE) {
+            drawRect(androidx.compose.ui.graphics.Color(0xFF1A1A1A))
+        } else {
+            drawDashboardBackground(style)
+        }
+    }
 }

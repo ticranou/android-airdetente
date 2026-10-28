@@ -157,6 +157,12 @@
     <string name="dashboard_cell_color_default">Défaut (réglages)</string>
     <string name="dashboard_cell_options">Options</string>
     <string name="dashboard_cell_manage">Cellule</string>
+    <string name="dashboard_cell_title_aspect">Aspect du titre</string>
+    <string name="dashboard_cell_bg">Fond de l\'instrument</string>
+    <string name="dashboard_cell_mode_default">Défaut</string>
+    <string name="dashboard_cell_mode_color">Couleur</string>
+    <string name="dashboard_cell_mode_texture">Texture</string>
+    <string name="dashboard_cell_pick_texture">Choisir une texture</string>
     <string name="dashboard_cell_hide_title">Masquer le titre</string>
     <string name="dashboard_cell_hide_border">Masquer la bordure de l\'instrument</string>
     <string name="instr_picker_title">Choisir un instrument</string>

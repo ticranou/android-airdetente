@@ -1,6 +1,5 @@
 package com.airchecklists.app.ui.efis.gauges
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,12 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
+import com.airchecklists.app.data.model.DashboardBackgroundStyle
 import com.airchecklists.app.data.model.EfisInstrument
 import com.airchecklists.app.data.model.EfisSpeedUnit
 import com.airchecklists.app.data.model.MapOrientation
 import com.airchecklists.app.data.model.SpeedArcs
 import com.airchecklists.app.data.sensors.EfisState
+import com.airchecklists.app.ui.efis.drawDashboardBackground
 import com.airchecklists.app.ui.efis.gauges.compact.AirspeedCompact
 import com.airchecklists.app.ui.efis.gauges.compact.AltVarioCompact
 import com.airchecklists.app.ui.efis.gauges.compact.AttitudeCompact
@@ -43,6 +45,9 @@ fun InstrumentSlot(
     bezelStyleOverride: com.airchecklists.app.data.model.GaugeBezelStyle? = null,
     hideTitle: Boolean = false,
     hideBorder: Boolean = false,
+    titleBackgroundTexture: DashboardBackgroundStyle? = null,
+    cellBackgroundColor: Long? = null,
+    cellBackgroundTexture: DashboardBackgroundStyle? = null,
     onOpenMap: () -> Unit = {},
     cellIdx: Int = 0,
     modifier: Modifier = Modifier,
@@ -54,11 +59,25 @@ fun InstrumentSlot(
         color = accentColor?.let { androidx.compose.ui.graphics.Color(it.toInt()) } ?: global.color,
         style = bezelStyleOverride ?: global.style,
         hideTitle = hideTitle,
+        titleTexture = titleBackgroundTexture,
     )
+    val cellBg = CellBackground(color = cellBackgroundColor, texture = cellBackgroundTexture)
     val showHints = LocalShowGestureHints.current
     androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
-    androidx.compose.runtime.CompositionLocalProvider(LocalGaugeBezel provides bezel, LocalHideTitle provides hideTitle, LocalHideBorder provides hideBorder) {
-    val boxModifier = if (instrument.isCompact) modifier.fillMaxSize() else modifier
+    androidx.compose.runtime.CompositionLocalProvider(
+        LocalGaugeBezel provides bezel,
+        LocalHideTitle provides hideTitle,
+        LocalHideBorder provides hideBorder,
+        LocalCellBackground provides cellBg,
+    ) {
+    // Build the cell-background modifier: draw behind all instrument content.
+    val bgModifier: Modifier = if (cellBackgroundColor != null || cellBackgroundTexture != null) {
+        Modifier.drawBehind {
+            cellBackgroundTexture?.let { drawDashboardBackground(it) }
+            cellBackgroundColor?.let { drawRect(androidx.compose.ui.graphics.Color(it.toInt())) }
+        }
+    } else Modifier
+    val boxModifier = if (instrument.isCompact) (modifier.fillMaxSize().then(bgModifier)) else modifier.then(bgModifier)
     Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
         val round = Modifier.gaugeCell()
         val fill = Modifier.fillMaxSize().padding(4.dp)

@@ -256,6 +256,18 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardCellHideBorder(id, index, hide) }
     }
 
+    fun setDashboardCellTitleTexture(id: String, index: Int, texture: com.airchecklists.app.data.model.DashboardBackgroundStyle?) {
+        viewModelScope.launch { prefsRepo.setDashboardCellTitleTexture(id, index, texture) }
+    }
+
+    fun setDashboardCellBgColor(id: String, index: Int, color: Long?) {
+        viewModelScope.launch { prefsRepo.setDashboardCellBgColor(id, index, color) }
+    }
+
+    fun setDashboardCellBgTexture(id: String, index: Int, texture: com.airchecklists.app.data.model.DashboardBackgroundStyle?) {
+        viewModelScope.launch { prefsRepo.setDashboardCellBgTexture(id, index, texture) }
+    }
+
     fun mergeDashboardCell(id: String, index: Int, dir: com.airchecklists.app.data.repository.MergeDir) {
         viewModelScope.launch { prefsRepo.mergeDashboardCell(id, index, dir) }
     }

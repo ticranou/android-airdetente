@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import com.airchecklists.app.ui.efis.drawDashboardBackground
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -40,6 +41,8 @@ data class GaugeBezel(
     val color: Color = Color(0xFF1C1C1C),
     val style: com.airchecklists.app.data.model.GaugeBezelStyle = com.airchecklists.app.data.model.GaugeBezelStyle.SOLID,
     val hideTitle: Boolean = false,
+    /** When non-null, the NUM title bar renders this texture instead of the bezel style. */
+    val titleTexture: com.airchecklists.app.data.model.DashboardBackgroundStyle? = null,
 )
 
 /** Resolve the current global bezel preference (used as the default). */
@@ -59,6 +62,14 @@ val LocalHideTitle = androidx.compose.runtime.compositionLocalOf { false }
  *  this to skip drawing their cell border. */
 val LocalHideBorder = androidx.compose.runtime.compositionLocalOf { false }
 
+/** Per-cell background (colour and/or texture) drawn behind the instrument body. */
+data class CellBackground(
+    val color: Long? = null,
+    val texture: com.airchecklists.app.data.model.DashboardBackgroundStyle? = null,
+)
+
+val LocalCellBackground = androidx.compose.runtime.compositionLocalOf { CellBackground() }
+
 /** Returns the standard title-bar height for a NUM instrument: 20dp capped at 40%
  *  of the available height, or 0 when the cell's hideTitle flag is set. */
 @androidx.compose.runtime.Composable
@@ -77,8 +88,21 @@ fun numTitleColor(): Color {
 }
 
 /** Paint a NUM instrument's title bar (0,0 → w×h) honouring the bezel style:
- *  solid colour, carbon weave, or brushed metal — matching the ANL bezel. */
+ *  solid colour, carbon weave, brushed metal, or a cockpit texture — matching the ANL bezel. */
 fun DrawScope.drawNumTitleBar(bezel: GaugeBezel, w: Float, h: Float) {
+    // If a texture is set it takes priority over the SOLID/CARBON/BRUSHED style.
+    val tex = bezel.titleTexture
+    if (tex != null) {
+        clipRect(0f, 0f, w, h) {
+            // Scale the texture rendering to the title-bar rectangle by translating the
+            // DrawScope's size reference via a temporary sub-scope trick: we can't
+            // change `this.size`, so we draw into a picture that is the title-bar size.
+            // Simplest approach: translate + clip and draw at full scope size — the clip
+            // already limits what's visible, and the texture is tileable / fills any size.
+            drawDashboardBackground(tex)
+        }
+        return
+    }
     when (bezel.style) {
         com.airchecklists.app.data.model.GaugeBezelStyle.SOLID ->
             drawRect(bezel.color, topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))

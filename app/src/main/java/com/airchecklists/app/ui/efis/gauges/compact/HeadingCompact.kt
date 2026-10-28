@@ -4,6 +4,9 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +45,7 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
         EfisHeadingSource.MAGNETIC -> if (state.headingOffsetDeg != 0f) "MAG+" else "MAG"
         EfisHeadingSource.GPS_TRACK -> "GPS"
     }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
@@ -51,7 +55,7 @@ fun HeadingCompact(headingDeg: Float, showValue: Boolean, modifier: Modifier = M
         val w = size.width
         val h = size.height
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)

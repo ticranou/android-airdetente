@@ -23,6 +23,9 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import kotlinx.coroutines.delay
 import java.util.TimeZone
 
@@ -47,6 +50,7 @@ fun NightInstrument(state: EfisState, modifier: Modifier = Modifier) {
     val bezel = LocalGaugeBezel.current
     val hideTitle = LocalHideTitle.current
     val hideCellBorder = LocalHideBorder.current
+    val cellBg = LocalCellBackground.current
 
     var nowMs by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
@@ -73,7 +77,7 @@ fun NightInstrument(state: EfisState, modifier: Modifier = Modifier) {
 
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
 
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)

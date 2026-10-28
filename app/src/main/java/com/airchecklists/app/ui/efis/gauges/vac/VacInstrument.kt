@@ -46,6 +46,9 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -147,6 +150,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
     var locked by remember { mutableStateOf(false) }
     // Mode négatif (inversion des couleurs pour la nuit).
     var negative by remember { mutableStateOf(false) }
+    val cellBg = LocalCellBackground.current
 
     val invertFilter = remember {
         ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
@@ -215,7 +219,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
         ) {
             val w = size.width
             val h = size.height
-            drawRect(CompactStyle.Bg, size = size)
+            drawCellBackground(cellBg)
 
             val headerH = if (hideTitle) 0f else 22.dp.toPx().coerceAtMost(h * 0.12f)
             val footerH = if (pageCount > 1) 24.dp.toPx() else 0f

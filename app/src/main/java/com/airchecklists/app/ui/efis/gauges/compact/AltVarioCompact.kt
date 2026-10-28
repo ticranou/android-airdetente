@@ -4,6 +4,9 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,6 +49,7 @@ fun AltVarioCompact(
     val calibAlt by ServiceLocator.altCalibrationFt.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var showCalibDialog by remember { mutableStateOf(false) }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
@@ -58,7 +62,7 @@ fun AltVarioCompact(
         val w = size.width
         val h = size.height
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (headerH > 0f) {
             drawNumTitleBar(bezel, w, headerH)
             drawGestureHints(6f, headerH / 2f, hasLongPress = true, hasDoubleTap = true)

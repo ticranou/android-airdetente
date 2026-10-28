@@ -26,6 +26,9 @@ import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import kotlinx.coroutines.launch
 
 private val FDR_GREEN = Color(0xFF32C832)
@@ -57,6 +60,7 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var showExport by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val cellBg = LocalCellBackground.current
     // Tick ~1/s so the flush-progress bar animates.
     var tick by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -118,7 +122,7 @@ fun FlightRecorderDigital(modifier: Modifier = Modifier) {
 
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.28f)
 
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 
         val recording = status.recording

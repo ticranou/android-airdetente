@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.airchecklists.app.data.model.SpeedArcs
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -110,14 +112,14 @@ private const val BAND_PX = 40f
 /** Draws the 3-zone panel: grey header (with title), black main, grey footer.
  *  Header and footer have a FIXED height so the main zone is as large as possible.
  *  Returns the main content Rect (between header and footer). */
-fun DrawScope.compactPanel(tm: TextMeasurer, title: String): androidx.compose.ui.geometry.Rect {
+fun DrawScope.compactPanel(tm: TextMeasurer, title: String, cellBg: CellBackground = CellBackground()): androidx.compose.ui.geometry.Rect {
     val w = size.width
     val h = size.height
     // Fixed bands, but never more than 22%/18% of a very short panel.
     val headerH = minOf(BAND_PX, h * 0.22f)
     val footerH = minOf(BAND_PX, h * 0.18f)
     // Main (black) background.
-    drawRect(CompactStyle.Bg, size = androidx.compose.ui.geometry.Size(w, h))
+    drawCellBackground(cellBg)
     // Grey header band.
     drawRect(Color(0xFF2A2A2A), topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, headerH))
     // Grey footer band.

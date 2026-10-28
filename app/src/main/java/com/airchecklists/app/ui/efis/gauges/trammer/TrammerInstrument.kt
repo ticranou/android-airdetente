@@ -26,6 +26,9 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -112,6 +115,7 @@ fun TrammerInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
             reset()
         }
     }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
@@ -134,7 +138,7 @@ fun TrammerInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     ) {
         val w = size.width
         val h = size.height
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
 
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
         if (headerH > 0f) {

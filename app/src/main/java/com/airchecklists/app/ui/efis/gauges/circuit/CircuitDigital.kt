@@ -33,6 +33,9 @@ import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.approach.ApproachGeometry
 import com.airchecklists.app.ui.efis.gauges.approach.ApproachTargetDialog
 import com.airchecklists.app.ui.efis.gauges.approach.ApproachTargetResolver
@@ -110,6 +113,7 @@ fun CircuitDigital(
         val diff = ((state.headingDeg - qfu + 540f) % 360f) - 180f
         abs(diff).roundToInt()
     }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
@@ -118,7 +122,7 @@ fun CircuitDigital(
     ) {
         val w = size.width
         val h = size.height
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
 
         val headerH = if (hideTitle) 0f else 22.dp.toPx().coerceAtMost(h * 0.12f)
         val bodyTop = headerH

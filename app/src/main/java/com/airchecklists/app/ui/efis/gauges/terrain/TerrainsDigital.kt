@@ -4,6 +4,9 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -103,6 +106,7 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
     fun addToMyTerrains(chart: VacChart) {
         scope.launch { ServiceLocator.vacRepository.upsert(chart.copy(id = "")) }
     }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(nearest) {
@@ -117,7 +121,7 @@ fun TerrainsDigital(modifier: Modifier = Modifier) {
     ) {
         val w = size.width; val h = size.height
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "TERRAINS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

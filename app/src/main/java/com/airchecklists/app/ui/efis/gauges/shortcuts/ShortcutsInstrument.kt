@@ -58,6 +58,9 @@ import com.airchecklists.app.ui.components.efisInstrumentLabel
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.compact.drawGestureHints
@@ -130,6 +133,7 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
     // Which slot is being configured (-1 = none) + step.
     var configIdx by remember { mutableIntStateOf(-1) }
     var configStep by remember { mutableStateOf(ConfigStep.CHOOSE_TYPE) }
+    val cellBg = LocalCellBackground.current
 
     Canvas(
         modifier = modifier.fillMaxWidth().height(52.dp).pointerInput(targets) {
@@ -152,7 +156,7 @@ fun ShortcutsInstrument(cellIdx: Int, modifier: Modifier = Modifier) {
         val h = size.height
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.4f)
 
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "RACCOURCIS", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

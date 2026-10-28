@@ -4,6 +4,9 @@ import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
 import com.airchecklists.app.ui.efis.gauges.LocalHideTitle
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +59,7 @@ fun AttitudeCompact(
     val hideCellBorder = LocalHideBorder.current
     val hideTitle = LocalHideTitle.current
     var showCalibrate by remember { mutableStateOf(false) }
+    val cellBg = LocalCellBackground.current
     Canvas(
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(onLongPress = { showCalibrate = true })
@@ -65,7 +69,7 @@ fun AttitudeCompact(
         val h = size.height
         val headerH = if (hideTitle) 0f else 20.dp.toPx().coerceAtMost(h * 0.2f)
         // Panel background + header + border.
-        drawRect(CompactStyle.Bg, size = size)
+        drawCellBackground(cellBg)
         if (headerH > 0f) drawNumTitleBar(bezel, w, headerH)
         if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
         if (headerH > 0f) compactText(tm, "HORIZON", w / 2f, headerH / 2f, sizeSp = 12f, color = CompactStyle.Dim)

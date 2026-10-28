@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.dp
 import com.airchecklists.app.di.ServiceLocator
 import com.airchecklists.app.ui.efis.gauges.LocalGaugeBezel
 import com.airchecklists.app.ui.efis.gauges.LocalHideBorder
+import com.airchecklists.app.ui.efis.gauges.CellBackground
+import com.airchecklists.app.ui.efis.gauges.LocalCellBackground
+import com.airchecklists.app.ui.efis.gauges.drawCellBackground
 import com.airchecklists.app.ui.efis.gauges.compact.CompactStyle
 import com.airchecklists.app.ui.efis.gauges.compact.compactText
 import com.airchecklists.app.ui.efis.gauges.drawNumTitleBar
@@ -100,6 +103,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
     val currentStroke = remember { mutableStateOf(emptyList<Offset>()) }
     var showHistory by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    val cellBg = LocalCellBackground.current
 
     // Hauteur du bandeau titre en dp (doit correspondre à la valeur Canvas)
     val headerDp = 20.dp
@@ -187,7 +191,7 @@ fun WhiteboardInstrument(modifier: Modifier = Modifier) {
             val barTop  = h - barH
             val drawH   = barTop - headerH
 
-            drawRect(CompactStyle.Bg, size = size)
+            drawCellBackground(cellBg)
             drawRect(bgColor, topLeft = Offset(0f, headerH), size = Size(w, drawH))
             if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
 

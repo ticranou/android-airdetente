@@ -74,6 +74,26 @@ data class CellBackground(
 
 val LocalCellBackground = androidx.compose.runtime.compositionLocalOf { CellBackground() }
 
+/** Draws the instrument cell background: texture, colour, or fallback [fallback] (default = opaque black). */
+fun DrawScope.drawCellBackground(
+    cellBg: CellBackground,
+    fallback: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color(0xFF0A0A0A),
+) {
+    val tex = cellBg.texture
+    val col = cellBg.color
+    when {
+        tex != null -> {
+            drawDashboardBackground(tex)
+            if (cellBg.opacity < 1f) drawRect(androidx.compose.ui.graphics.Color.Black.copy(alpha = 1f - cellBg.opacity))
+        }
+        col != null -> {
+            val base = androidx.compose.ui.graphics.Color(col.toInt())
+            drawRect(base.copy(alpha = base.alpha * cellBg.opacity))
+        }
+        else -> drawRect(fallback)
+    }
+}
+
 /** Returns the standard title-bar height for a NUM instrument: 20dp capped at 40%
  *  of the available height, or 0 when the cell's hideTitle flag is set. */
 @androidx.compose.runtime.Composable

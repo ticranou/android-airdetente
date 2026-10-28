@@ -6,28 +6,46 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import com.airchecklists.app.data.model.AppDataset
+import com.airchecklists.app.data.model.DatasetPrefs
+import com.airchecklists.app.data.model.VacChart
+import com.airchecklists.app.data.model.Aircraft
+import com.airchecklists.app.data.model.AppPreferences
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Creates a timestamped backup of settings.json in Downloads/AirDetente at each
- *  app launch, keeping the [MAX_BACKUPS] most recent files with automatic rotation.
- *
- *  Uses MediaStore on Android 10+ (no permission needed); falls back to a direct
- *  file write on older versions (same pattern as FlightLogExporter). */
+/** Writes a full AppDataset backup (aircraft + terrains + business prefs) to
+ *  Downloads/AirDetente at app startup, keeping the [MAX_BACKUPS] most recent files. */
 class SettingsBackupManager(private val context: Context) {
 
-    private val source = File(context.filesDir, "settings.json")
+    private val json = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 
-    fun backupNow() {
-        if (!source.exists()) return
+    fun backupNow(
+        aircraft: List<Aircraft>,
+        terrains: List<VacChart>,
+        prefs: AppPreferences,
+    ) {
         runCatching {
+            val dataset = AppDataset(
+                aircraft    = aircraft,
+                terrains    = terrains,
+                preferences = DatasetPrefs.from(prefs),
+            )
+            val text  = json.encodeToString(AppDataset.serializer(), dataset)
             val ts    = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-            val name  = "settings-$ts.json"
-            val bytes = source.readBytes()
-            writeToDownloads(name, bytes)
+            val name  = "airdetente-backup-$ts.json"
+            writeToDownloads(name, text.toByteArray())
             rotate()
+            Log.i("SettingsBackupManager",
+                "Backup created: $name (${aircraft.size} aircraft, ${terrains.size} terrains)")
         }.onFailure {
             Log.w("SettingsBackupManager", "Backup failed: ${it.message}")
         }
@@ -59,34 +77,26 @@ class SettingsBackupManager(private val context: Context) {
         }
     }
 
-    /** Remove MediaStore entries for AirDetente backup files beyond the [MAX_BACKUPS] most recent. */
     private fun rotate() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val projection = arrayOf(
-                MediaStore.Downloads._ID,
-                MediaStore.Downloads.DISPLAY_NAME,
-            )
+            val projection = arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME)
             val selection  = "${MediaStore.Downloads.RELATIVE_PATH} = ? " +
                 "AND ${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
             val selectionArgs = arrayOf(
                 "${Environment.DIRECTORY_DOWNLOADS}/AirDetente/",
-                "settings-%.json",
+                "airdetente-backup-%.json",
             )
             val resolver = context.contentResolver
-            val entries  = mutableListOf<Pair<Long, String>>()   // id → name
+            val entries  = mutableListOf<Long>()
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                 projection, selection, selectionArgs,
                 "${MediaStore.Downloads.DISPLAY_NAME} DESC",
             )?.use { cursor ->
-                val idCol   = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
-                val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
-                while (cursor.moveToNext()) {
-                    entries.add(cursor.getLong(idCol) to cursor.getString(nameCol))
-                }
+                val idCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
+                while (cursor.moveToNext()) entries.add(cursor.getLong(idCol))
             }
-            // Entries are already sorted DESC by name (= DESC by timestamp).
-            entries.drop(MAX_BACKUPS).forEach { (id, _) ->
+            entries.drop(MAX_BACKUPS).forEach { id ->
                 resolver.delete(
                     MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                     "${MediaStore.Downloads._ID} = ?",
@@ -100,7 +110,7 @@ class SettingsBackupManager(private val context: Context) {
                 "AirDetente",
             )
             dir.listFiles()
-                ?.filter { it.isFile && it.name.startsWith("settings-") && it.name.endsWith(".json") }
+                ?.filter { it.isFile && it.name.startsWith("airdetente-backup-") }
                 ?.sortedByDescending { it.name }
                 ?.drop(MAX_BACKUPS)
                 ?.forEach { it.delete() }

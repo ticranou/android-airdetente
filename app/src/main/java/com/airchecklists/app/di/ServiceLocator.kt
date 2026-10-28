@@ -239,7 +239,6 @@ object ServiceLocator {
         val safIo = SafIo(appContext)
         repository = AircraftRepositoryImpl(store, safIo)
         preferences = PreferencesRepository(SettingsStore(appContext))
-        SettingsBackupManager(appContext).backupNow()
 
         // Restore durable instrument state + heading/altitude targets from disk.
         instrumentPersist = preferences.preferences.value.instruments
@@ -279,6 +278,12 @@ object ServiceLocator {
             mapRepository.load()
             maybeSeed()
             preferences.ensureDashboardsMigrated()
+            // Automatic backup — same content as the manual "Sauvegarder mes données" button.
+            SettingsBackupManager(appContext).backupNow(
+                aircraft = repository.aircraft.value,
+                terrains = vacRepository.charts.value,
+                prefs    = preferences.preferences.value,
+            )
             // Auto-check for data updates on startup (conditioned on preference).
             if (preferences.preferences.value.autoCheckUpdates) {
                 runCatching { mapRepository.checkForUpdate() }

@@ -46,8 +46,10 @@ fun InstrumentSlot(
     hideTitle: Boolean = false,
     hideBorder: Boolean = false,
     titleBackgroundTexture: DashboardBackgroundStyle? = null,
+    titleBackgroundOpacity: Float = 1.0f,
     cellBackgroundColor: Long? = null,
     cellBackgroundTexture: DashboardBackgroundStyle? = null,
+    cellBackgroundOpacity: Float = 1.0f,
     onOpenMap: () -> Unit = {},
     cellIdx: Int = 0,
     modifier: Modifier = Modifier,
@@ -60,8 +62,9 @@ fun InstrumentSlot(
         style = bezelStyleOverride ?: global.style,
         hideTitle = hideTitle,
         titleTexture = titleBackgroundTexture,
+        titleOpacity = titleBackgroundOpacity,
     )
-    val cellBg = CellBackground(color = cellBackgroundColor, texture = cellBackgroundTexture)
+    val cellBg = CellBackground(color = cellBackgroundColor, texture = cellBackgroundTexture, opacity = cellBackgroundOpacity)
     val showHints = LocalShowGestureHints.current
     androidx.compose.runtime.SideEffect { GestureHintsState.enabled = showHints }
     androidx.compose.runtime.CompositionLocalProvider(
@@ -73,8 +76,17 @@ fun InstrumentSlot(
     // Build the cell-background modifier: draw behind all instrument content.
     val bgModifier: Modifier = if (cellBackgroundColor != null || cellBackgroundTexture != null) {
         Modifier.drawBehind {
-            cellBackgroundTexture?.let { drawDashboardBackground(it) }
-            cellBackgroundColor?.let { drawRect(androidx.compose.ui.graphics.Color(it.toInt())) }
+            cellBackgroundTexture?.let {
+                drawDashboardBackground(it)
+                // Apply opacity via black veil over the texture
+                if (cellBackgroundOpacity < 1f) {
+                    drawRect(androidx.compose.ui.graphics.Color.Black.copy(alpha = 1f - cellBackgroundOpacity))
+                }
+            }
+            cellBackgroundColor?.let {
+                val base = androidx.compose.ui.graphics.Color(it.toInt())
+                drawRect(base.copy(alpha = base.alpha * cellBackgroundOpacity))
+            }
         }
     } else Modifier
     val boxModifier = if (instrument.isCompact) (modifier.fillMaxSize().then(bgModifier)) else modifier.then(bgModifier)

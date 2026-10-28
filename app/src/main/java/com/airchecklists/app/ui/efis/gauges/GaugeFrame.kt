@@ -43,6 +43,8 @@ data class GaugeBezel(
     val hideTitle: Boolean = false,
     /** When non-null, the NUM title bar renders this texture instead of the bezel style. */
     val titleTexture: com.airchecklists.app.data.model.DashboardBackgroundStyle? = null,
+    /** Opacity of the title bar (colour or texture). */
+    val titleOpacity: Float = 1.0f,
 )
 
 /** Resolve the current global bezel preference (used as the default). */
@@ -66,6 +68,8 @@ val LocalHideBorder = androidx.compose.runtime.compositionLocalOf { false }
 data class CellBackground(
     val color: Long? = null,
     val texture: com.airchecklists.app.data.model.DashboardBackgroundStyle? = null,
+    /** Opacity applied to the colour or texture (0.05–1.0). */
+    val opacity: Float = 1.0f,
 )
 
 val LocalCellBackground = androidx.compose.runtime.compositionLocalOf { CellBackground() }
@@ -88,24 +92,27 @@ fun numTitleColor(): Color {
 }
 
 /** Paint a NUM instrument's title bar (0,0 → w×h) honouring the bezel style:
- *  solid colour, carbon weave, brushed metal, or a cockpit texture — matching the ANL bezel. */
+ *  solid colour, carbon weave, brushed metal, or a cockpit texture — matching the ANL bezel.
+ *  [bezel.titleOpacity] dims the result by drawing a black veil on top. */
 fun DrawScope.drawNumTitleBar(bezel: GaugeBezel, w: Float, h: Float) {
     // If a texture is set it takes priority over the SOLID/CARBON/BRUSHED style.
     val tex = bezel.titleTexture
     if (tex != null) {
         clipRect(0f, 0f, w, h) {
-            // Scale the texture rendering to the title-bar rectangle by translating the
-            // DrawScope's size reference via a temporary sub-scope trick: we can't
-            // change `this.size`, so we draw into a picture that is the title-bar size.
-            // Simplest approach: translate + clip and draw at full scope size — the clip
-            // already limits what's visible, and the texture is tileable / fills any size.
             drawDashboardBackground(tex)
+        }
+        // Apply opacity: black veil (1 - opacity) over the texture
+        if (bezel.titleOpacity < 1f) {
+            drawRect(Color.Black.copy(alpha = 1f - bezel.titleOpacity),
+                topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))
         }
         return
     }
     when (bezel.style) {
-        com.airchecklists.app.data.model.GaugeBezelStyle.SOLID ->
-            drawRect(bezel.color, topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))
+        com.airchecklists.app.data.model.GaugeBezelStyle.SOLID -> {
+            val c = if (bezel.titleOpacity < 1f) bezel.color.copy(alpha = bezel.titleOpacity) else bezel.color
+            drawRect(c, topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))
+        }
 
         com.airchecklists.app.data.model.GaugeBezelStyle.BRUSHED -> {
             drawRect(
@@ -117,6 +124,8 @@ fun DrawScope.drawNumTitleBar(bezel: GaugeBezel, w: Float, h: Float) {
             )
             var x = 0f
             while (x < w) { drawLine(Color(0x22FFFFFF), Offset(x, 0f), Offset(x, h), strokeWidth = 1f); x += 5f }
+            if (bezel.titleOpacity < 1f) drawRect(Color.Black.copy(alpha = 1f - bezel.titleOpacity),
+                topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))
         }
 
         com.airchecklists.app.data.model.GaugeBezelStyle.CARBON -> {
@@ -138,6 +147,8 @@ fun DrawScope.drawNumTitleBar(bezel: GaugeBezel, w: Float, h: Float) {
                     yy += cell; row++
                 }
             }
+            if (bezel.titleOpacity < 1f) drawRect(Color.Black.copy(alpha = 1f - bezel.titleOpacity),
+                topLeft = Offset(0f, 0f), size = androidx.compose.ui.geometry.Size(w, h))
         }
     }
 }

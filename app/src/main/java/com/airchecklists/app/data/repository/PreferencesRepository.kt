@@ -321,6 +321,28 @@ class PreferencesRepository(private val store: SettingsStore) {
         })
     }
 
+    /** Set the per-cell title opacity (applies to both colour and texture title). */
+    suspend fun setDashboardCellTitleOpacity(id: String, index: Int, opacity: Float) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(titleBackgroundOpacity = opacity.coerceIn(0.05f, 1f))
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
+    /** Set the per-cell background opacity (applies to both colour and texture background). */
+    suspend fun setDashboardCellBgOpacity(id: String, index: Int, opacity: Float) = persist { prefs ->
+        prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
+            val cells = d.normalizedCells.toMutableList()
+            if (index in cells.indices && !cells[index].covered) {
+                cells[index] = cells[index].copy(cellBackgroundOpacity = opacity.coerceIn(0.05f, 1f))
+            }
+            d.copy(cells = repairCells(cells, d.rows), slots = emptyList())
+        })
+    }
+
     /** Merge the master cell at [index] with its RIGHT or DOWN neighbour(s). */
     suspend fun mergeDashboardCell(id: String, index: Int, dir: MergeDir) = persist { prefs ->
         prefs.copy(dashboards = mapDashboard(prefs, id) { d ->
@@ -455,6 +477,14 @@ class PreferencesRepository(private val store: SettingsStore) {
 
     suspend fun setDashboardBackgroundOpacity(id: String, opacity: Float) = persist { prefs ->
         prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(backgroundOpacity = opacity.coerceIn(0.05f, 1f)) else it })
+    }
+
+    suspend fun setDashboardBackgroundColor(id: String, color: Long?) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(backgroundColor = color) else it })
+    }
+
+    suspend fun setDashboardBackgroundColorOpacity(id: String, opacity: Float) = persist { prefs ->
+        prefs.copy(dashboards = prefs.effectiveDashboards.map { if (it.id == id) it.copy(backgroundColorOpacity = opacity.coerceIn(0.05f, 1f)) else it })
     }
 
     /** Reorder dashboards to match the given id order (unknown ids keep their tail order). */

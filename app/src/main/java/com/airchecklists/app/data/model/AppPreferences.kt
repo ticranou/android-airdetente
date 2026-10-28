@@ -324,10 +324,14 @@ data class DashboardCell(
     val hideBorder: Boolean = false,
     /** Texture of the NUM title bar (null = use SOLID/CARBON/BRUSHED bezel style). */
     val titleBackgroundTexture: DashboardBackgroundStyle? = null,
+    /** Opacity applied to the title bar colour or texture (0.05–1.0). */
+    val titleBackgroundOpacity: Float = 1.0f,
     /** Semi-transparent fill colour (ARGB) behind the instrument body (null = opaque default). */
     val cellBackgroundColor: Long? = null,
     /** Texture drawn behind the instrument body (null = opaque default). */
     val cellBackgroundTexture: DashboardBackgroundStyle? = null,
+    /** Opacity applied to the cell background colour or texture (0.05–1.0). */
+    val cellBackgroundOpacity: Float = 1.0f,
 )
 
 /** Dark accent colours offered for gauge bezels / NUM title bars. */
@@ -363,6 +367,10 @@ data class Dashboard(
     val statusBannerBottom: Boolean = false,
     val backgroundStyle: DashboardBackgroundStyle = DashboardBackgroundStyle.NONE,
     val backgroundOpacity: Float = 1.0f,
+    /** Flat colour shown behind the cockpit (null = no colour; use backgroundStyle texture). */
+    val backgroundColor: Long? = null,
+    /** Opacity of [backgroundColor] (0.05–1.0). */
+    val backgroundColorOpacity: Float = 1.0f,
     // ---- legacy (migration only) ----
     val cols: Int = 2,
     val slots: List<EfisInstrument> = emptyList(),

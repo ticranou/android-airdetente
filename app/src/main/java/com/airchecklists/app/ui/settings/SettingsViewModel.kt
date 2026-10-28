@@ -232,6 +232,22 @@ class SettingsViewModel(
         viewModelScope.launch { prefsRepo.setDashboardBackgroundOpacity(id, opacity) }
     }
 
+    fun setDashboardBackgroundColor(id: String, color: Long?) {
+        viewModelScope.launch { prefsRepo.setDashboardBackgroundColor(id, color) }
+    }
+
+    fun setDashboardBackgroundColorOpacity(id: String, opacity: Float) {
+        viewModelScope.launch { prefsRepo.setDashboardBackgroundColorOpacity(id, opacity) }
+    }
+
+    fun setDashboardCellTitleOpacity(id: String, index: Int, opacity: Float) {
+        viewModelScope.launch { prefsRepo.setDashboardCellTitleOpacity(id, index, opacity) }
+    }
+
+    fun setDashboardCellBgOpacity(id: String, index: Int, opacity: Float) {
+        viewModelScope.launch { prefsRepo.setDashboardCellBgOpacity(id, index, opacity) }
+    }
+
     fun setDashboardRows(id: String, rows: Int) {
         viewModelScope.launch { prefsRepo.setDashboardRows(id, rows) }
     }

@@ -414,6 +414,15 @@ internal fun DashboardGrid(
             }
             val rowOffsets = FloatArray(rows) { r -> rowHeights.take(r).sum() }
 
+            // Background colour (behind instruments, behind texture)
+            dashboard.backgroundColor?.let { col ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(dashboard.backgroundColorOpacity)
+                        .background(androidx.compose.ui.graphics.Color(col.toInt())),
+                )
+            }
             // Background texture (behind instruments)
             if (dashboard.backgroundStyle != com.airchecklists.app.data.model.DashboardBackgroundStyle.NONE) {
                 androidx.compose.foundation.Canvas(
@@ -492,8 +501,10 @@ internal fun DashboardGrid(
                         hideTitle = cell.hideTitle,
                         hideBorder = cell.hideBorder,
                         titleBackgroundTexture = cell.titleBackgroundTexture,
+                        titleBackgroundOpacity = cell.titleBackgroundOpacity,
                         cellBackgroundColor = cell.cellBackgroundColor,
                         cellBackgroundTexture = cell.cellBackgroundTexture,
+                        cellBackgroundOpacity = cell.cellBackgroundOpacity,
                         onOpenMap = onOpenMap,
                         cellIdx = i,
                         modifier = Modifier.fillMaxSize(),

@@ -163,6 +163,11 @@
     <string name="dashboard_cell_mode_color">Couleur</string>
     <string name="dashboard_cell_mode_texture">Texture</string>
     <string name="dashboard_cell_pick_texture">Choisir une texture</string>
+    <string name="dashboard_cell_pick_color">Choisir une couleur</string>
+    <string name="dashboard_cockpit_bg">Fond du cockpit</string>
+    <string name="opacity_label">Opacité : %d %%</string>
+    <string name="color_hex_hint">#RRGGBB</string>
+    <string name="action_validate">Valider</string>
     <string name="dashboard_cell_hide_title">Masquer le titre</string>
     <string name="dashboard_cell_hide_border">Masquer la bordure de l\'instrument</string>
     <string name="instr_picker_title">Choisir un instrument</string>

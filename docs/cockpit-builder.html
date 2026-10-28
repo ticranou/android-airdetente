@@ -53,7 +53,7 @@
   .btnbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 
   /* ---- Grid editor ---- */
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; grid-auto-rows: 132px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; grid-auto-rows: 132px; position: relative; }
   .cell {
     background: var(--panel2); border: 1.5px solid var(--line); border-radius: 12px;
     padding: 8px; position: relative; overflow: hidden; display: flex; flex-direction: column;
@@ -182,8 +182,21 @@
       </div>
 
       <div class="panel">
+        <h2>Fond du cockpit</h2>
+        <p class="hint">Trois modes : <b>Défaut</b> (pas de fond), <b>Couleur</b> (palette + hex + opacité 0–100%), ou <b>Texture</b> (grille de textures + opacité 0–100%). Les vignettes affichent un badge d'opacité quand opacité &lt; 100%.</p>
+        <div class="seclabel">Fond du cockpit</div>
+        <div class="chips" id="cockpitBgChips"></div>
+        <div id="cockpitBgColorWrap" style="display:none">
+          <div class="thumb-row" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
+        </div>
+        <div id="cockpitBgTextureWrap" style="display:none">
+          <div class="thumb-row" style="display:flex;align-items:center;gap:8px;margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="panel">
         <h2>Grille (2 colonnes)</h2>
-        <p class="hint">Choisissez un instrument par case (tapez dans le champ pour filtrer la liste). <b>Options</b> ouvre la couleur, le biseau, la gestion de la cellule (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>) et « Masquer le titre ». Les flèches <b>↑/↓</b> réorganisent les lignes.</p>
+        <p class="hint">Choisissez un instrument par case (tapez dans le champ pour filtrer la liste). <b>Options</b> ouvre la couleur, le biseau, la gestion de la cellule (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>), « Masquer le titre », l'aspect du titre (Défaut / Couleur / Texture) et le fond de l'instrument (Défaut / Couleur / Texture). Les flèches <b>↑/↓</b> réorganisent les lignes.</p>
         <div class="grid" id="grid"></div>
       </div>
     </div>
@@ -235,6 +248,32 @@
     <div class="seclabel">Couleur</div>
     <div class="chips" id="styleChips"></div>
     <div class="swatches" id="swatches"></div>
+    <div class="divider"></div>
+    <div class="seclabel">Aspect du titre</div>
+    <div class="chips" id="titleStyleChips"></div>
+    <div id="titleColorWrap" style="display:none">
+      <div class="swatches thumb-row" id="titleSwatches" style="display:flex;align-items:center;gap:8px"></div>
+    </div>
+    <div id="titleTextureWrap" style="display:none">
+      <div class="swatches thumb-row" id="titleTextureGrid" style="display:flex;align-items:center;gap:8px"></div>
+    </div>
+    <div id="titleOpacityWrap" style="display:none;margin-top:8px">
+      <label for="titleOpacity">Opacité: <span id="titleOpacityValue">100%</span></label>
+      <input type="range" id="titleOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
+    </div>
+    <div class="divider"></div>
+    <div class="seclabel">Fond de l'instrument</div>
+    <div class="chips" id="bodyStyleChips"></div>
+    <div id="bodyColorWrap" style="display:none">
+      <div class="swatches thumb-row" id="bodySwatches" style="display:flex;align-items:center;gap:8px"></div>
+    </div>
+    <div id="bodyTextureWrap" style="display:none">
+      <div class="swatches thumb-row" id="bodyTextureGrid" style="display:flex;align-items:center;gap:8px"></div>
+    </div>
+    <div id="bodyOpacityWrap" style="display:none;margin-top:8px">
+      <label for="bodyOpacity">Opacité: <span id="bodyOpacityValue">100%</span></label>
+      <input type="range" id="bodyOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
+    </div>
     <div id="manageWrap">
       <div class="divider"></div>
       <div class="seclabel">Cellule</div>
@@ -251,6 +290,42 @@
     </div>
     <div class="foot">
       <button class="primary" id="optSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Color picker dialog -->
+<div class="overlay" id="colorPickerOverlay" style="display:none">
+  <div class="dialog">
+    <h3 id="colorPickerTitle">Choisir une couleur</h3>
+    <div class="swatches" id="colorPickerSwatches"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+      <input type="text" id="colorPickerHex" placeholder="#RRGGBB" maxlength="7" style="width:100px;font-family:monospace;background:#1a1a1a;color:#fff;border:1px solid #555;border-radius:4px;padding:4px 6px">
+      <div id="colorPickerPreview" style="width:40px;height:40px;border-radius:6px;border:1px solid #555;flex-shrink:0"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label style="font-size:13px;color:#aaa">Opacité : <span id="colorPickerOpacityLabel">100%</span></label>
+      <input type="range" id="colorPickerOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
+    </div>
+    <div class="foot">
+      <button class="secondary" id="colorPickerCancel">Annuler</button>
+      <button class="primary" id="colorPickerOk">Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- Texture picker dialog -->
+<div class="overlay" id="texturePickerOverlay" style="display:none">
+  <div class="dialog" style="max-width:340px">
+    <h3 id="texturePickerTitle">Choisir une texture</h3>
+    <div id="texturePickerGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:320px;overflow-y:auto"></div>
+    <div style="margin-top:10px">
+      <label style="font-size:13px;color:#aaa">Opacité : <span id="texturePickerOpacityLabel">100%</span></label>
+      <input type="range" id="texturePickerOpacity" min="0" max="100" value="100" style="width:100%;margin-top:4px">
+    </div>
+    <div class="foot">
+      <button class="secondary" id="texturePickerCancel">Annuler</button>
+      <button class="primary" id="texturePickerOk">Valider</button>
     </div>
   </div>
 </div>
@@ -2629,6 +2704,28 @@ const STYLE_CHIPS = [
   { key: "CARBON",  label: "Carbone" },
   { key: "BRUSHED", label: "Métal" },
 ];
+
+const BACKGROUND_STYLES = [
+  { key: "NONE",          label: "Aucun" },
+  { key: "CARBON",        label: "Carbone" },
+  { key: "BRUSHED_METAL", label: "Métal brossé" },
+  { key: "RIVETED_METAL", label: "Rivets" },
+  { key: "CARBON_RED",    label: "Carbone rouge" },
+  { key: "CARBON_BLUE",   label: "Carbone bleu" },
+  { key: "WOVEN_CARBON",  label: "Carbone tissé" },
+  { key: "TOPOGRAPHIC",   label: "Topographie" },
+  { key: "TITANIUM",      label: "Titane" },
+  { key: "ANODIZED_DARK", label: "Anodisé" },
+  { key: "DIAMOND_PLATE", label: "Larmé" },
+  { key: "STARFIELD",     label: "Étoiles" },
+  { key: "DEEP_OCEAN",    label: "Océan" },
+];
+
+const BG_COLOR_PALETTE = [
+  0x88000000, 0xAA000000, 0x550A1830,
+  0x55141414, 0x55123A1E, 0x551A0B2E,
+];
+
 const COLS = 2;
 const MAX_ROWS = 8;
 
@@ -2653,11 +2750,23 @@ function newCell() {
   return {
     instrument: "NONE", colSpan: 1, rowSpan: 1, covered: false,
     accentColor: null, bezelStyle: null, hideTitle: false, hideBorder: false,
+    titleBackgroundTexture: null,
+    titleBackgroundOpacity: 1.0,
+    cellBackgroundColor: null,
+    cellBackgroundTexture: null,
+    cellBackgroundOpacity: 1.0,
   };
 }
 
 let rows = 2;
 let cells = [];
+
+const dash = {
+  backgroundStyle: "NONE",
+  backgroundOpacity: 1.0,
+  backgroundColor: null,
+  backgroundColorOpacity: 1.0,
+};
 
 function resizeCells() {
   const n = COLS * rows;
@@ -2773,6 +2882,7 @@ function render() {
     gridEl.appendChild(el);
   }
   syncJson();
+  renderGridBg();
 }
 
 function mkBtn(txt, enabled, fn, title) {
@@ -2893,6 +3003,136 @@ function renderOptions() {
     sw.appendChild(d);
   }
 
+  // Aspect du titre
+  const titleMode = c.titleBackgroundTexture ? 2
+    : (c.accentColor !== null && c.accentColor !== undefined && c.bezelStyle === "SOLID") ? 1 : 0;
+  const titleChips = document.getElementById("titleStyleChips");
+  titleChips.innerHTML = "";
+  ["Défaut", "Couleur", "Texture"].forEach((lbl, i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip" + (titleMode === i ? " sel" : "");
+    chip.textContent = lbl;
+    chip.onclick = () => {
+      if (i === 0) { c.accentColor = null; c.bezelStyle = null; c.titleBackgroundTexture = null; }
+      else if (i === 1) {
+        c.titleBackgroundTexture = null;
+        if (!c.accentColor) c.accentColor = DARK_ACCENTS[0];
+        c.bezelStyle = "SOLID";
+      } else {
+        c.accentColor = null; c.bezelStyle = null;
+        if (!c.titleBackgroundTexture) c.titleBackgroundTexture = "CARBON";
+      }
+      renderOptions(); syncJson();
+    };
+    titleChips.appendChild(chip);
+  });
+
+  const titleColorWrap = document.getElementById("titleColorWrap");
+  const titleTextureWrap = document.getElementById("titleTextureWrap");
+  const titleOpacityWrap = document.getElementById("titleOpacityWrap");
+  titleColorWrap.style.display = titleMode === 1 ? "" : "none";
+  titleTextureWrap.style.display = titleMode === 2 ? "" : "none";
+  titleOpacityWrap.style.display = "none"; // opacity handled in pickers
+
+  if (titleMode === 1) {
+    const row = titleColorWrap.querySelector(".swatches");
+    renderThumb(row, { type: "color", color: c.accentColor, opacity: c.titleBackgroundOpacity || 1.0 });
+    let btn = titleColorWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; titleColorWrap.appendChild(btn); }
+    btn.onclick = () => openColorPicker({
+      title: "Aspect du titre",
+      palette: DARK_ACCENTS,
+      color: c.accentColor,
+      opacity: c.titleBackgroundOpacity || 1.0,
+      onSelect: (col, op) => {
+        c.accentColor = col; c.bezelStyle = "SOLID";
+        c.titleBackgroundOpacity = op; c.titleBackgroundTexture = null;
+        renderOptions(); syncJson();
+      },
+    });
+  }
+  if (titleMode === 2) {
+    const row = titleTextureWrap.querySelector(".swatches");
+    renderThumb(row, { type: "texture", key: c.titleBackgroundTexture, opacity: c.titleBackgroundOpacity || 1.0 });
+    let btn = titleTextureWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; titleTextureWrap.appendChild(btn); }
+    btn.onclick = () => openTexturePicker({
+      title: "Aspect du titre",
+      selected: c.titleBackgroundTexture,
+      opacity: c.titleBackgroundOpacity || 1.0,
+      onSelect: (key, op) => {
+        c.titleBackgroundTexture = key; c.titleBackgroundOpacity = op;
+        c.accentColor = null; c.bezelStyle = null;
+        renderOptions(); syncJson();
+      },
+    });
+  }
+
+  // Fond de l'instrument
+  const bodyMode = c.cellBackgroundTexture ? 2
+    : (c.cellBackgroundColor !== null && c.cellBackgroundColor !== undefined) ? 1 : 0;
+  const bodyChips = document.getElementById("bodyStyleChips");
+  bodyChips.innerHTML = "";
+  ["Défaut", "Couleur", "Texture"].forEach((lbl, i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip" + (bodyMode === i ? " sel" : "");
+    chip.textContent = lbl;
+    chip.onclick = () => {
+      if (i === 0) { c.cellBackgroundColor = null; c.cellBackgroundTexture = null; }
+      else if (i === 1) {
+        c.cellBackgroundTexture = null;
+        if (c.cellBackgroundColor === null || c.cellBackgroundColor === undefined)
+          c.cellBackgroundColor = 0x88000000;
+      } else {
+        c.cellBackgroundColor = null;
+        if (!c.cellBackgroundTexture) c.cellBackgroundTexture = "CARBON";
+      }
+      renderOptions(); syncJson();
+    };
+    bodyChips.appendChild(chip);
+  });
+
+  const bodyColorWrap = document.getElementById("bodyColorWrap");
+  const bodyTextureWrap = document.getElementById("bodyTextureWrap");
+  const bodyOpacityWrap = document.getElementById("bodyOpacityWrap");
+  bodyColorWrap.style.display = bodyMode === 1 ? "" : "none";
+  bodyTextureWrap.style.display = bodyMode === 2 ? "" : "none";
+  bodyOpacityWrap.style.display = "none";
+
+  if (bodyMode === 1) {
+    const row = bodyColorWrap.querySelector(".swatches");
+    renderThumb(row, { type: "color", color: c.cellBackgroundColor, opacity: c.cellBackgroundOpacity || 1.0 });
+    let btn = bodyColorWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; bodyColorWrap.appendChild(btn); }
+    btn.onclick = () => openColorPicker({
+      title: "Fond de l'instrument",
+      palette: BG_COLOR_PALETTE,
+      color: c.cellBackgroundColor,
+      opacity: c.cellBackgroundOpacity || 1.0,
+      onSelect: (col, op) => {
+        c.cellBackgroundColor = col; c.cellBackgroundOpacity = op;
+        c.cellBackgroundTexture = null;
+        renderOptions(); syncJson();
+      },
+    });
+  }
+  if (bodyMode === 2) {
+    const row = bodyTextureWrap.querySelector(".swatches");
+    renderThumb(row, { type: "texture", key: c.cellBackgroundTexture, opacity: c.cellBackgroundOpacity || 1.0 });
+    let btn = bodyTextureWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; bodyTextureWrap.appendChild(btn); }
+    btn.onclick = () => openTexturePicker({
+      title: "Fond de l'instrument",
+      selected: c.cellBackgroundTexture,
+      opacity: c.cellBackgroundOpacity || 1.0,
+      onSelect: (key, op) => {
+        c.cellBackgroundTexture = key; c.cellBackgroundOpacity = op;
+        c.cellBackgroundColor = null;
+        renderOptions(); syncJson();
+      },
+    });
+  }
+
   // Cellule: Large / Haut / Séparer (shown only when applicable).
   const mr = canMergeRight(optsIndex, row, col, c);
   const md = canMergeDown(optsIndex, row, col, c);
@@ -2937,6 +3177,383 @@ function argbToCss(argb) {
   return "#" + rgb;
 }
 
+function argbToRgba(argb, opacityOverride) {
+  const v = Number(argb);
+  const a = opacityOverride !== undefined ? opacityOverride
+            : ((v >>> 24) & 0xFF) / 255;
+  const r = (v >>> 16) & 0xFF;
+  const g = (v >>> 8) & 0xFF;
+  const b = v & 0xFF;
+  return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+}
+
+function drawTextureThumbnail(ctx, w, h, key, opacity) {
+  ctx.clearRect(0, 0, w, h);
+  switch (key) {
+    case "NONE":
+      ctx.fillStyle = "#1A1A1A"; ctx.fillRect(0, 0, w, h); break;
+    case "CARBON": case "WOVEN_CARBON": {
+      const cell = 5;
+      for (let row = 0; row * cell < h; row++) {
+        for (let col = 0; col * cell < w; col++) {
+          ctx.fillStyle = (row + col) % 2 === 0 ? "#1E1E1E" : "#2C2C2C";
+          ctx.fillRect(col * cell, row * cell, cell, cell);
+        }
+      }
+      // Diagonal highlight lines
+      ctx.strokeStyle = "rgba(255,255,255,0.06)"; ctx.lineWidth = 1;
+      for (let row = 0; row * cell < h; row++) {
+        for (let col = 0; col * cell < w; col++) {
+          ctx.beginPath();
+          ctx.moveTo(col * cell, row * cell + cell);
+          ctx.lineTo(col * cell + cell, row * cell);
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+    case "CARBON_RED": {
+      const cell = 5;
+      for (let row = 0; row * cell < h; row++)
+        for (let col = 0; col * cell < w; col++) {
+          ctx.fillStyle = (row + col) % 2 === 0 ? "#1E0A0A" : "#2C1515";
+          ctx.fillRect(col * cell, row * cell, cell, cell);
+        }
+      break;
+    }
+    case "CARBON_BLUE": {
+      const cell = 5;
+      for (let row = 0; row * cell < h; row++)
+        for (let col = 0; col * cell < w; col++) {
+          ctx.fillStyle = (row + col) % 2 === 0 ? "#0A0A1E" : "#15152C";
+          ctx.fillRect(col * cell, row * cell, cell, cell);
+        }
+      break;
+    }
+    case "BRUSHED_METAL": case "TITANIUM": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#BFC3C7"); grad.addColorStop(0.55, "#6E7276"); grad.addColorStop(1, "#303336");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(255,255,255,0.13)"; ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 5) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      break;
+    }
+    case "RIVETED_METAL": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#8A8E92"); grad.addColorStop(1, "#3A3D40");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#222426";
+      for (let ry = 6; ry < h; ry += 12)
+        for (let rx = 6; rx < w; rx += 12) {
+          ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      break;
+    }
+    case "TOPOGRAPHIC": {
+      ctx.fillStyle = "#0A1208"; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(180,160,100,0.4)"; ctx.lineWidth = 1;
+      for (let i = 0; i < 5; i++) {
+        const y = h * (0.15 + i * 0.18);
+        ctx.beginPath(); ctx.moveTo(0, y);
+        for (let x = 0; x <= w; x += 4)
+          ctx.lineTo(x, y + Math.sin(x * 0.15 + i * 1.2) * (h * 0.06));
+        ctx.stroke();
+      }
+      break;
+    }
+    case "ANODIZED_DARK":
+      ctx.fillStyle = "#0D1520"; ctx.fillRect(0, 0, w, h); break;
+    case "DIAMOND_PLATE": {
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, "#5A5E62"); grad.addColorStop(1, "#303336");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(200,200,200,0.2)"; ctx.lineWidth = 1;
+      const d = 8;
+      for (let y = 0; y < h + d; y += d) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y - d); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y + d); ctx.stroke();
+      }
+      break;
+    }
+    case "STARFIELD": {
+      ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      // Deterministic positions using a simple LCG
+      let s = 42;
+      for (let i = 0; i < 40; i++) {
+        s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+        const px = ((s >>> 16) & 0xFF) / 255 * w;
+        s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+        const py = ((s >>> 16) & 0xFF) / 255 * h;
+        ctx.fillRect(px, py, 1, 1);
+      }
+      break;
+    }
+    case "DEEP_OCEAN": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#020D1A"); grad.addColorStop(0.5, "#0A2535"); grad.addColorStop(1, "#0D3B4A");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h); break;
+    }
+    default:
+      ctx.fillStyle = "#1A1A1A"; ctx.fillRect(0, 0, w, h);
+  }
+  if (opacity < 1) {
+    ctx.fillStyle = `rgba(0,0,0,${1 - opacity})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
+function renderThumb(container, { type, key, color, opacity = 1.0 }) {
+  container.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:relative;display:inline-block;width:48px;height:48px;border-radius:4px;overflow:hidden;border:1px solid #3A3A3A;flex-shrink:0";
+  if (type === "texture") {
+    const cv = document.createElement("canvas");
+    cv.width = 48; cv.height = 48;
+    const ctx2 = cv.getContext("2d");
+    drawTextureThumbnail(ctx2, 48, 48, key, opacity);
+    wrap.appendChild(cv);
+  } else {
+    const fill = document.createElement("div");
+    fill.style.cssText = `width:100%;height:100%;background:${argbToRgba(color, opacity)}`;
+    wrap.appendChild(fill);
+  }
+  if (opacity < 0.99) {
+    const badge = document.createElement("span");
+    badge.textContent = Math.round(opacity * 100) + "%";
+    badge.style.cssText = "position:absolute;bottom:1px;right:1px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:0 2px;border-radius:2px;line-height:14px";
+    wrap.appendChild(badge);
+  }
+  container.appendChild(wrap);
+}
+
+// ----------------------------------------------------------------------------
+// Color picker dialog
+// ----------------------------------------------------------------------------
+let _colorPickerCb = null;
+let _colorPickerCurrent = 0xFF000000;
+let _colorPickerOpacity = 1.0;
+
+function openColorPicker({ title, palette, color, opacity, onSelect }) {
+  _colorPickerCb = onSelect;
+  _colorPickerCurrent = color || (palette && palette[0]) || 0xFF000000;
+  _colorPickerOpacity = (opacity !== undefined && opacity !== null) ? opacity : 1.0;
+  document.getElementById("colorPickerTitle").textContent = title || "Choisir une couleur";
+
+  const sw = document.getElementById("colorPickerSwatches");
+  sw.innerHTML = "";
+  const pal = palette || DARK_ACCENTS;
+  for (const col of pal) {
+    const d = document.createElement("div");
+    d.className = "swatch";
+    d.style.background = argbToRgba(col);
+    if (col === _colorPickerCurrent) d.classList.add("sel");
+    d.onclick = () => {
+      _colorPickerCurrent = col;
+      document.querySelectorAll("#colorPickerSwatches .swatch").forEach(s => s.classList.remove("sel"));
+      d.classList.add("sel");
+      document.getElementById("colorPickerHex").value = "#" + (Number(col) & 0xFFFFFF).toString(16).padStart(6, "0").toUpperCase();
+      updateColorPickerPreview();
+    };
+    sw.appendChild(d);
+  }
+
+  const hexInput = document.getElementById("colorPickerHex");
+  hexInput.value = "#" + (Number(_colorPickerCurrent) & 0xFFFFFF).toString(16).padStart(6, "0").toUpperCase();
+  hexInput.oninput = () => {
+    const raw = hexInput.value.replace(/^#/, "").toUpperCase();
+    if (/^[0-9A-F]{6}$/.test(raw)) {
+      _colorPickerCurrent = (0xFF000000 | parseInt(raw, 16)) >>> 0;
+      document.querySelectorAll("#colorPickerSwatches .swatch").forEach(s => s.classList.remove("sel"));
+      updateColorPickerPreview();
+    }
+  };
+
+  const slider = document.getElementById("colorPickerOpacity");
+  slider.value = Math.round(_colorPickerOpacity * 100);
+  document.getElementById("colorPickerOpacityLabel").textContent = slider.value + "%";
+  slider.oninput = () => {
+    _colorPickerOpacity = parseInt(slider.value) / 100;
+    document.getElementById("colorPickerOpacityLabel").textContent = slider.value + "%";
+    updateColorPickerPreview();
+  };
+
+  document.getElementById("colorPickerCancel").onclick = () => {
+    document.getElementById("colorPickerOverlay").style.display = "none";
+  };
+  document.getElementById("colorPickerOk").onclick = () => {
+    document.getElementById("colorPickerOverlay").style.display = "none";
+    if (_colorPickerCb) _colorPickerCb(_colorPickerCurrent, _colorPickerOpacity);
+  };
+
+  updateColorPickerPreview();
+  document.getElementById("colorPickerOverlay").style.display = "";
+}
+
+function updateColorPickerPreview() {
+  document.getElementById("colorPickerPreview").style.background =
+    argbToRgba(_colorPickerCurrent, _colorPickerOpacity);
+}
+
+// ----------------------------------------------------------------------------
+// Texture picker dialog
+// ----------------------------------------------------------------------------
+let _texturePickerCb = null;
+let _texturePickerSelected = "NONE";
+let _texturePickerOpacity = 1.0;
+
+function openTexturePicker({ title, selected, opacity, onSelect }) {
+  _texturePickerCb = onSelect;
+  _texturePickerSelected = selected || "NONE";
+  _texturePickerOpacity = (opacity !== undefined && opacity !== null) ? opacity : 1.0;
+  document.getElementById("texturePickerTitle").textContent = title || "Choisir une texture";
+
+  const grid = document.getElementById("texturePickerGrid");
+  grid.innerHTML = "";
+  for (const bg of BACKGROUND_STYLES) {
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:flex;flex-direction:column;align-items:center;padding:4px;border-radius:8px;cursor:pointer;border:1px solid #3A3A3A";
+    if (bg.key === _texturePickerSelected) wrap.style.borderColor = "var(--accent)";
+    const cv = document.createElement("canvas");
+    cv.width = 60; cv.height = 34;
+    cv.style.cssText = "display:block;border-radius:4px";
+    drawTextureThumbnail(cv.getContext("2d"), 60, 34, bg.key, _texturePickerOpacity);
+    const lbl = document.createElement("div");
+    lbl.textContent = bg.label;
+    lbl.style.cssText = "font-size:10px;color:#aaa;margin-top:3px;text-align:center;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    wrap.appendChild(cv); wrap.appendChild(lbl);
+    wrap.onclick = () => {
+      _texturePickerSelected = bg.key;
+      document.querySelectorAll("#texturePickerGrid > div").forEach((el, i) => {
+        el.style.borderColor = BACKGROUND_STYLES[i].key === _texturePickerSelected ? "var(--accent)" : "#3A3A3A";
+      });
+      updateTexturePickerGrid();
+    };
+    grid.appendChild(wrap);
+  }
+
+  const slider = document.getElementById("texturePickerOpacity");
+  slider.value = Math.round(_texturePickerOpacity * 100);
+  document.getElementById("texturePickerOpacityLabel").textContent = slider.value + "%";
+  slider.oninput = () => {
+    _texturePickerOpacity = parseInt(slider.value) / 100;
+    document.getElementById("texturePickerOpacityLabel").textContent = slider.value + "%";
+    updateTexturePickerGrid();
+  };
+
+  document.getElementById("texturePickerCancel").onclick = () => {
+    document.getElementById("texturePickerOverlay").style.display = "none";
+  };
+  document.getElementById("texturePickerOk").onclick = () => {
+    document.getElementById("texturePickerOverlay").style.display = "none";
+    if (_texturePickerCb) _texturePickerCb(_texturePickerSelected, _texturePickerOpacity);
+  };
+
+  document.getElementById("texturePickerOverlay").style.display = "";
+}
+
+function updateTexturePickerGrid() {
+  const canvases = document.querySelectorAll("#texturePickerGrid canvas");
+  BACKGROUND_STYLES.forEach((bg, i) => {
+    const cv = canvases[i];
+    if (cv) drawTextureThumbnail(cv.getContext("2d"), 60, 34, bg.key, _texturePickerOpacity);
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Cockpit background section
+// ----------------------------------------------------------------------------
+function renderCockpitBg() {
+  const chips = document.getElementById("cockpitBgChips");
+  chips.innerHTML = "";
+
+  const mode = dash.backgroundStyle && dash.backgroundStyle !== "NONE" ? 2
+    : dash.backgroundColor !== null && dash.backgroundColor !== undefined ? 1 : 0;
+
+  const labels = ["Défaut", "Couleur", "Texture"];
+  labels.forEach((lbl, i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip" + (mode === i ? " sel" : "");
+    chip.textContent = lbl;
+    chip.onclick = () => {
+      if (i === 0) { dash.backgroundStyle = "NONE"; dash.backgroundColor = null; }
+      else if (i === 1) {
+        dash.backgroundStyle = "NONE";
+        if (dash.backgroundColor === null || dash.backgroundColor === undefined)
+          dash.backgroundColor = 0x88000000;
+      } else {
+        dash.backgroundColor = null;
+        if (!dash.backgroundStyle || dash.backgroundStyle === "NONE")
+          dash.backgroundStyle = "CARBON";
+      }
+      renderCockpitBg(); syncJson(); renderGridBg();
+    };
+    chips.appendChild(chip);
+  });
+
+  const colorWrap = document.getElementById("cockpitBgColorWrap");
+  const textureWrap = document.getElementById("cockpitBgTextureWrap");
+  colorWrap.style.display = mode === 1 ? "" : "none";
+  textureWrap.style.display = mode === 2 ? "" : "none";
+
+  if (mode === 1) {
+    const row = colorWrap.querySelector(".thumb-row");
+    renderThumb(row, { type: "color", color: dash.backgroundColor, opacity: dash.backgroundColorOpacity });
+    let btn = colorWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; colorWrap.appendChild(btn); }
+    btn.onclick = () => openColorPicker({
+      title: "Fond du cockpit",
+      palette: BG_COLOR_PALETTE,
+      color: dash.backgroundColor,
+      opacity: dash.backgroundColorOpacity,
+      onSelect: (col, op) => { dash.backgroundColor = col; dash.backgroundColorOpacity = op; renderCockpitBg(); syncJson(); renderGridBg(); },
+    });
+  }
+
+  if (mode === 2) {
+    const row = textureWrap.querySelector(".thumb-row");
+    renderThumb(row, { type: "texture", key: dash.backgroundStyle || "NONE", opacity: dash.backgroundOpacity });
+    let btn = textureWrap.querySelector("button");
+    if (!btn) { btn = document.createElement("button"); btn.className = "secondary"; btn.textContent = "Choisir…"; textureWrap.appendChild(btn); }
+    btn.onclick = () => openTexturePicker({
+      title: "Fond du cockpit",
+      selected: dash.backgroundStyle,
+      opacity: dash.backgroundOpacity,
+      onSelect: (key, op) => { dash.backgroundStyle = key; dash.backgroundOpacity = op; renderCockpitBg(); syncJson(); renderGridBg(); },
+    });
+  }
+}
+
+function renderGridBg() {
+  const grid = document.querySelector(".grid");
+  if (!grid) return;
+  const mode = dash.backgroundStyle && dash.backgroundStyle !== "NONE" ? 2
+    : dash.backgroundColor !== null && dash.backgroundColor !== undefined ? 1 : 0;
+  if (mode === 1) {
+    grid.style.backgroundColor = argbToRgba(dash.backgroundColor, dash.backgroundColorOpacity);
+    // Remove any texture canvas overlay
+    const existing = grid.querySelector(".grid-bg-canvas");
+    if (existing) existing.remove();
+  } else if (mode === 2) {
+    grid.style.backgroundColor = "";
+    // Render texture as an absolutely-positioned canvas behind cells
+    let cv = grid.querySelector(".grid-bg-canvas");
+    if (!cv) {
+      cv = document.createElement("canvas");
+      cv.className = "grid-bg-canvas";
+      cv.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0";
+      grid.insertBefore(cv, grid.firstChild);
+    }
+    // Size to grid
+    cv.width = grid.offsetWidth || 300; cv.height = grid.offsetHeight || 400;
+    drawTextureThumbnail(cv.getContext("2d"), cv.width, cv.height, dash.backgroundStyle, dash.backgroundOpacity);
+  } else {
+    grid.style.backgroundColor = "";
+    const existing = grid.querySelector(".grid-bg-canvas");
+    if (existing) existing.remove();
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Build the export object (matches CockpitExport { type, version, dashboard }).
 // ----------------------------------------------------------------------------
@@ -2950,6 +3567,11 @@ function buildExport() {
     bezelStyle: c.bezelStyle,
     hideTitle: c.hideTitle,
     hideBorder: c.hideBorder,
+    titleBackgroundTexture: c.titleBackgroundTexture || null,
+    titleBackgroundOpacity: c.titleBackgroundOpacity !== undefined ? c.titleBackgroundOpacity : 1.0,
+    cellBackgroundColor: c.cellBackgroundColor !== undefined ? c.cellBackgroundColor : null,
+    cellBackgroundTexture: c.cellBackgroundTexture || null,
+    cellBackgroundOpacity: c.cellBackgroundOpacity !== undefined ? c.cellBackgroundOpacity : 1.0,
   }));
   return {
     type: "airdetente.cockpit",
@@ -2963,6 +3585,10 @@ function buildExport() {
       showTitle: document.getElementById("showTitle").checked,
       showStatusTop: document.getElementById("showStatusTop").checked,
       showStatusBottom: document.getElementById("showStatusBottom").checked,
+      backgroundStyle: dash.backgroundStyle || "NONE",
+      backgroundOpacity: dash.backgroundOpacity !== undefined ? dash.backgroundOpacity : 1.0,
+      backgroundColor: dash.backgroundColor !== undefined ? dash.backgroundColor : null,
+      backgroundColorOpacity: dash.backgroundColorOpacity !== undefined ? dash.backgroundColorOpacity : 1.0,
     },
   };
 }
@@ -3133,6 +3759,7 @@ document.getElementById("showStatusTop").onchange = syncJson;
 document.getElementById("showStatusBottom").onchange = syncJson;
 
 render();
+renderCockpitBg();
 </script>
 <script src="assets/nav.js"></script>
 </body>

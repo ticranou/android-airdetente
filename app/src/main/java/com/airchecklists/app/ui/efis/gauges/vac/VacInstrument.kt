@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -60,8 +61,11 @@ import java.io.File
  * NUMVAC — Carte VAC intégrée (330 dp).
  *
  * Affiche la carte VAC PDF du terrain cible partagé (lockedApproachTarget / AUTO).
- * Pinch-to-zoom, pan, double-tap pour réinitialiser. Navigation entre pages en bas.
- * Bouton Lock/Unlock (coin bas-droit) pour figer la carte.
+ * Pinch-to-zoom, pan, double-tap pour réinitialiser. Navigation entre pages via boutons
+ * numérotés en bas. Bouton Lock/Unlock et Négatif (coin bas-droit).
+ *
+ * Le zoom, le pan, le lock et la page courante sont conservés pendant toute la session.
+ * Seul un changement de cible d'approche (lockedTarget) réinitialise ces paramètres.
  */
 @Composable
 fun VacInstrument(modifier: Modifier = Modifier) {
@@ -97,9 +101,59 @@ fun VacInstrument(modifier: Modifier = Modifier) {
 
     val pdfFile: File? = chart?.let { ServiceLocator.vacRepository.localPdf(it) }
 
+    // ── États persistants session (survivent aux changements de cockpit) ─────────
+    // Clé stable sur l'icao de la cible (ou "auto") pour isoler les VACs entre elles.
+    val targetKey = lockedTarget?.icao ?: "auto"
+
+    @Suppress("UNCHECKED_CAST")
+    val scaleState = remember {
+        ServiceLocator.instrumentState("vac.scale") { mutableFloatStateOf(1f) }
+    } as androidx.compose.runtime.MutableFloatState
+
+    @Suppress("UNCHECKED_CAST")
+    val offsetState = remember {
+        ServiceLocator.instrumentState("vac.offset") { mutableStateOf(Offset.Zero) }
+    } as androidx.compose.runtime.MutableState<Offset>
+
+    @Suppress("UNCHECKED_CAST")
+    val lockedState = remember {
+        ServiceLocator.instrumentState("vac.locked") { mutableStateOf(false) }
+    } as androidx.compose.runtime.MutableState<Boolean>
+
+    @Suppress("UNCHECKED_CAST")
+    val negativeState = remember {
+        ServiceLocator.instrumentState("vac.negative") { mutableStateOf(false) }
+    } as androidx.compose.runtime.MutableState<Boolean>
+
+    @Suppress("UNCHECKED_CAST")
+    val pageState = remember {
+        ServiceLocator.instrumentState("vac.page") { mutableIntStateOf(0) }
+    } as androidx.compose.runtime.MutableIntState
+
+    @Suppress("UNCHECKED_CAST")
+    val lastTargetState = remember {
+        ServiceLocator.instrumentState("vac.lastTarget") { mutableStateOf<String?>(null) }
+    } as androidx.compose.runtime.MutableState<String?>
+
+    // Réinitialiser zoom/pan/lock/page quand la cible change.
+    LaunchedEffect(targetKey) {
+        if (lastTargetState.value != targetKey) {
+            lastTargetState.value = targetKey
+            scaleState.floatValue = 1f
+            offsetState.value = Offset.Zero
+            lockedState.value = false
+            pageState.intValue = 0
+        }
+    }
+
+    var scale by scaleState
+    var offset by offsetState
+    var locked by lockedState
+    var negative by negativeState
+    var currentPage by pageState
+
     // Nombre de pages du PDF.
     var pageCount by remember(pdfFile) { mutableIntStateOf(0) }
-    var currentPage by remember(pdfFile) { mutableIntStateOf(0) }
     DisposableEffect(pdfFile) {
         if (pdfFile != null) {
             runCatching {
@@ -142,14 +196,6 @@ fun VacInstrument(modifier: Modifier = Modifier) {
         }
     }
 
-    // Pan + Zoom.
-    var scale by remember(pdfFile) { mutableFloatStateOf(1f) }
-    var offset by remember(pdfFile) { mutableStateOf(Offset.Zero) }
-
-    // Verrouillage du zoom/pan.
-    var locked by remember { mutableStateOf(false) }
-    // Mode négatif (inversion des couleurs pour la nuit).
-    var negative by remember { mutableStateOf(false) }
     val cellBg = LocalCellBackground.current
 
     val invertFilter = remember {
@@ -161,9 +207,6 @@ fun VacInstrument(modifier: Modifier = Modifier) {
         )))
     }
 
-    // Le pointerInput consommateur est sur le Box extérieur (même niveau hiérarchique
-    // que le pointerInput Focus du cockpit parent) pour que consume() soit effectif
-    // avec PointerEventPass.Initial avant que le parent ne mesure la distance.
     Box(modifier = modifier.fillMaxSize()
         .pointerInput(pdfFile, locked) {
             awaitPointerEventScope {
@@ -174,7 +217,6 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                     val pressed = event.changes.filter { it.pressed }
                     when {
                         pressed.size >= 2 -> {
-                            // Consume always — blocks parent Focus mode trigger.
                             event.changes.forEach { it.consume() }
                             if (!locked) {
                                 val p1 = pressed[0].position
@@ -207,10 +249,12 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                         onDoubleTap = { if (!locked) { scale = 1f; offset = Offset.Zero } },
                         onTap = { tap ->
                             if (pageCount > 1) {
-                                val footerTop = size.height - 24.dp.roundToPx()
+                                val footerH = 32.dp.roundToPx()
+                                val footerTop = size.height - footerH
                                 if (tap.y >= footerTop) {
-                                    if (tap.x < size.width / 2f && currentPage > 0) currentPage--
-                                    else if (tap.x >= size.width / 2f && currentPage < pageCount - 1) currentPage++
+                                    val btnW = size.width / pageCount
+                                    val tappedPage = (tap.x / btnW).toInt().coerceIn(0, pageCount - 1)
+                                    currentPage = tappedPage
                                 }
                             }
                         },
@@ -222,7 +266,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
             drawCellBackground(cellBg)
 
             val headerH = if (hideTitle) 0f else 22.dp.toPx().coerceAtMost(h * 0.12f)
-            val footerH = if (pageCount > 1) 24.dp.toPx() else 0f
+            val footerH = if (pageCount > 1) 32.dp.toPx() else 0f
             val bodyTop = headerH
             val bodyH = h - headerH - footerH
 
@@ -257,17 +301,37 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                         sizeSp = 12f, color = CompactStyle.Dim)
             }
 
-            // Bande de navigation entre pages.
+            // Bande de navigation entre pages — boutons numérotés.
             if (pageCount > 1) {
                 val fy = h - footerH
                 drawRect(Color(0xFF1E1E1E), topLeft = Offset(0f, fy), size = Size(w, footerH))
                 drawLine(Color(0xFF3A3A3A), Offset(0f, fy), Offset(w, fy), strokeWidth = 1f)
-                compactText(tm, "${currentPage + 1} / $pageCount", w / 2f, fy + footerH / 2f,
-                    sizeSp = 12f, color = CompactStyle.Dim)
-                if (currentPage > 0)
-                    compactText(tm, "◀", w * 0.15f, fy + footerH / 2f, sizeSp = 14f, color = CompactStyle.Accent)
-                if (currentPage < pageCount - 1)
-                    compactText(tm, "▶", w * 0.85f, fy + footerH / 2f, sizeSp = 14f, color = CompactStyle.Accent)
+
+                val btnW = w / pageCount
+                for (p in 0 until pageCount) {
+                    val bx = p * btnW
+                    val isActive = p == currentPage
+                    if (isActive) {
+                        drawRect(
+                            Color(0xFF2A4A6A),
+                            topLeft = Offset(bx + 1f, fy + 1f),
+                            size = Size(btnW - 2f, footerH - 2f),
+                        )
+                    }
+                    compactText(
+                        tm, "${p + 1}",
+                        bx + btnW / 2f, fy + footerH / 2f,
+                        sizeSp = 13f,
+                        color = if (isActive) CompactStyle.Accent else CompactStyle.Dim,
+                        bold = isActive,
+                    )
+                    if (p > 0) drawLine(
+                        Color(0xFF3A3A3A),
+                        Offset(bx, fy + footerH * 0.2f),
+                        Offset(bx, fy + footerH * 0.8f),
+                        strokeWidth = 1f,
+                    )
+                }
             }
 
             if (!hideCellBorder) drawRect(Color(0xFF3A3A3A), size = size, style = Stroke(width = 2f))
@@ -288,43 +352,47 @@ fun VacInstrument(modifier: Modifier = Modifier) {
             )
         }
 
-        // Boutons Lock/Unlock et Négatif — coin bas-droit, au-dessus de la bande de navigation.
-        val lockBtnSize = 28.dp
-        val lockBtnPad = 4.dp
-        val extraBottom = if (pageCount > 1) 24.dp else 0.dp
+        // Boutons Lock/Unlock et Négatif — coin bas-droit en Row, au-dessus de la bande de navigation.
+        val btnSize = 28.dp
+        val btnPad = 4.dp
+        val extraBottom = if (pageCount > 1) 32.dp else 0.dp
 
-        // Bouton Négatif (à gauche du cadenas)
-        IconButton(
-            onClick = { negative = !negative },
+        Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = lockBtnPad + lockBtnSize + lockBtnPad, bottom = lockBtnPad + extraBottom)
-                .size(lockBtnSize)
-                .background(Color(0xAA000000), CircleShape),
+                .padding(end = btnPad, bottom = btnPad + extraBottom),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Filled.InvertColors,
-                contentDescription = if (negative) "Mode normal" else "Mode négatif",
-                tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
-                modifier = Modifier.size(20.dp),
-            )
-        }
+            // Bouton Négatif
+            IconButton(
+                onClick = { negative = !negative },
+                modifier = Modifier
+                    .padding(end = btnPad)
+                    .size(btnSize)
+                    .background(Color(0xAA000000), CircleShape),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.InvertColors,
+                    contentDescription = if (negative) "Mode normal" else "Mode négatif",
+                    tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
+                    modifier = Modifier.size(20.dp),
+                )
+            }
 
-        // Bouton Lock/Unlock
-        IconButton(
-            onClick = { locked = !locked },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = lockBtnPad, bottom = lockBtnPad + extraBottom)
-                .size(lockBtnSize)
-                .background(Color(0xAA000000), CircleShape),
-        ) {
-            Icon(
-                imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
-                tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
-                modifier = Modifier.size(20.dp),
-            )
+            // Bouton Lock/Unlock
+            IconButton(
+                onClick = { locked = !locked },
+                modifier = Modifier
+                    .size(btnSize)
+                    .background(Color(0xAA000000), CircleShape),
+            ) {
+                Icon(
+                    imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                    contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
+                    tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
     }
 }

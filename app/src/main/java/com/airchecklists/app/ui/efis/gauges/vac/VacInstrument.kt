@@ -250,7 +250,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                     detectTapGestures(
                         onDoubleTap = { if (!locked) { scale = 1f; offset = Offset.Zero } },
                         onTap = { tap ->
-                            if (pageCount > 1) {
+                            if (pageCount > 1 && !locked) {
                                 val footerH = 32.dp.roundToPx()
                                 val footerTop = size.height - footerH
                                 if (tap.y >= footerTop) {

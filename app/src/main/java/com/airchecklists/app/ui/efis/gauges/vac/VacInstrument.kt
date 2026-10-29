@@ -357,7 +357,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
         // Boutons Lock/Unlock et Négatif — coin bas-droit, empilés au-dessus du footer.
         // On utilise Box+clickable plutôt qu'IconButton pour éviter la zone de touch
         // minimale de 48dp imposée par Material qui crée des chevauchements.
-        val btnSize = 28.dp
+        val btnSize = 36.dp
         val btnPad = 4.dp
 
         Column(
@@ -384,7 +384,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                         imageVector = Icons.Filled.InvertColors,
                         contentDescription = if (negative) "Mode normal" else "Mode négatif",
                         tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(26.dp),
                     )
                 }
                 // Bouton Lock/Unlock
@@ -402,7 +402,7 @@ fun VacInstrument(modifier: Modifier = Modifier) {
                         imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
                         contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
                         tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(26.dp),
                     )
                 }
             }

@@ -5,8 +5,11 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +21,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -352,47 +354,61 @@ fun VacInstrument(modifier: Modifier = Modifier) {
             )
         }
 
-        // Boutons Lock/Unlock et Négatif — coin bas-droit en Row, au-dessus de la bande de navigation.
+        // Boutons Lock/Unlock et Négatif — coin bas-droit, empilés au-dessus du footer.
+        // On utilise Box+clickable plutôt qu'IconButton pour éviter la zone de touch
+        // minimale de 48dp imposée par Material qui crée des chevauchements.
         val btnSize = 28.dp
         val btnPad = 4.dp
-        val extraBottom = if (pageCount > 1) 32.dp else 0.dp
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = btnPad, bottom = btnPad + extraBottom),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.align(Alignment.BottomEnd),
+            horizontalAlignment = Alignment.End,
         ) {
-            // Bouton Négatif
-            IconButton(
-                onClick = { negative = !negative },
-                modifier = Modifier
-                    .padding(end = btnPad)
-                    .size(btnSize)
-                    .background(Color(0xAA000000), CircleShape),
+            Row(
+                modifier = Modifier.padding(end = btnPad, bottom = btnPad),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Filled.InvertColors,
-                    contentDescription = if (negative) "Mode normal" else "Mode négatif",
-                    tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
-                    modifier = Modifier.size(20.dp),
-                )
+                // Bouton Négatif
+                Box(
+                    modifier = Modifier
+                        .padding(end = btnPad)
+                        .size(btnSize)
+                        .background(Color(0xAA000000), CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { negative = !negative },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.InvertColors,
+                        contentDescription = if (negative) "Mode normal" else "Mode négatif",
+                        tint = if (negative) Color(0xFF4FC3F7) else Color(0xCCFFFFFF),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                // Bouton Lock/Unlock
+                Box(
+                    modifier = Modifier
+                        .size(btnSize)
+                        .background(Color(0xAA000000), CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { locked = !locked },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                        contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
+                        tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
-
-            // Bouton Lock/Unlock
-            IconButton(
-                onClick = { locked = !locked },
-                modifier = Modifier
-                    .size(btnSize)
-                    .background(Color(0xAA000000), CircleShape),
-            ) {
-                Icon(
-                    imageVector = if (locked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (locked) "Déverrouiller" else "Verrouiller",
-                    tint = if (locked) Color(0xFFFFCC44) else Color(0xCCFFFFFF),
-                    modifier = Modifier.size(20.dp),
-                )
-            }
+            // Spacer transparent de la hauteur exacte du footer pour que la Row se
+            // positionne juste au-dessus sans chevauchement.
+            if (pageCount > 1) Box(modifier = Modifier.size(width = 1.dp, height = 32.dp))
         }
     }
 }

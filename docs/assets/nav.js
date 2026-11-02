@@ -53,6 +53,8 @@
   ];
 
   var here = location.pathname.split("/").pop() || "index.html";
+  var theme = new URLSearchParams(location.search).get("theme");
+  var suffix = theme && theme !== "dark" ? "?theme=" + theme : "";
 
   var side = document.createElement("aside");
   side.className = "sidebar";
@@ -61,7 +63,7 @@
     html += '<div class="nav-group">' + g.title + "</div><nav>";
     g.items.forEach(function (it) {
       var cls = it[0] === here ? ' class="active"' : "";
-      html += '<a href="' + it[0] + '"' + cls + ">" + it[1] + "</a>";
+      html += '<a href="' + it[0] + suffix + '"' + cls + ">" + it[1] + "</a>";
     });
     html += "</nav>";
   });

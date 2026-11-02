@@ -4,19 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AirDetente — Créateur de cockpit</title>
-<script>!function(){var t=new URLSearchParams(location.search).get("theme");var h=t&&t!=="dark"?"themes/"+t+"/style.css":"assets/docs.css";document.write('<link id="theme-css" rel="stylesheet" href="'+h+'">');}();</script>
+<script>!function(){var t=new URLSearchParams(location.search).get("theme");var h=t&&t!=="dark"?"themes/"+t+"/style.css":"assets/docs.css";document.write('<link id="theme-css" rel="stylesheet" href="'+h+'">');if(t&&t!=="dark")document.documentElement.className="theme-"+t;}();</script>
 <style>
   :root {
     --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --line: #2a2f3a;
     --txt: #e6e8ec; --dim: #9aa0a6; --accent: #4fc3f7; --anl: #ffcc44; --num: #7fd1ff;
     --danger: #ef5350; --ok: #4caf50;
   }
-  /* Keep the shared left navigation on the common (orange) theme: this page's
-     :root overrides --accent/--line etc. for the editor UI, so restore the
-     docs.css palette locally on the sidebar only. */
+  /* Thème www : palette claire AviationBlue */
+  html.theme-www :root {
+    --bg: #F7F9FC; --panel: #FFFFFF; --panel2: #EEF2F8; --line: #D9E2EC;
+    --txt: #1A2230; --dim: #5B6A80; --accent: #0B3D91; --anl: #C47500; --num: #0077AA;
+    --danger: #C0392B; --ok: #1E8A3E;
+  }
+  /* Sidebar : restaurer la palette du thème actif (dark ou www) */
   .sidebar {
     --accent: #e8843a; --accent2: #d24dea;
     --line: #2b323c; --ink: #e7ecf2; --ink-soft: #9aa6b2; --panel-2: #1b2028;
+  }
+  html.theme-www .sidebar {
+    --accent: #0B3D91; --accent2: #00A6D6;
+    --line: #D9E2EC; --ink: #1A2230; --ink-soft: #5B6A80; --panel-2: #EEF2F8;
   }
   * { box-sizing: border-box; }
   body {
@@ -49,6 +57,7 @@
   }
   button:hover { border-color: var(--accent); }
   button.primary { background: var(--accent); color: #04121a; border-color: var(--accent); font-weight: 600; }
+  html.theme-www button.primary { color: #FFFFFF; }
   button.small { padding: 3px 7px; font-size: 12px; }
   .btnbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 
@@ -87,7 +96,8 @@
     border: 1px solid var(--line); background: var(--panel2); color: var(--txt);
     border-radius: 16px; padding: 5px 12px; font-size: 13px; cursor: pointer;
   }
-  .chip.sel { border-color: var(--accent); background: #10303d; }
+  .chip.sel { border-color: var(--accent); background: rgba(79,195,247,0.12); }
+  html.theme-www .chip.sel { background: rgba(11,61,145,0.10); }
   .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
   .swatch { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 1px solid #777; }
   .swatch.sel { outline: 3px solid var(--accent); outline-offset: 1px; }
@@ -97,6 +107,9 @@
   .msg.warn { background: #3a2a12; color: #ffcc80; }
   .msg.err { background: #3a1716; color: #ffb4ab; }
   .msg.ok { background: #16301f; color: #a5e8bf; }
+  html.theme-www .msg.warn { background: #FFF3CD; color: #856404; }
+  html.theme-www .msg.err  { background: #FDECEA; color: #C0392B; }
+  html.theme-www .msg.ok   { background: #D4EDDA; color: #1E8A3E; }
   #qr { margin-top: 12px; display: flex; justify-content: center; }
   #qr canvas, #qr img { background: #fff; padding: 10px; border-radius: 8px; }
   code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }

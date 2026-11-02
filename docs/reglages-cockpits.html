@@ -6,6 +6,7 @@
 <title>AirDetente — Cockpits</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="assets/theme.js"></script>
 <link rel="stylesheet" href="themes/dark/style.css">
 </head>
 <body>
@@ -49,8 +50,9 @@
           <li><b>Ajout / édition / suppression</b> (menu <b>⋮</b>) et réordonnancement des tableaux de bord.</li>
           <li>Case <b>« Afficher dans le Cockpit »</b> : slidez gauche/droite pour changer de tableau.</li>
           <li><b>Bandeau de statuts</b> : fine bande colorée (7 dp) affichable <b>en haut</b> (coché par défaut) et/ou <b>en bas</b> du tableau de bord. Trois zones indépendantes — <b>GPS</b> (fix satellite), <b>CALAGE</b> (horizon artificiel calibré par appui long), <b>DONNÉES</b> (cartes &amp; VAC à jour) — passent au vert quand l'état est nominal, au rouge sinon. Chaque tableau de bord a son propre réglage.</li>
+          <li><b>Fond du cockpit</b> : SegmentedButton 3 modes — <b>Défaut</b> (pas de fond), <b>Couleur</b> (palette + hex + opacité 0–100%), <b>Texture</b> (grille de textures + opacité 0–100%). Les vignettes affichent un badge d'opacité quand opacité < 100%.</li>
           <li>Flèches <b>↑ / ↓</b> à côté d'« Options » : <b>réordonner les lignes</b> (déplacement par blocs, en tenant compte des cases fusionnées sur plusieurs lignes).</li>
-          <li>Bouton <b>« Options »</b> d'une case : couleur / style du contour (<b>Couleur par défaut</b>, <b>Carbone</b>, <b>Métal</b>, ou une couleur sombre spécifique), gestion de la case (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>) <b>et</b> les options <b>« Masquer le titre »</b> (supprime la pastille de titre sur les instruments analogiques ou le libellé sur les numériques — donne plus de place au contenu) et <b>« Masquer la bordure de l'instrument »</b> (supprime le contour de la case) — de quoi repérer un instrument d'un coup d'œil.</li>
+          <li>Bouton <b>« Options »</b> d'une case : couleur / style du contour (<b>Couleur par défaut</b>, <b>Carbone</b>, <b>Métal</b>, ou une couleur sombre spécifique), gestion de la case (<b>Large</b> / <b>Haut</b> / <b>Séparer</b>), options <b>« Masquer le titre »</b> et <b>« Masquer la bordure de l'instrument »</b>, <b>Aspect du titre</b> (Défaut / Couleur / Texture, avec opacité 0–100%), et <b>Fond de l'instrument</b> (Défaut / Couleur / Texture, avec opacité jusqu'à 0%). Chaque mode (Couleur / Texture) ouvre un sélecteur dédié avec vignette de prévisualisation.</li>
         </ul>
 
         <h3>Import / export d'un cockpit</h3>
